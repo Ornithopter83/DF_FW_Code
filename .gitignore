@@ -1,0 +1,32 @@
+# Visual Studio and editor state
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.VC.opendb
+
+# Generated firmware artifacts
+/Vm1.0.9.0/DF_Main/build/
+/Vr1.0.1.0/build/
+/firmware/DF_Main/build/
+/firmware/DF_Rod/build/
+artifacts/
+*.bin
+*.elf
+*.map
+*.hex
+
+# Bundled executable tools and archives
+*.exe
+*.zip
+
+# Machine-local settings
+toolchain/
+local.settings.cmd
+*.local.cmd
+.env
+
+# Temporary files
+*.tmp
+*.bak
+*~

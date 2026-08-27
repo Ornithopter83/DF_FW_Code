@@ -1,0 +1,64 @@
+# 작업 05
+
+Main 펌웨어 물리적 모듈 분리
+
+## 목표
+
+`DF_Main.ino`의 동작을 유지하면서 기능별 C++98/03 `.cpp/.h` 번역 단위로 이동한다.
+
+## 현재 기준
+
+- `DF_Main.ino`는 22,714줄과 약 359개 최상위 함수를 포함한다.
+- 기존 driver 클래스는 별도 파일로 일부 분리되어 있다.
+
+## 관련 영역
+
+- 향후 `firmware/DF_Main/DF_Main.ino`, `firmware/DF_Main/src/`
+
+## 구현 원칙
+
+- 함수 이동, 이름 변경, 상태 변경을 같은 단위에 섞지 않는다.
+- 전역 객체는 초기 물리 분리 동안 한 소유 위치에 유지한다.
+- ISR, timer, ESP-NOW callback은 후순위다.
+
+## 세부 작업
+
+### A. Utility와 문자열 처리 분리
+
+### B. DeviceCheck와 Diagnostics 분리
+
+### C. LED application control 분리
+
+### D. AP/UART와 Rod 상위 통신 분리
+
+### E. LM/Wire control 분리
+
+### F. Bite/Hit/Hold/Game control 분리
+
+### G. Scheduler와 Main application entry 분리
+
+### H. 단계별 수동 빌드와 주요 smoke 게이트
+
+- 각 문자 이동 뒤 사용자 수동 build가 필요하다.
+- C, D, E, F, G 완료 지점에서는 관련 장비 smoke test도 요청한다.
+
+## 진행
+
+잔여 작업 8개 (A, B, C, D, E, F, G, H)
+
+## 변경 금지
+
+- protocol, 상태머신 의미, motor timing, ISR 동작을 물리 이동과 함께 바꾸지 않는다.
+
+## 완료 조건
+
+- `.ino`는 초기화와 상위 process 중심으로 축소되고 기능 경계별 `.cpp/.h`가 독립 빌드된다.
+
+## 시험 방법
+
+- 모든 문자 작업에 사용자 수동 compile/link 결과가 필요하며 주요 경계마다 장비 smoke 결과가 필요하다.
+
+## 결과
+
+- 작업 수행 후 기록.
+
