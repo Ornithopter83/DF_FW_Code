@@ -67,7 +67,8 @@ CodexManage/
 ├─ tools/
 ├─ tests/
 ├─ tasks/
-└─ artifacts/              # 생성물, Git 제외
+├─ artifacts/              # 중간 생성물, Git 제외
+└─ bin/                    # configuration/platform/version별 플래시 산출물, Git 제외
 ```
 
 ## 현재 상태

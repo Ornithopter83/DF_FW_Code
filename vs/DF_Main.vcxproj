@@ -21,9 +21,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <NMakeBuildCommandLine>call "$(ProjectDir)..\tools\build-main.cmd"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>call "$(ProjectDir)..\tools\build-main.cmd"</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>call "$(ProjectDir)..\tools\clean-main.cmd"</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>call "$(ProjectDir)..\tools\build-main.cmd" "$(Configuration)" "$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>call "$(ProjectDir)..\tools\build-main.cmd" "$(Configuration)" "$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>call "$(ProjectDir)..\tools\clean-main.cmd" "$(Configuration)" "$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)..\artifacts\firmware\DF_Main\DF_Main.ino.bin</NMakeOutput>
     <NMakePreprocessorDefinitions>$(DFArduinoPreprocessorDefinitions);$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(ProjectDir)..\Vm1.0.9.0\DF_Main;$(DFArduinoIncludeSearchPath);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>

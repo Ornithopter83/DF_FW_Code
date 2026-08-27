@@ -21,9 +21,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <NMakeBuildCommandLine>call "$(ProjectDir)..\tools\build-rod.cmd"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>call "$(ProjectDir)..\tools\build-rod.cmd"</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>call "$(ProjectDir)..\tools\clean-rod.cmd"</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>call "$(ProjectDir)..\tools\build-rod.cmd" "$(Configuration)" "$(Platform)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>call "$(ProjectDir)..\tools\build-rod.cmd" "$(Configuration)" "$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>call "$(ProjectDir)..\tools\clean-rod.cmd" "$(Configuration)" "$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)..\artifacts\firmware\DF_Rod\DF_Rod.ino.bin</NMakeOutput>
     <NMakePreprocessorDefinitions>$(DFArduinoPreprocessorDefinitions);$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(ProjectDir)..\Vr1.0.1.0;$(DFArduinoIncludeSearchPath);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>

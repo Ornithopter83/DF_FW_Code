@@ -11,6 +11,7 @@
 /firmware/DF_Main/build/
 /firmware/DF_Rod/build/
 artifacts/
+/bin/
 *.bin
 *.elf
 *.map

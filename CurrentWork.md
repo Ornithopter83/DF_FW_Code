@@ -37,6 +37,7 @@ Updated: 2026-08-27
 - Rod는 원본 폴더/대표 `.ino` 이름 불일치를 `artifacts/sketch/DF_Rod` clean staging으로 해결했고 파일 hash 및 Arduino CLI sketch 인식 검증을 통과했다.
 - Windows GCC 8.4의 긴 경로 문제는 저장소를 `X:`에 자동 매핑해 해결했다.
 - 2026-08-27 재현 build application은 Main 882,320 bytes, Rod 763,552 bytes다. 필수 flash 파일 8개 생성을 확인했으며 upload/flash는 수행하지 않았다.
+- 배포 산출물은 `bin/<configuration>/<platform>/<version>/`에 대상별 플래시 파일 4개만 둔다. 현재 Release 경로는 `Vm1.0.9.0`, `Vr1.0.1.0`으로 분리되며 2026-08-27 VS2022 Rebuild와 SHA-256 일치 검증을 통과했다.
 
 ## 목표 구조
 
@@ -52,7 +53,7 @@ Updated: 2026-08-27
 
 작업 01 잔여 문자 3개 (B, C, G)
 
-작업 02 잔여 문자 0개 (완료)
+작업 02 잔여 문자 0개 (A~H 완료)
 
 ## 작업 정책
 

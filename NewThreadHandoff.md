@@ -31,6 +31,7 @@ Updated: 2026-08-27
 - Main/Rod IntelliSense는 `vs/DF_Arduino_ESP32S3.props`를 공유한다. Core/SDK/현재 사용 library 경로 207개, 실제 전처리 정의와 forced `Arduino.h`가 설정되어 있다.
 - Windows GCC 8.4의 긴 경로 문제 때문에 `arduino-env.cmd`가 저장소를 `X:`에 자동 매핑한다.
 - 2026-08-27 VS2022 `Release|x64` 전체 빌드가 성공했다. Main 882,320 bytes, Rod 763,552 bytes 및 필수 flash 파일 8개를 확인했다.
+- 배포 산출물은 `bin/release/x64/Vm1.0.9.0`과 `bin/release/x64/Vr1.0.1.0`에 각각 4개만 생성한다. 버전은 `tools/firmware-versions.cmd`에서 관리하며 소스 `Version.h`와 함께 갱신한다.
 
 ## 현재 작업
 
@@ -39,7 +40,7 @@ Updated: 2026-08-27
 - 부분 완료 단위: 01-B/01-C 코드 기준 Main/Rod 하드웨어 구성 문서화; 실제 장비 대조 보류
 - 완료 단위: 01-D Arduino 참조와 외부 library/FQBN 확정
 - 완료 단위: 01-E 기존 산출물 release 기준값 확정
-- 완료 단위: 02-A~F Arduino CLI 환경, Main/Rod/통합 script, VS2022 solution 및 실제 clean build
+- 완료 단위: 02-A~H Arduino CLI 환경, Main/Rod/통합 script, VS2022 solution, IntelliSense, 실제 build 및 버전별 배포 산출물 관리
 - 완료 단위: 01-F 기준 clean build gate
 - 다음 단위: 01-B/C/G 실제 Main/Rod 하드웨어 대조 및 사용자 장비 gate
 

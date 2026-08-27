@@ -99,7 +99,19 @@ $fqbn = 'esp32:esp32:esp32s3:UploadSpeed=921600,USBMode=hwcdc,CDCOnBoot=cdc,MSCO
 .\tools\build-all.cmd
 ```
 
-각 script는 실패 code를 반환하며 필수 flash file의 존재를 검사한다. 결과물은 `artifacts/firmware/DF_Main`, `artifacts/firmware/DF_Rod`에 생성한다.
+각 script는 실패 code를 반환하며 필수 flash file의 존재를 검사한다. 인수를 생략하면 `release x64`를 사용하며, 필요하면 `build-all.cmd Debug x64`처럼 지정한다.
+
+Arduino CLI의 전체 중간 산출물은 `artifacts/`에 둔다. 실제 플래시용 배포 결과는 아래 위치에 대상별 4개 파일만 복사한다.
+
+```text
+bin/<configuration>/<platform>/<version>/
+├─ <sketch>.ino.bin
+├─ <sketch>.ino.bootloader.bin
+├─ <sketch>.ino.partitions.bin
+└─ boot_app0.bin
+```
+
+현재 경로는 `bin/release/x64/Vm1.0.9.0`과 `bin/release/x64/Vr1.0.1.0`이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전을 올릴 때는 소스의 `Version.h`와 `tools/firmware-versions.cmd`를 같은 변경에서 함께 갱신한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
 
 ## Visual Studio 2022
 
