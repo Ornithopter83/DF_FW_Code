@@ -9,8 +9,6 @@ if exist "%DF_REPO_ROOT%\artifacts\build\DF_Rod" rmdir /s /q "%DF_REPO_ROOT%\art
 if errorlevel 1 exit /b %errorlevel%
 if exist "%DF_REPO_ROOT%\artifacts\firmware\DF_Rod" rmdir /s /q "%DF_REPO_ROOT%\artifacts\firmware\DF_Rod"
 if errorlevel 1 exit /b %errorlevel%
-if exist "%DF_REPO_ROOT%\artifacts\sketch\DF_Rod" rmdir /s /q "%DF_REPO_ROOT%\artifacts\sketch\DF_Rod"
-if errorlevel 1 exit /b %errorlevel%
 if exist "%DF_REPO_ROOT%\bin\%DF_BUILD_CONFIGURATION%\%DF_BUILD_PLATFORM%\%DF_ROD_VERSION%" rmdir /s /q "%DF_REPO_ROOT%\bin\%DF_BUILD_CONFIGURATION%\%DF_BUILD_PLATFORM%\%DF_ROD_VERSION%"
 if errorlevel 1 exit /b %errorlevel%
 

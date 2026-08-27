@@ -26,37 +26,53 @@
     <NMakeCleanCommandLine>call "$(ProjectDir)..\tools\clean-main.cmd" "$(Configuration)" "$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)..\artifacts\firmware\DF_Main\DF_Main.ino.bin</NMakeOutput>
     <NMakePreprocessorDefinitions>$(DFArduinoPreprocessorDefinitions);$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(ProjectDir)..\Vm1.0.9.0\DF_Main;$(DFArduinoIncludeSearchPath);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(ProjectDir)..\firmware\DF_Main;$(ProjectDir)..\firmware\DF_Main\src;$(ProjectDir)..\libraries\DFProtocol\src;$(DFArduinoIncludeSearchPath);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(DFArduinoForcedIncludes);$(NMakeForcedIncludes)</NMakeForcedIncludes>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\DF_Main.ino"><CompileAs>CompileAsCpp</CompileAs></ClCompile>
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\BobbinMotor.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Diag.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\ENow.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Eeprom.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Encoder.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\FileSys.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Led.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\LmMotor.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Potentiometer.cpp" />
-    <ClCompile Include="..\Vm1.0.9.0\DF_Main\ServoMotor.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\DF_Main.ino"><CompileAs>CompileAsCpp</CompileAs></ClCompile>
+    <ClCompile Include="..\firmware\DF_Main\src\DF_Main_Application.cpp" />
+    <ClCompile Include="..\libraries\DFProtocol\src\DFProtocol.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\BobbinMotor.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\Diag.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\ENow.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\Eeprom.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\Encoder.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\FileSys.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\Led.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\LmMotor.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\Potentiometer.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\ServoMotor.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\Version.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\BobbinMotor.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Common.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Config.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\DF_Main.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Diag.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\ENow.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Eeprom.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Encoder.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\FileSys.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Led.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\LmMotor.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Potentiometer.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\ServoMotor.h" />
-    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Version.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\BobbinMotor.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Common.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Config.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\DF_Main.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\DF_Main_Application.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Diag.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\ENow.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Eeprom.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Encoder.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\FileSys.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Led.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\LmMotor.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Potentiometer.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\ServoMotor.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\Version.h" />
+    <ClInclude Include="..\libraries\DFProtocol\src\DFProtocol.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_Foundation.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_Communication.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_LedApplication.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_ApplicationCommands.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_DeviceCheck.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_LmWire.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_GameControl.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_Diagnostics.inc" />
+    <None Include="..\firmware\DF_Main\src\modules\DF_Main_Scheduler.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

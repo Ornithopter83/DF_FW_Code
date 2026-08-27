@@ -13,11 +13,12 @@ Updated: 2026-08-27
 - Main 코드 기준 하드웨어 표: `docs/hardware/MAIN_HARDWARE_BASELINE.md`
 - Rod 코드 기준 하드웨어 표: `docs/hardware/ROD_HARDWARE_BASELINE.md`
 - 기존 release 산출물 기준: `docs/releases/BASELINE_RELEASE_MANIFEST.md`
-- Main 기준 소스: `Vm1.0.9.0/DF_Main`
-- Rod 기준 소스: `Vr1.0.1.0`
+- Main 활성 소스: `firmware/DF_Main`
+- Rod 활성 소스: `firmware/DF_Rod`
+- 변경 전 기준 원본: `legacy/Vm1.0.9.0/DF_Main`, `legacy/Vr1.0.1.0`
 - 확인된 MCU/Core: ESP32-S3, Arduino-ESP32 Core 2.0.17
 - 확정 FQBN: `PROJECT_COMMANDS.md`의 Main/Rod 공통 전체 FQBN
-- 활성 작업서: `tasks/01_현재제품_기준선_확정.md`
+- 다음 활성 작업서: `tasks/07_상태_Callback_안전성.md`
 
 ## 확인된 현재 구현
 
@@ -38,6 +39,8 @@ Updated: 2026-08-27
 - Windows GCC 8.4의 긴 경로 문제는 저장소를 `X:`에 자동 매핑해 해결했다.
 - 2026-08-27 재현 build application은 Main 882,320 bytes, Rod 763,552 bytes다. 필수 flash 파일 8개 생성을 확인했으며 upload/flash는 수행하지 않았다.
 - 배포 산출물은 `bin/<configuration>/<platform>/<version>/`에 대상별 플래시 파일 4개만 둔다. 현재 Release 경로는 `Vm1.0.9.0`, `Vr1.0.1.0`으로 분리되며 2026-08-27 VS2022 Rebuild와 SHA-256 일치 검증을 통과했다.
+- 작업 03~06에서 현재 Variant 단일화, deprecated/legacy 보존, DFProtocol 공유 계약, Main/Rod 물리적 모듈 분리를 적용했다. 두 `.ino`에는 setup/loop 위임만 남았다.
+- 작업 03~06 변경 이후에는 사용자의 명시적 지시에 따라 build, host test, protocol test 및 장비 smoke를 수행하지 않았다. 직전 성공 산출물은 구조 변경 전 기준일 뿐 현재 소스를 검증하지 않는다.
 
 ## 목표 구조
 
@@ -49,11 +52,13 @@ Updated: 2026-08-27
 
 ## 진행
 
-잔여 작업 7개 (01, 03, 04, 05, 06, 07, 08)
+잔여 번호 작업 3개 (01, 07, 08)
 
 작업 01 잔여 문자 3개 (B, C, G)
 
 작업 02 잔여 문자 0개 (A~H 완료)
+
+작업 03~06 잔여 구현 문자 0개 (검증 게이트 미수행)
 
 ## 작업 정책
 
@@ -72,4 +77,4 @@ Updated: 2026-08-27
 
 ## 다음 작업
 
-작업 01-B/C/G 장비 게이트: 실제 Main/Rod PCB 리비전과 장착 부품을 문서와 대조한다. 신규 bootloader는 기존과 flash header는 같지만 내부 segment가 다르므로 사용할 bootloader를 확인한 뒤, 사용자가 flash 및 기본 Main–Rod smoke test를 수행해야 한다.
+작업 07 착수 전 현재 구조의 compile/link 가능 여부를 확인하지 않은 상태임을 전제로 해야 한다. 사용자가 계속 검증 생략을 지시하면 상태/Callback 변경도 미검증으로 누적된다. 별도 장비 게이트로 작업 01-B/C/G와 작업 03~06의 Main/Rod build, protocol host test 및 smoke가 남아 있다.

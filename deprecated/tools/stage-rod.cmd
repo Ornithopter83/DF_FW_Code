@@ -1,4 +1,5 @@
 @echo off
+rem DEPRECATED 2026-08-27. Original: tools/stage-rod.cmd. Replacement: direct firmware/DF_Rod build.
 setlocal
 
 call "%~dp0arduino-env.cmd"

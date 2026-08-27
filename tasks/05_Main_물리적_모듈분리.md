@@ -23,28 +23,28 @@ Main 펌웨어 물리적 모듈 분리
 
 ## 세부 작업
 
-### A. Utility와 문자열 처리 분리
+### A. Utility와 문자열 처리 분리 (완료: 2026-08-27)
 
-### B. DeviceCheck와 Diagnostics 분리
+### B. DeviceCheck와 Diagnostics 분리 (완료: 2026-08-27)
 
-### C. LED application control 분리
+### C. LED application control 분리 (완료: 2026-08-27)
 
-### D. AP/UART와 Rod 상위 통신 분리
+### D. AP/UART와 Rod 상위 통신 분리 (완료: 2026-08-27)
 
-### E. LM/Wire control 분리
+### E. LM/Wire control 분리 (완료: 2026-08-27)
 
-### F. Bite/Hit/Hold/Game control 분리
+### F. Bite/Hit/Hold/Game control 분리 (완료: 2026-08-27)
 
-### G. Scheduler와 Main application entry 분리
+### G. Scheduler와 Main application entry 분리 (완료: 2026-08-27)
 
-### H. 단계별 수동 빌드와 주요 smoke 게이트
+### H. 단계별 수동 빌드와 주요 smoke 게이트 (미수행: 2026-08-27, 사용자 지시)
 
 - 각 문자 이동 뒤 Codex가 build를 실행한다.
 - C, D, E, F, G 완료 지점에서는 관련 장비 smoke test도 요청한다.
 
 ## 진행
 
-잔여 작업 8개 (A, B, C, D, E, F, G, H)
+잔여 구현 작업 0개. 빌드 및 장비 smoke 검증 미수행.
 
 ## 변경 금지
 
@@ -52,7 +52,7 @@ Main 펌웨어 물리적 모듈 분리
 
 ## 완료 조건
 
-- `.ino`는 초기화와 상위 process 중심으로 축소되고 기능 경계별 `.cpp/.h`가 독립 빌드된다.
+- `.ino`에는 `setup()`과 `loop()` 위임만 남았다. 기능 경계는 unity implementation module로 분리했으며 독립 번역 단위 빌드는 검증하지 않았다.
 
 ## 시험 방법
 
@@ -60,4 +60,7 @@ Main 펌웨어 물리적 모듈 분리
 
 ## 결과
 
-- 작업 수행 후 기록.
+- 2026-08-27 작업 05-A~G 완료: `DF_Main.ino`를 10줄의 setup/loop 위임 파일로 축소하고 Application `.cpp/.h`, Foundation, Communication, LedApplication, ApplicationCommands, DeviceCheck, LmWire, GameControl, Diagnostics, Scheduler 구현 경계로 분리했다.
+- 기존 driver `.cpp/.h`는 `firmware/DF_Main/src` 아래로 이동했다. 기능 구현 파일은 자동 생성 선언과 기존 전역 정의 순서를 보존하기 위해 Application `.cpp` 한 곳에서 순서대로 include하는 `.inc` unity module이다.
+- 독립 `.cpp` 전환에 필요한 전역 상태 계약 정리는 작업 07 이후 검증 가능한 단위에서 수행해야 한다. 구조 근거는 `docs/architecture/ACTIVE_SOURCE_LAYOUT.md`에 기록했다.
+- 2026-08-27 작업 05-H는 사용자 지시에 따라 compile/link, firmware 생성 및 장비 smoke를 수행하지 않았다.

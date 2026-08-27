@@ -1,0 +1,11 @@
+#include "DF_Main_Application.h"
+
+#include "modules/DF_Main_Foundation.inc"
+#include "modules/DF_Main_Communication.inc"
+#include "modules/DF_Main_LedApplication.inc"
+#include "modules/DF_Main_ApplicationCommands.inc"
+#include "modules/DF_Main_DeviceCheck.inc"
+#include "modules/DF_Main_LmWire.inc"
+#include "modules/DF_Main_GameControl.inc"
+#include "modules/DF_Main_Diagnostics.inc"
+#include "modules/DF_Main_Scheduler.inc"

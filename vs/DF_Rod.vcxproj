@@ -26,27 +26,41 @@
     <NMakeCleanCommandLine>call "$(ProjectDir)..\tools\clean-rod.cmd" "$(Configuration)" "$(Platform)"</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)..\artifacts\firmware\DF_Rod\DF_Rod.ino.bin</NMakeOutput>
     <NMakePreprocessorDefinitions>$(DFArduinoPreprocessorDefinitions);$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(ProjectDir)..\Vr1.0.1.0;$(DFArduinoIncludeSearchPath);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(ProjectDir)..\firmware\DF_Rod;$(ProjectDir)..\firmware\DF_Rod\src;$(ProjectDir)..\libraries\DFProtocol\src;$(DFArduinoIncludeSearchPath);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(DFArduinoForcedIncludes);$(NMakeForcedIncludes)</NMakeForcedIncludes>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\Vr1.0.1.0\DF_Rod.ino"><CompileAs>CompileAsCpp</CompileAs></ClCompile>
-    <ClCompile Include="..\Vr1.0.1.0\Battery.cpp" />
-    <ClCompile Include="..\Vr1.0.1.0\EB_IMU.cpp" />
-    <ClCompile Include="..\Vr1.0.1.0\ENow.cpp" />
-    <ClCompile Include="..\Vr1.0.1.0\Encoder.cpp" />
-    <ClCompile Include="..\Vr1.0.1.0\Potentiometer.cpp" />
-    <ClCompile Include="..\Vr1.0.1.0\SwitchButton.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\DF_Rod.ino"><CompileAs>CompileAsCpp</CompileAs></ClCompile>
+    <ClCompile Include="..\firmware\DF_Rod\src\DF_Rod_Application.cpp" />
+    <ClCompile Include="..\libraries\DFProtocol\src\DFProtocol.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\Battery.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\EB_IMU.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\ENow.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\Encoder.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\Potentiometer.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\SwitchButton.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\Version.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Vr1.0.1.0\Battery.h" />
-    <ClInclude Include="..\Vr1.0.1.0\Common.h" />
-    <ClInclude Include="..\Vr1.0.1.0\EB_IMU.h" />
-    <ClInclude Include="..\Vr1.0.1.0\ENow.h" />
-    <ClInclude Include="..\Vr1.0.1.0\Encoder.h" />
-    <ClInclude Include="..\Vr1.0.1.0\Potentiometer.h" />
-    <ClInclude Include="..\Vr1.0.1.0\SwitchButton.h" />
-    <ClInclude Include="..\Vr1.0.1.0\Version.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\Battery.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\Common.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\DF_Rod_Application.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\EB_IMU.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\ENow.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\Encoder.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\Potentiometer.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\SwitchButton.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\Version.h" />
+    <ClInclude Include="..\libraries\DFProtocol\src\DFProtocol.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_Foundation.inc" />
+    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_Communication.inc" />
+    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_SetupProtocol.inc" />
+    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_BatteryMonitor.inc" />
+    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_PowerAndImu.inc" />
+    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_Registration.inc" />
+    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_SchedulerAndInput.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

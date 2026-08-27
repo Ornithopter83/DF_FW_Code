@@ -46,6 +46,7 @@ Arduino toolchain의 실제 컴파일 모드와 무관하게 프로젝트 작성
 
 - 제품 Variant용 조건부 컴파일을 새로 만들지 않는다.
 - 현재 항상 사용하는 기능은 조건 없이 직접 호출한다.
+- 활성 제품 소스에는 제품 선택용 `#if/#ifdef/#else/#endif`를 두지 않는다. 변경 전 분기는 `deprecated/`와 `legacy/`에서만 조회한다.
 - 헤더 보호는 `#pragma once`를 사용한다.
 - 정수 상수는 익명 `enum` 또는 선언/정의를 분리한 `const`를 사용한다.
 - 문자열 상수는 헤더의 `extern const char[]`와 `.cpp`의 단일 정의로 관리한다.
@@ -54,4 +55,3 @@ Arduino toolchain의 실제 컴파일 모드와 무관하게 프로젝트 작성
 ## 참고 스타일
 
 선언/구현 분리와 명시적인 자료형 사용은 `C:\Projects\VS\RS232\BoardIO.h/.cpp` 형식을 참고한다. Windows 전용 API, 전역 singleton 및 동적 할당을 그대로 복제하라는 의미는 아니다.
-

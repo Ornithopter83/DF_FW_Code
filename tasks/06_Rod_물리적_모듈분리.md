@@ -22,28 +22,28 @@ Rod 펌웨어 물리적 모듈 분리
 
 ## 세부 작업
 
-### A. Utility와 PC setup protocol 분리
+### A. Utility와 PC setup protocol 분리 (완료: 2026-08-27)
 
-### B. Rod registration 분리
+### B. Rod registration 분리 (완료: 2026-08-27)
 
-### C. Battery monitor 분리
+### C. Battery monitor 분리 (완료: 2026-08-27)
 
-### D. Button/Encoder input control 분리
+### D. Button/Encoder input control 분리 (완료: 2026-08-27)
 
-### E. IMU service 분리
+### E. IMU service 분리 (완료: 2026-08-27)
 
-### F. Power/Sleep 및 Main communication 분리
+### F. Power/Sleep 및 Main communication 분리 (완료: 2026-08-27)
 
-### G. Scheduler와 Rod application entry 분리
+### G. Scheduler와 Rod application entry 분리 (완료: 2026-08-27)
 
-### H. 단계별 수동 빌드와 주요 smoke 게이트
+### H. 단계별 수동 빌드와 주요 smoke 게이트 (미수행: 2026-08-27, 사용자 지시)
 
 - 각 문자 이동 뒤 Codex가 build를 실행한다.
 - 입력, IMU, 등록, 통신 및 mode 경계에서는 장비 smoke test도 요청한다.
 
 ## 진행
 
-잔여 작업 8개 (A, B, C, D, E, F, G, H)
+잔여 구현 작업 0개. 빌드 및 장비 smoke 검증 미수행.
 
 ## 변경 금지
 
@@ -51,7 +51,7 @@ Rod 펌웨어 물리적 모듈 분리
 
 ## 완료 조건
 
-- `.ino`가 초기화와 상위 process 중심으로 축소되고 각 장치/서비스 경계가 분리된다.
+- `.ino`에는 `setup()`과 `loop()` 위임만 남고 각 장치/서비스 구현 경계가 분리된다. 독립 번역 단위 빌드는 검증하지 않았다.
 
 ## 시험 방법
 
@@ -59,4 +59,7 @@ Rod 펌웨어 물리적 모듈 분리
 
 ## 결과
 
-- 작업 수행 후 기록.
+- 2026-08-27 작업 06-A~G 완료: `DF_Rod.ino`를 10줄의 setup/loop 위임 파일로 축소하고 Foundation, Communication, SetupProtocol, BatteryMonitor, PowerAndImu, Registration, SchedulerAndInput 구현 경계로 분리했다.
+- 기존 Battery, Button, Encoder, IMU, ESP-NOW 및 장치 driver는 `firmware/DF_Rod/src`로 이동했다. 현재 Rod는 New Board V2, Button V2, Break 없음, Encoder V3, Battery 800 V2로 고정하고 구보드 GPIO와 runtime 선택 경로를 활성 코드에서 제거했다.
+- 구현 파일은 자동 생성 선언과 기존 전역 정의 순서를 보존하는 `.inc` unity module이며 Application `.cpp`에서만 순서대로 include한다. 구조 근거는 `docs/architecture/ACTIVE_SOURCE_LAYOUT.md`에 기록했다.
+- 2026-08-27 작업 06-H는 사용자 지시에 따라 compile/link, firmware 생성, 입력/IMU/등록/통신 smoke를 수행하지 않았다.

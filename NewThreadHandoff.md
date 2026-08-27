@@ -12,13 +12,13 @@ Updated: 2026-08-27
 2. `DF_FIRMWARE_INTEGRATED_REFACTORING_PLAN.md`
 3. `CurrentWork.md`
 4. `PROJECT_COMMANDS.md`
-5. `tasks/01_현재제품_기준선_확정.md`
+5. `tasks/07_상태_Callback_안전성.md`
 6. `docs/STYLE_POLICY.md`
 7. `docs/build/ARDUINO_REFERENCE_AUDIT.md`
 
 ## 확인된 상태
 
-- Main 기준은 `Vm1.0.9.0`, Rod 기준은 `Vr1.0.1.0`이다.
+- 변경 전 기준은 `legacy/Vm1.0.9.0`, `legacy/Vr1.0.1.0`이며 활성 소스는 `firmware/DF_Main`, `firmware/DF_Rod`다.
 - 두 펌웨어는 ESP32-S3 및 Arduino-ESP32 Core 2.0.17 산출물 근거가 있다.
 - 프로젝트 로컬 Arduino CLI 1.5.2-rc.1, ESP32 Core 2.0.17, ESP32Servo 1.1.2가 설치되어 있다.
 - Rod의 `Kalman.h`는 비활성 코드에서만 참조되어 설치 대상에서 제외했다.
@@ -26,23 +26,26 @@ Updated: 2026-08-27
 - Git 저장소와 `origin` 구성 및 최초 기준선 commit/push가 완료되어 있다.
 - 작업 01-A에서 Main/Rod 소스 40개, 33,276줄과 기존 산출물 해시를 `docs/baseline/SOURCE_BASELINE_MANIFEST.md`에 확정했다.
 - 원본은 작업 02까지 현재 경로를 유지하고 작업 03에서 `git mv`로 `legacy/`에 이동한다.
-- Rod build는 원본 폴더명 불일치 때문에 `tools/stage-rod.cmd`로 `artifacts/sketch/DF_Rod`를 생성한 뒤 수행한다. 원본/staging 15개 hash 일치와 CLI sketch 인식은 확인됐다.
+- Rod build는 정규화된 `firmware/DF_Rod`를 직접 사용한다. 이전 staging 도구는 `deprecated/tools/stage-rod.cmd`로 이동했다.
 - `DF_Firmware.sln`에는 실제 firmware project인 Main/Rod만 둔다. Rod가 Main에 의존해 Solution Build가 두 project를 순차 실행한다.
 - Main/Rod IntelliSense는 `vs/DF_Arduino_ESP32S3.props`를 공유한다. Core/SDK/현재 사용 library 경로 207개, 실제 전처리 정의와 forced `Arduino.h`가 설정되어 있다.
 - Windows GCC 8.4의 긴 경로 문제 때문에 `arduino-env.cmd`가 저장소를 `X:`에 자동 매핑한다.
 - 2026-08-27 VS2022 `Release|x64` 전체 빌드가 성공했다. Main 882,320 bytes, Rod 763,552 bytes 및 필수 flash 파일 8개를 확인했다.
 - 배포 산출물은 `bin/release/x64/Vm1.0.9.0`과 `bin/release/x64/Vr1.0.1.0`에 각각 4개만 생성한다. 버전은 `tools/firmware-versions.cmd`에서 관리하며 소스 `Version.h`와 함께 갱신한다.
+- 작업 03~06에서 활성 제품 분기 단일화, deprecated/legacy 보존, `libraries/DFProtocol` 계약 적용과 Main/Rod 모듈 분리를 수행했다. 양쪽 `.ino`는 setup/loop 위임만 포함한다.
+- 작업 03~06 이후 build/test/smoke는 사용자 지시로 실행하지 않았다. 현재 활성 소스의 compile/link 가능 여부와 protocol 호환성은 확인되지 않았다.
 
 ## 현재 작업
 
-- 작업서: `tasks/01_현재제품_기준선_확정.md`
+- 다음 작업서: `tasks/07_상태_Callback_안전성.md`
 - 완료 단위: 01-A 저장소와 원본 기준선 목록 확정
 - 부분 완료 단위: 01-B/01-C 코드 기준 Main/Rod 하드웨어 구성 문서화; 실제 장비 대조 보류
 - 완료 단위: 01-D Arduino 참조와 외부 library/FQBN 확정
 - 완료 단위: 01-E 기존 산출물 release 기준값 확정
 - 완료 단위: 02-A~H Arduino CLI 환경, Main/Rod/통합 script, VS2022 solution, IntelliSense, 실제 build 및 버전별 배포 산출물 관리
+- 구현 완료·미검증: 03-A~F, 04-A~F, 05-A~G, 06-A~G
 - 완료 단위: 01-F 기준 clean build gate
-- 다음 단위: 01-B/C/G 실제 Main/Rod 하드웨어 대조 및 사용자 장비 gate
+- 다음 단위: 작업 07 상태와 Callback 안전성 개선 또는 보류된 build/protocol/smoke 검증
 
 ## 중요한 경계
 

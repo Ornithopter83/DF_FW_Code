@@ -47,9 +47,9 @@ bin/
          └─ boot_app0.bin
 ```
 
-`artifacts/`와 `bin/`은 Git에서 제외된다. `bin/<configuration>/<platform>/<version>`은 build마다 해당 version 폴더를 다시 만들고 정확히 4개 플래시 파일만 복사한다. 현재 version은 `tools/firmware-versions.cmd`에서 관리하며 소스 `Version.h` 변경과 함께 갱신한다. 기존 `Vm1.0.9.0/.../build`와 `Vr1.0.1.0/build`는 덮어쓰지 않는다.
+`artifacts/`와 `bin/`은 Git에서 제외된다. `bin/<configuration>/<platform>/<version>`은 build마다 해당 version 폴더를 다시 만들고 정확히 4개 플래시 파일만 복사한다. 현재 version은 `tools/firmware-versions.cmd`에서 관리하며 활성 소스 `Version.cpp` 변경과 함께 갱신한다. `legacy/` 기준 원본과 기존 build 산출물은 덮어쓰지 않는다.
 
-Rod 원본 폴더 `Vr1.0.1.0`과 대표 sketch `DF_Rod.ino`의 이름이 달라 Arduino CLI가 원본 폴더를 직접 sketch로 열 수 없다. `build-rod.cmd`는 매 build마다 현재 Rod `.ino/.cpp/.h`만 `artifacts/sketch/DF_Rod`에 새로 복사하고 그 staging sketch를 컴파일한다. 원본은 변경하지 않으며 stale file이 남지 않도록 staging 폴더를 먼저 제거한다.
+Main/Rod build script는 각각 `firmware/DF_Main`, `firmware/DF_Rod`를 직접 sketch로 사용하고 저장소 `libraries/`를 Arduino library 검색 경로로 전달한다. 변경 전 전체 원본은 `legacy/`에 있고 활성 빌드에서 제외된다.
 
 ## Clean/Rebuild
 
@@ -90,3 +90,5 @@ Main/Rod NMake project는 `vs/DF_Arduino_ESP32S3.props`를 공유한다. 이 파
 빌드는 Main 다음 Rod 순서로 각각 한 번 실행됐다. upload, flash 및 COM port 접근은 수행하지 않았다. 기존 release와의 상세 비교는 `docs/releases/BASELINE_RELEASE_MANIFEST.md`를 따른다.
 
 같은 날 배포 경로 적용 후 `/t:Rebuild`를 다시 실행해 `bin/release/x64/Vm1.0.9.0`과 `bin/release/x64/Vr1.0.1.0`에 각각 정확히 4개 파일이 생성됨을 확인했다. 8개 파일은 각각 `artifacts/firmware`의 대응 파일과 SHA-256이 일치했다.
+
+위 성공 결과는 작업 03~06 구조 변경 전 기준이다. 2026-08-27 구조 변경 이후에는 사용자 지시에 따라 VS/Arduino build, host test와 장비 시험을 실행하지 않았으므로 현재 활성 소스의 결과로 간주하면 안 된다.

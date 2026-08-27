@@ -111,7 +111,7 @@ bin/<configuration>/<platform>/<version>/
 └─ boot_app0.bin
 ```
 
-현재 경로는 `bin/release/x64/Vm1.0.9.0`과 `bin/release/x64/Vr1.0.1.0`이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전을 올릴 때는 소스의 `Version.h`와 `tools/firmware-versions.cmd`를 같은 변경에서 함께 갱신한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
+현재 경로는 `bin/release/x64/Vm1.0.9.0`과 `bin/release/x64/Vr1.0.1.0`이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전을 올릴 때는 `firmware/DF_Main/src/Version.cpp` 또는 `firmware/DF_Rod/src/Version.cpp`와 `tools/firmware-versions.cmd`를 같은 변경에서 함께 갱신한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
 
 ## Visual Studio 2022
 
@@ -126,10 +126,14 @@ DF_Firmware.sln
 - 명령행 통합 build에는 `tools/build-all.cmd`를 사용한다.
 - 자세한 절차와 결과물 위치: `docs/build/VS2022_BUILD.md`
 - Arduino/ESP32-S3 IntelliSense 공통 설정: `vs/DF_Arduino_ESP32S3.props`
+- 활성 소스: `firmware/DF_Main`, `firmware/DF_Rod`
+- 공통 protocol library: `libraries/DFProtocol`
 - solution이 열린 상태에서 project 파일이 변경되면 `Reload All`을 선택하거나 solution을 다시 연다.
 - Solution Build는 compile만 수행하고 upload/flash는 수행하지 않는다.
 - Codex는 compile/link 빌드를 직접 실행하고 결과를 기록한다.
 - upload, flash 및 장비 검증은 사용자가 수행하며 장비 게이트에서 필요한 명령, 예상 결과와 전달받아야 할 항목을 제시한다.
+
+주의: 2026-08-27 작업 03~06 구조 변경 이후에는 사용자 지시에 따라 build와 test를 실행하지 않았다. 위 명령의 마지막 성공 기록은 구조 변경 전 기준이며 현재 활성 소스의 성공 근거가 아니다.
 
 ## Git
 

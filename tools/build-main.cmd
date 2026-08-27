@@ -6,7 +6,7 @@ if errorlevel 1 exit /b %errorlevel%
 call "%~dp0build-output-env.cmd" "%~1" "%~2"
 if errorlevel 1 exit /b %errorlevel%
 
-set "DF_SKETCH=%DF_REPO_ROOT%\Vm1.0.9.0\DF_Main"
+set "DF_SKETCH=%DF_REPO_ROOT%\firmware\DF_Main"
 set "DF_BUILD_PATH=%DF_REPO_ROOT%\artifacts\build\DF_Main"
 set "DF_OUTPUT_PATH=%DF_REPO_ROOT%\artifacts\firmware\DF_Main"
 set "DF_RELEASE_PATH=%DF_REPO_ROOT%\bin\%DF_BUILD_CONFIGURATION%\%DF_BUILD_PLATFORM%\%DF_MAIN_VERSION%"
@@ -22,7 +22,7 @@ if not exist "%DF_OUTPUT_PATH%" mkdir "%DF_OUTPUT_PATH%"
 if errorlevel 1 exit /b %errorlevel%
 
 echo [DF Main] Clean build started.
-"%DF_ARDUINO_CLI%" --config-file "%DF_ARDUINO_CONFIG%" compile --clean --fqbn "%DF_ARDUINO_FQBN%" --build-path "%DF_BUILD_PATH%" --output-dir "%DF_OUTPUT_PATH%" "%DF_SKETCH%"
+"%DF_ARDUINO_CLI%" --config-file "%DF_ARDUINO_CONFIG%" compile --clean --fqbn "%DF_ARDUINO_FQBN%" --libraries "%DF_REPO_ROOT%\libraries" --build-path "%DF_BUILD_PATH%" --output-dir "%DF_OUTPUT_PATH%" "%DF_SKETCH%"
 set "DF_BUILD_EXIT=%ERRORLEVEL%"
 if not "%DF_BUILD_EXIT%"=="0" (
     echo [ERROR] DF Main build failed with exit code %DF_BUILD_EXIT%.
