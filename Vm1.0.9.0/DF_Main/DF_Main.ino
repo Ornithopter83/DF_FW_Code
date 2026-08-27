@@ -1097,17 +1097,17 @@ int oldTorq = DEFAULT_TORQ; //60;
 /*-----------------------------------------------------------
 Continue Torq Control
 ------------------------------------------------------------*/
-int rdy_outTorq = DEFAULT_TORQ; //60;
-int rdy_eachTime = 1000;		// 1000ms
-int rdy_cnt = 0;
-int rdy_incTorq = 10;
-int rdy_reqCnt = 0;
+int rdy_outTorq		= DEFAULT_TORQ; //60;
+int rdy_eachTime	= 1000;			// 1000ms
+int rdy_cnt			= 0;
+int rdy_incTorq		= 10;
+int rdy_reqCnt		= 0;
 
 //
-int gLevel = 1;
-int gZone = 1;
-int gStage = 1;
-String rdyMsg;
+int		gLevel	= 1;
+int		gZone	= 1;
+int		gStage	= 1;
+String	rdyMsg;
 
 //
 int recvMainConn_Pwr1stCnt = 0;

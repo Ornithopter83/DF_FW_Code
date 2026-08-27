@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6A30D849-A80B-4A3C-9A96-2E89CE8671A1}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+    <RootNamespace>DF_Main</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration"><ConfigurationType>Makefile</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v143</PlatformToolset></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration"><ConfigurationType>Makefile</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset></PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="DF_Arduino_ESP32S3.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <NMakeBuildCommandLine>call "$(ProjectDir)..\tools\build-main.cmd"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>call "$(ProjectDir)..\tools\build-main.cmd"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>call "$(ProjectDir)..\tools\clean-main.cmd"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)..\artifacts\firmware\DF_Main\DF_Main.ino.bin</NMakeOutput>
+    <NMakePreprocessorDefinitions>$(DFArduinoPreprocessorDefinitions);$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>$(ProjectDir)..\Vm1.0.9.0\DF_Main;$(DFArduinoIncludeSearchPath);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(DFArduinoForcedIncludes);$(NMakeForcedIncludes)</NMakeForcedIncludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\DF_Main.ino"><CompileAs>CompileAsCpp</CompileAs></ClCompile>
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\BobbinMotor.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Diag.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\ENow.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Eeprom.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Encoder.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\FileSys.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Led.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\LmMotor.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\Potentiometer.cpp" />
+    <ClCompile Include="..\Vm1.0.9.0\DF_Main\ServoMotor.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\BobbinMotor.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Common.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Config.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\DF_Main.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Diag.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\ENow.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Eeprom.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Encoder.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\FileSys.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Led.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\LmMotor.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Potentiometer.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\ServoMotor.h" />
+    <ClInclude Include="..\Vm1.0.9.0\DF_Main\Version.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

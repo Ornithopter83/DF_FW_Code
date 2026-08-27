@@ -1,0 +1,20 @@
+﻿  [DF Firmware] Main and Rod clean build started.
+  [DF Main] Clean build started.
+  In file included from c:\projects\vs\df_fw_code\codexmanage\toolchain\arduino-data\packages\esp32\tools\xtensa-esp32s3-elf-gcc\esp-2021r2-patch5-8.4.0\xtensa-esp32s3-elf\include\c++\8.4.0\stdlib.h:36,
+                   from C:\Projects\VS\DF_FW_Code\CodexManage\toolchain\arduino-data\packages\esp32\hardware\esp32\2.0.17/tools/sdk/esp32s3/include/newlib/platform_include/assert.h:21,
+                   from c:\projects\vs\df_fw_code\codexmanage\toolchain\arduino-data\packages\esp32\tools\xtensa-esp32s3-elf-gcc\esp-2021r2-patch5-8.4.0\xtensa-esp32s3-elf\sys-include\sys\reent.h:503,
+                   from C:\Projects\VS\DF_FW_Code\CodexManage\toolchain\arduino-data\packages\esp32\hardware\esp32\2.0.17/tools/sdk/esp32s3/include/newlib/platform_include/sys/reent.h:17,
+                   from c:\projects\vs\df_fw_code\codexmanage\toolchain\arduino-data\packages\esp32\tools\xtensa-esp32s3-elf-gcc\esp-2021r2-patch5-8.4.0\xtensa-esp32s3-elf\sys-include\stdio.h:60,
+                   from C:\Projects\VS\DF_FW_Code\CodexManage\toolchain\arduino-data\packages\esp32\hardware\esp32\2.0.17\cores\esp32/Arduino.h:27,
+                   from C:\Projects\VS\DF_FW_Code\CodexManage\artifacts\build\DF_Main\sketch\DF_Main.ino.cpp.merged:1:
+  c:\projects\vs\df_fw_code\codexmanage\toolchain\arduino-data\packages\esp32\tools\xtensa-esp32s3-elf-gcc\esp-2021r2-patch5-8.4.0\xtensa-esp32s3-elf\include\c++\8.4.0\cstdlib:41:10: fatal error: bits/c++config.h: No such file or directory
+   #include <bits/c++config.h>
+            ^~~~~~~~~~~~~~~~~~
+  compilation terminated.
+  
+  [92mUsed platform[0m [92mVersion[0m [90mPath[0m
+  [93mesp32:esp32[0m   2.0.17  [90mC:\Projects\VS\DF_FW_Code\CodexManage\toolchain\arduino-data\packages\esp32\hardware\esp32\2.0.17[0m
+  Error during build: exit status 1
+  [ERROR] DF Main build failed with exit code 1.
+  [ERROR] Combined build stopped after Main failure. Exit code 1.
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.MakeFile.Targets(45,5): error MSB3073: "call "C:\Projects\VS\DF_FW_Code\CodexManage\vs\..\tools\build-all.cmd"" 명령이 종료되었습니다(코드: 1).
