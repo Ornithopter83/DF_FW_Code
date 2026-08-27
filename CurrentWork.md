@@ -24,7 +24,7 @@ Updated: 2026-08-27
 - 프로젝트 로컬 `toolchain/arduino-data`에 ESP32 Core 2.0.17과 요구 compiler/tools가 설치되어 있다. 시스템 Core 3.3.0과 분리되어 있다.
 - 프로젝트 로컬 library에서 ESP32Servo 1.1.2가 인식된다.
 - Rod의 `Kalman.h` 참조는 실제 사용 코드가 `#if 0`에만 있어 현재 제품에는 불필요한 의존성으로 판정했다. 설치하지 않고 이후 활성 코드에서 제거한다.
-- Core 제공 참조 외에 Main은 `ESP32Servo.h`, Rod는 `Kalman.h`를 직접 참조하지만 해당 라이브러리 원본과 버전은 작업공간 및 인접 DF 펌웨어 프로젝트에 없다.
+- Main의 외부 의존성은 프로젝트 로컬 ESP32Servo 1.1.2로 확정했으며, Rod의 `Kalman.h`는 현재 제품 빌드에 불필요하므로 설치 대상에서 제외했다.
 - 여러 파일이 `Arduino.h` 대신 `arduino.h`를 사용한다.
 - 빌드 및 장비 검증은 사용자 수동 수행 정책이다.
 
@@ -51,7 +51,7 @@ Updated: 2026-08-27
 
 ## 표준 검증
 
-- 자동 실행 없음. 정확한 Arduino CLI 명령은 FQBN menu option과 외부 라이브러리 버전 확정 후 작업 02에서 고정한다.
+- 자동 실행 없음. 정확한 Arduino CLI 명령은 FQBN menu option 확정 후 작업 02에서 고정한다.
 - 모든 코드 변경의 최소 수동 게이트: Main/Rod 대상 빌드 성공, link 성공, firmware 생성 확인.
 - 주요 경계 변경 후 수동 smoke test, 프로토콜 변경 후 Main–Rod 통합 시험을 요청한다.
 
