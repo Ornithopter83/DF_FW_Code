@@ -63,3 +63,4 @@ Rod 펌웨어 물리적 모듈 분리
 - 기존 Battery, Button, Encoder, IMU, ESP-NOW 및 장치 driver는 `firmware/DF_Rod/src`로 이동했다. 현재 Rod는 New Board V2, Button V2, Break 없음, Encoder V3, Battery 800 V2로 고정하고 구보드 GPIO와 runtime 선택 경로를 활성 코드에서 제거했다.
 - 구현 파일은 자동 생성 선언과 기존 전역 정의 순서를 보존하는 `.inc` unity module이며 Application `.cpp`에서만 순서대로 include한다. 구조 근거는 `docs/architecture/ACTIVE_SOURCE_LAYOUT.md`에 기록했다.
 - 2026-08-27 작업 06-H는 사용자 지시에 따라 compile/link, firmware 생성, 입력/IMU/등록/통신 smoke를 수행하지 않았다.
+- 2026-08-28 후속 작업 08-F~G에서 모든 Rod `.inc`를 대응 `.cpp/.h` 독립 번역 단위로 전환하고 VS2022 project에 등록했다. Arduino CLI clean build와 VS2022 Solution Rebuild가 성공했으며 장비 smoke는 여전히 미수행이다.

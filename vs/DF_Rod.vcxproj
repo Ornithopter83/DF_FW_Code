@@ -32,6 +32,13 @@
   <ItemGroup>
     <ClCompile Include="..\firmware\DF_Rod\DF_Rod.ino"><CompileAs>CompileAsCpp</CompileAs></ClCompile>
     <ClCompile Include="..\firmware\DF_Rod\src\DF_Rod_Application.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\DF_Rod_State.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_Communication.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_SetupProtocol.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_BatteryMonitor.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_PowerAndImu.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_Registration.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_SchedulerAndInput.cpp" />
     <ClCompile Include="..\libraries\DFProtocol\src\DFProtocol.cpp" />
     <ClCompile Include="..\firmware\DF_Rod\src\Battery.cpp" />
     <ClCompile Include="..\firmware\DF_Rod\src\EB_IMU.cpp" />
@@ -45,6 +52,14 @@
     <ClInclude Include="..\firmware\DF_Rod\src\Battery.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\Common.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\DF_Rod_Application.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\DF_Rod_Internal.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\DF_Rod_State.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_Communication.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_SetupProtocol.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_BatteryMonitor.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_PowerAndImu.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_Registration.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_SchedulerAndInput.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\EB_IMU.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\ENow.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\Encoder.h" />
@@ -52,15 +67,6 @@
     <ClInclude Include="..\firmware\DF_Rod\src\SwitchButton.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\Version.h" />
     <ClInclude Include="..\libraries\DFProtocol\src\DFProtocol.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_Foundation.inc" />
-    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_Communication.inc" />
-    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_SetupProtocol.inc" />
-    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_BatteryMonitor.inc" />
-    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_PowerAndImu.inc" />
-    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_Registration.inc" />
-    <None Include="..\firmware\DF_Rod\src\modules\DF_Rod_SchedulerAndInput.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

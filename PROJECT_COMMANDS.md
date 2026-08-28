@@ -1,6 +1,6 @@
 # DF Firmware 프로젝트 명령서
 
-Updated: 2026-08-27
+Updated: 2026-08-28
 
 ## 기본 경로
 
@@ -133,7 +133,21 @@ DF_Firmware.sln
 - Codex는 compile/link 빌드를 직접 실행하고 결과를 기록한다.
 - upload, flash 및 장비 검증은 사용자가 수행하며 장비 게이트에서 필요한 명령, 예상 결과와 전달받아야 할 항목을 제시한다.
 
-주의: 2026-08-27 작업 03~06 구조 변경 이후에는 사용자 지시에 따라 build와 test를 실행하지 않았다. 위 명령의 마지막 성공 기록은 구조 변경 전 기준이며 현재 활성 소스의 성공 근거가 아니다.
+2026-08-28 callback/ISR 안전화 후 `build-all.cmd Release x64`와 VS2022 `DF_Firmware.sln` Rebuild가 모두 성공했다. 현재 기록은 Main application 882,749 bytes/배포 bin 883,120 bytes, Rod application 762,153 bytes/배포 bin 762,512 bytes이며 대상별 배포 파일 4개가 생성된다. project 파일이 변경되었으므로 열려 있던 VS2022에서는 `Reload All` 또는 solution 재열기를 수행한다.
+
+## ESP32-S3 native USB 테스트 보드 업로드
+
+업로드는 장비 종류와 포트를 확인하고 명시적으로 승인받은 테스트 보드에만 수행한다. Core 2.0.17의 기본 flasher stub이 native USB에서 끊기는 보드는 115200 baud ROM bootloader 방식으로 배포 파일 4개를 기록할 수 있다. `<PORT>`는 실행 시 확인한 포트로 바꾸며 저장소 문서에 개인 장비 포트를 고정하지 않는다.
+
+```powershell
+$esptool = '.\toolchain\arduino-data\packages\esp32\tools\esptool_py\4.5.1\esptool.exe'
+$firmwareBin = '.\bin\release\x64\Vm1.0.9.0' # Rod는 Vr1.0.1.0으로 변경
+$sketchName = 'DF_Main'                         # Rod는 DF_Rod로 변경
+
+& $esptool --chip esp32s3 --port '<PORT>' --baud 115200 --before default_reset --after hard_reset --no-stub write_flash --flash_mode dio --flash_freq 80m --flash_size 4MB --verify 0x0000 "$firmwareBin\$sketchName.ino.bootloader.bin" 0x8000 "$firmwareBin\$sketchName.ino.partitions.bin" 0xE000 "$firmwareBin\boot_app0.bin" 0x10000 "$firmwareBin\$sketchName.ino.bin"
+```
+
+2026-08-28 외부 장치가 없는 Main 테스트 보드와 Rod 테스트 보드에서 네 영역의 write/hash/verify와 각 firmware 버전 응답을 확인했다. Main–Rod 상호 등록 뒤 무선 버전 왕복도 확인했다. 999ms 1회 진동 명령에서 사용자가 릴 연동 LED 점멸과 약 1초 실제 진동을 확인했다. 테스트 보드의 물리 flash가 8MB로 검출돼도 제품 FQBN과 partition 기준은 4MB이므로 설정을 변경하지 않는다.
 
 ## Git
 

@@ -1,9 +1,1 @@
-﻿  [DF Main] Clean build started.
-  스케치는 프로그램 저장 공간 881949 바이트(67%)를 사용. 최대 1310720 바이트.
-  전역 변수는 동적 메모리 153444바이트(46%)를 사용, 174236바이트의 지역변수가 남음.  최대는 327680 바이트.
-  [DF Main] Build completed.
-  [ARTIFACT] DF_Main.ino.bin 882320 bytes
-  [ARTIFACT] DF_Main.ino.bootloader.bin 14032 bytes
-  [ARTIFACT] DF_Main.ino.partitions.bin 3072 bytes
-  [ARTIFACT] boot_app0.bin 8192 bytes
-  [OUTPUT] "C:\Projects\VS\DF_FW_Code\CodexManage\artifacts\firmware\DF_Main"
+﻿  [DF Main] Intermediate and published artifacts cleaned.

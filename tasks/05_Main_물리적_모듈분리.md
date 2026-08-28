@@ -64,3 +64,4 @@ Main 펌웨어 물리적 모듈 분리
 - 기존 driver `.cpp/.h`는 `firmware/DF_Main/src` 아래로 이동했다. 기능 구현 파일은 자동 생성 선언과 기존 전역 정의 순서를 보존하기 위해 Application `.cpp` 한 곳에서 순서대로 include하는 `.inc` unity module이다.
 - 독립 `.cpp` 전환에 필요한 전역 상태 계약 정리는 작업 07 이후 검증 가능한 단위에서 수행해야 한다. 구조 근거는 `docs/architecture/ACTIVE_SOURCE_LAYOUT.md`에 기록했다.
 - 2026-08-27 작업 05-H는 사용자 지시에 따라 compile/link, firmware 생성 및 장비 smoke를 수행하지 않았다.
+- 2026-08-28 후속 작업 08-C~E에서 모든 Main `.inc`를 대응 `.cpp/.h` 독립 번역 단위로 전환하고 VS2022 project에 등록했다. Arduino CLI clean build와 VS2022 Solution Rebuild가 성공했으며 장비 smoke는 여전히 미수행이다.
