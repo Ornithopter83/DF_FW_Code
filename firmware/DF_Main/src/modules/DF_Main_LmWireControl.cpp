@@ -187,7 +187,8 @@ void ana_LineMotControl_Check(String msg)
 }
 
 //
-// $04ADDDTTTT%
+// $04ADDDTTTT%: A=0 정지/1 정방향/2 역방향, DDD=duty 0~255, TTTT=동작 시간(ms).
+// 예: $0410230050% -> 정방향, duty 23/255, 50ms 정지 예약. 0ms는 자동 정지 없음.
 //
 void ana_BobbinControl(String msg)
 {

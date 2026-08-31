@@ -114,8 +114,8 @@
 
 
 //===PWM LIMIT 
-#define BLDC_DUTY_FULL		(0)
-#define BLDC_DUTY_LIMIT192	(1)
+#define BLDC_DUTY_FULL		(1)
+#define BLDC_DUTY_LIMIT192	(0)
 #define BLDC_DUTY_LIMIT128	(0)
 
 //=== IO ACTIVE LEVEL
@@ -248,8 +248,8 @@
 
 //=== DEFINE BBN PWR
 
-#define DEFAULT_BBN_PWR		7	// 38 W
-#define WAVE_ADD_BBN_PWR	1
+#define DEFAULT_BBN_PWR		13	// 16 W
+#define WAVE_ADD_BBN_PWR	2
 
 
 //---- game Status---

@@ -19,7 +19,7 @@
 //========================================
 
 //---DUTY MAX
-#define BOBBIN_MAX_DUTY		1023			// 10 bit
+#define BOBBIN_MAX_DUTY		1023			// LEDC 10bit 최대값; AP 명령 duty 최대값(255)과 구분
 #define BOBBIN_OFF_DUTY	0
 
 
@@ -40,7 +40,7 @@
 
 #define PWM_ADJ_MAX200	(255*100/200)	//200% = duty/128
 #define PWM_ADJ_MAX150	(255*100/150)	//150% = duty/170
-#define PWM_ADJ_MAX100	255				//100% = duty/255
+#define PWM_ADJ_MAX100	255				// AP 명령 duty 최대값; 10bit PWM 변환의 분모
 #define PWM_ADJ_MAX075	(255*125/100)	// 75% = duty /318
 #define PWM_ADJ_MAX050	(255*150/100)	// 50% = duty /382
 

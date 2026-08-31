@@ -47,7 +47,7 @@ bin/
          └─ boot_app0.bin
 ```
 
-`artifacts/`와 `bin/`은 Git에서 제외된다. `bin/<configuration>/<platform>/<version>`은 build마다 해당 version 폴더를 다시 만들고 정확히 4개 플래시 파일만 복사한다. 현재 version은 `tools/firmware-versions.cmd`에서 관리하며 활성 소스 `Version.cpp` 변경과 함께 갱신한다. `legacy/` 기준 원본과 기존 build 산출물은 덮어쓰지 않는다.
+`artifacts/`와 `bin/`은 Git에서 제외된다. `bin/<configuration>/<platform>/<version>`은 build마다 해당 version 폴더를 다시 만들고 정확히 4개 플래시 파일만 복사한다. 현재 version은 활성 소스 `Version.cpp`의 `mainVer`/`rodVer`만 수정한다. `tools/firmware-versions.cmd`와 `.ps1`이 매 build/clean 때 소스에서 읽어 `bin/<configuration>/<platform>/<version>/`에 적용한다. VS2022 Build/Rebuild/Clean도 같은 경로를 사용하며 project 파일 수정이나 solution 재로드는 필요 없다. 소스는 빌드 전에 저장해야 한다. 버전 정의 누락·중복·조건부 정의·형식 오류 시 작업을 중단하며 이전 폴더로 대체하지 않는다. Clean은 현재 소스 버전 폴더와 중간 산출물만 대상으로 하며 과거 버전 폴더를 일괄 제거하지 않는다. `legacy/` 기준 원본과 기존 build 산출물은 덮어쓰지 않는다.
 
 Main/Rod build script는 각각 `firmware/DF_Main`, `firmware/DF_Rod`를 직접 sketch로 사용하고 저장소 `libraries/`를 Arduino library 검색 경로로 전달한다. 변경 전 전체 원본은 `legacy/`에 있고 활성 빌드에서 제외된다.
 

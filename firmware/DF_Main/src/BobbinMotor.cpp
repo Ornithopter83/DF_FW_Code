@@ -27,7 +27,7 @@ void BobbinMotor::init()
   ledcAttachPin(BBN_MOT_PWM_PIN, BOBBIN_CH);				// PWM Set ( Pin No, Channel no)
 
   //=== DUTY설정없으면 50% Duty 출력됨.
-  ledcWrite(BOBBIN_CH, BOBBIN_OFF_DUTY);					  // OFF PWM OUT
+  ledcWrite(BOBBIN_CH, BOBBIN_MAX_DUTY);					  // OFF PWM OUT
 
 	// 출력DUTY 저장
 	sbbnOut = PWM_MIN_DUTY;
@@ -109,17 +109,14 @@ void BobbinMotor::onBldc(int _dir, int _duty255)
 	else { }
 
 	
-	  if( motTestAct && ( GAME_WAVE < gameStatus && GAME_RANDING > gameStatus) )	// Hooking ~ Success & TEST SET
-	  {
-		_duty255 = _duty255 * motTestBbnIdx / 20;	// 20 Step
-	  }
+	// 현재 REL 구성은 시험 배율을 적용하지 않는다.
 
 	// 출력DUTY 저장
 	sbbnOut = _duty255;
 
   
-  	//outDuty = (BOBBIN_MAX_DUTY * _dutyP / PWM_ADJ_MAX075);	  // SET PWM 
-  	outDuty = (BOBBIN_MAX_DUTY * _duty255 / PWM_ADJ_MAX100);	  // SET PWM 
+  	// 원본 REL: 명령 duty(0~255)를 10비트 반전 PWM(0~1023)으로 변환한다.
+  	outDuty = BOBBIN_MAX_DUTY - (BOBBIN_MAX_DUTY * _duty255 / PWM_ADJ_MAX100);
   	ledcWrite(BOBBIN_CH, outDuty);	  // SET PWM ( / 1023 )
 	// TBD ON/OFF Control 
 	if(0 != _duty255)	// OFF
@@ -131,7 +128,9 @@ void BobbinMotor::onBldc(int _dir, int _duty255)
 	//LogPrintln(" LG] BLDCo FW," + String(_dir) + "," + String(_duty255)+"/255, "+String(outDuty)+"/1023");
 	logMsg = ((BBN_MOT_CW ==_dir)? "CW_" : "CCW");
 	//LogPrintln(" LG] BLDCo FW," + ((BBN_MOT_CW ==_dir)? "CW_" : "CCW") + "," + String(_duty255) + "/255");
-	LogPrintln(" LG] BLDCo " + logMsg + "," + String(_duty255) + "/255" + (_duty255 != inDuty ? "in:" + String(inDuty) : ""));
+	LogPrintln(" LG] BLDCo " + logMsg + "," + String(_duty255) + "/255" + (_duty255 != inDuty ? "in:" + String(inDuty) : "")
+		+ ",pwm_cmd:" + String(outDuty) + "/" + String(BOBBIN_MAX_DUTY)
+		+ ",hz:" + String(ledcReadFreq(BOBBIN_CH)));
 
 
 }
@@ -144,14 +143,14 @@ void BobbinMotor::offBldc()
   
 	digitalWrite(BBN_MOT_ON_PIN, BBN_MOT_OFF);
 
-  		ledcWrite(BOBBIN_CH, BOBBIN_OFF_DUTY);
+  		ledcWrite(BOBBIN_CH, BOBBIN_MAX_DUTY);
 
 	// 출력DUTY 저장
 	sbbnOut = PWM_MIN_DUTY;
 
   //-- LOG OUT
 
-		LogPrintln(" LG] BLDCo OFF: " + String(BOBBIN_OFF_DUTY));
+		LogPrintln(" LG] BLDCo OFF: " + String(BOBBIN_MAX_DUTY));
 
 
 

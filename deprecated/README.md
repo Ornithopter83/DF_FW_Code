@@ -15,4 +15,10 @@
 
 | `rod/handle-led-test-Vr1.0.1.2/` | Rod Application·Encoder·Communication 5개 파일 | 2026-08-31 | 사용자 요청으로 HANDLE 시험 LED 표식 제거; 원본 파일은 `.txt`로 보존 | `firmware/DF_Rod/src/`의 `Vr1.0.1.3` |
 
+| `tools/firmware-versions-static.cmd.txt` | `tools/firmware-versions.cmd` | 2026-08-31 | 소스 버전과 별도 고정값의 불일치 제거 | `tools/firmware-versions.cmd`, `tools/firmware-versions.ps1` |
+
+| `main/bldc-before-restore-20260831/` | Main `BobbinMotor.cpp`, `Common.h` | 2026-08-31 | PWM 반전 누락 및 구형 모터 상수 복구 전 코드 보존 | `firmware/DF_Main/src/BobbinMotor.cpp`, `Common.h` |
+
+| `main/bldc-before-recompare-20260831/` | Main BobbinMotor.cpp/.h, DF_Main_LmWireControl.cpp | 2026-08-31 | 비활성 시험 배율 제거 및 PWM/명령 단위·UART 로그 보완 전 보존 | 동일 활성 소스 경로 |
+
 전체 변경 전 기준 원본은 `legacy/Vm1.0.9.0`, `legacy/Vr1.0.1.0`에도 변경 금지 상태로 보존한다.
