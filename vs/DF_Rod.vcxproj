@@ -39,6 +39,7 @@
     <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_PowerAndImu.cpp" />
     <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_Registration.cpp" />
     <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_SchedulerAndInput.cpp" />
+    <ClCompile Include="..\firmware\DF_Rod\src\modules\DF_Rod_Ota.cpp" />
     <ClCompile Include="..\libraries\DFProtocol\src\DFProtocol.cpp" />
     <ClCompile Include="..\firmware\DF_Rod\src\Battery.cpp" />
     <ClCompile Include="..\firmware\DF_Rod\src\EB_IMU.cpp" />
@@ -60,6 +61,7 @@
     <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_PowerAndImu.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_Registration.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_SchedulerAndInput.h" />
+    <ClInclude Include="..\firmware\DF_Rod\src\modules\DF_Rod_Ota.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\EB_IMU.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\ENow.h" />
     <ClInclude Include="..\firmware\DF_Rod\src\Encoder.h" />

@@ -41,6 +41,7 @@
     <ClCompile Include="..\firmware\DF_Main\src\modules\DF_Main_GameControl.cpp" />
     <ClCompile Include="..\firmware\DF_Main\src\modules\DF_Main_Diagnostics.cpp" />
     <ClCompile Include="..\firmware\DF_Main\src\modules\DF_Main_Scheduler.cpp" />
+    <ClCompile Include="..\firmware\DF_Main\src\modules\DF_Main_RodOtaRelay.cpp" />
     <ClCompile Include="..\libraries\DFProtocol\src\DFProtocol.cpp" />
     <ClCompile Include="..\firmware\DF_Main\src\BobbinMotor.cpp" />
     <ClCompile Include="..\firmware\DF_Main\src\Diag.cpp" />
@@ -70,6 +71,7 @@
     <ClInclude Include="..\firmware\DF_Main\src\modules\DF_Main_GameControl.h" />
     <ClInclude Include="..\firmware\DF_Main\src\modules\DF_Main_Diagnostics.h" />
     <ClInclude Include="..\firmware\DF_Main\src\modules\DF_Main_Scheduler.h" />
+    <ClInclude Include="..\firmware\DF_Main\src\modules\DF_Main_RodOtaRelay.h" />
     <ClInclude Include="..\firmware\DF_Main\src\Diag.h" />
     <ClInclude Include="..\firmware\DF_Main\src\ENow.h" />
     <ClInclude Include="..\firmware\DF_Main\src\Eeprom.h" />

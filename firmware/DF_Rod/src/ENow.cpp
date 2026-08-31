@@ -150,6 +150,15 @@ void ENow::write(String pid, String str)
 	  sendPid = pid;  //LOG용
 }
 
+bool ENow::writeRaw(const unsigned char *data, unsigned int length)
+{
+	if ((NULL == data) || (0 == length) || (250 < length))
+	{
+		return false;
+	}
+	return ESP_OK == esp_now_send(main_board_addr, data, length);
+}
+
 //----------------------------------------------------------------
 // Send BROAD CAST
 void ENow::writeBC(String pid, String str)

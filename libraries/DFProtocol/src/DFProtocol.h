@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 enum
 {
@@ -70,5 +71,70 @@ typedef struct
     size_t payloadLength;
 } DF_Protocol_MessageView;
 
+enum
+{
+    DF_Protocol_RodOta_ProtocolVersion = 1,
+    DF_Protocol_RodOta_HeaderLength = 15,
+    DF_Protocol_RodOta_CrcLength = 4,
+    DF_Protocol_RodOta_MaxPayloadLength = 96,
+    DF_Protocol_RodOta_MaxFrameLength = 115,
+    DF_Protocol_RodOta_DigestLength = 32,
+    DF_Protocol_RodOta_MaxVersionLength = 24,
+    DF_Protocol_RodOta_StartTargetOffset = 0,
+    DF_Protocol_RodOta_StartImageSizeOffset = 1,
+    DF_Protocol_RodOta_StartDigestOffset = 5,
+    DF_Protocol_RodOta_StartVersionLengthOffset = 37,
+    DF_Protocol_RodOta_StartFixedPayloadLength = 38,
+    DF_Protocol_RodOta_StartVersionOffset = 38,
+    DF_Protocol_RodOta_AckFrameTypeOffset = 0,
+    DF_Protocol_RodOta_AckStatusOffset = 1,
+    DF_Protocol_RodOta_AckNextSequenceOffset = 2,
+    DF_Protocol_RodOta_AckBytesWrittenOffset = 6,
+    DF_Protocol_RodOta_AckPayloadLength = 10,
+    DF_Protocol_RodOta_ServiceImageLimit = 1250000
+};
+
+typedef enum
+{
+    DF_Protocol_RodOta_FrameStart = 1,
+    DF_Protocol_RodOta_FrameData = 2,
+    DF_Protocol_RodOta_FrameFinish = 3,
+    DF_Protocol_RodOta_FrameAbort = 4,
+    DF_Protocol_RodOta_FrameAck = 5
+} DF_Protocol_RodOtaFrameType;
+
+typedef enum
+{
+    DF_Protocol_RodOta_TargetRod = 1
+} DF_Protocol_RodOtaTarget;
+
+typedef enum
+{
+    DF_Protocol_RodOta_StatusOk = 0,
+    DF_Protocol_RodOta_StatusInvalidFrame = 1,
+    DF_Protocol_RodOta_StatusUnauthorized = 2,
+    DF_Protocol_RodOta_StatusBusy = 3,
+    DF_Protocol_RodOta_StatusSequenceError = 4,
+    DF_Protocol_RodOta_StatusWriteError = 5,
+    DF_Protocol_RodOta_StatusImageError = 6,
+    DF_Protocol_RodOta_StatusSizeError = 7,
+    DF_Protocol_RodOta_StatusTargetError = 8,
+    DF_Protocol_RodOta_StatusCancelled = 9
+} DF_Protocol_RodOtaStatus;
+
+typedef struct
+{
+    unsigned char frameType;
+    uint32_t sessionId;
+    uint32_t sequence;
+    const unsigned char* payload;
+    unsigned int payloadLength;
+} DF_Protocol_RodOtaFrameView;
+
 int DF_Protocol_Encode(char* output, size_t outputCapacity, const char* pidText, const char* payload, size_t payloadLength);
 int DF_Protocol_Decode(const char* input, size_t inputLength, DF_Protocol_MessageView* message);
+uint32_t DF_Protocol_RodOta_CalculateCrc32(const unsigned char* data, size_t dataLength);
+void DF_Protocol_RodOta_WriteUint32(unsigned char* output, uint32_t value);
+uint32_t DF_Protocol_RodOta_ReadUint32(const unsigned char* input);
+int DF_Protocol_RodOta_EncodeFrame(unsigned char* output, size_t outputCapacity, unsigned char frameType, uint32_t sessionId, uint32_t sequence, const unsigned char* payload, unsigned int payloadLength);
+int DF_Protocol_RodOta_DecodeFrame(const unsigned char* input, size_t inputLength, DF_Protocol_RodOtaFrameView* frame);

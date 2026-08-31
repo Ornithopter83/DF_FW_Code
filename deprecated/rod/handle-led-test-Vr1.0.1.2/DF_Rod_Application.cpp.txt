@@ -117,6 +117,7 @@ void DF_Rod_Application_Setup()
 
 		// Set Callback Funtion encoder/Btn/imu, Only Norma Mode
 		encoder.setRotateCallback(rotateChangeCallback);
+		encoder.setActivityCallback(DF_Rod_Communication_HandleEncoderActivity);
 		sBtn.setSwitchCallback(btnChangeCallback);
 		imu.setStateCallback(imuDataCallback);
 
@@ -202,6 +203,7 @@ void DF_Rod_Application_Loop()
 
 			//
 			encoder.rotate();		// 1ms Handle Encoder
+			DF_Rod_Communication_ProcessEncoderActivityLed();
 			//
 			sBtn.toggle();			// 1ms Button Toggle READ
 

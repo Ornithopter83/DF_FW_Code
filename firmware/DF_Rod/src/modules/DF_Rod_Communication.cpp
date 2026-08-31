@@ -4,6 +4,7 @@
 
 enum { DF_Rod_Communication_ReceiveBufferSize = 128 };
 static char DF_Rod_Communication_ReceiveBuffer[DF_Rod_Communication_ReceiveBufferSize];
+static unsigned char DF_Rod_Communication_ReceiveSourceAddress[6];
 static volatile unsigned int DF_Rod_Communication_ReceiveLength = 0;
 static volatile unsigned int DF_Rod_Communication_ReceivePending = 0;
 static volatile unsigned long DF_Rod_Communication_OverwrittenCount = 0;
@@ -11,6 +12,7 @@ static volatile unsigned long DF_Rod_Communication_InvalidCount = 0;
 static volatile unsigned int DF_Rod_Communication_SendPending = 0;
 static volatile int DF_Rod_Communication_SendStatus = ESP_NOW_SEND_SUCCESS;
 static portMUX_TYPE DF_Rod_Communication_Mux = portMUX_INITIALIZER_UNLOCKED;
+
 
 void sent_cb_esp_now_sts(const uint8_t* mac_addr, esp_now_send_status_t status)
 {
@@ -54,16 +56,17 @@ void recv_cb_esp_now_msg(const uint8_t *mac_info, const uint8_t *data, int data_
 		DF_Rod_Communication_OverwrittenCount++;
 	}
 	memcpy(DF_Rod_Communication_ReceiveBuffer, data, data_len);
+	memcpy(DF_Rod_Communication_ReceiveSourceAddress, mac_info, 6);
 	DF_Rod_Communication_ReceiveBuffer[data_len] = '\0';
 	DF_Rod_Communication_ReceiveLength = (unsigned int)data_len;
 	DF_Rod_Communication_ReceivePending = 1;
 	portEXIT_CRITICAL(&DF_Rod_Communication_Mux);
 }
 
-int DF_Rod_Communication_TakeReceived(char *data, unsigned int capacity, unsigned int *length, unsigned long *overwrittenCount, unsigned long *invalidCount)
+int DF_Rod_Communication_TakeReceived(char *data, unsigned int capacity, unsigned int *length, unsigned char *sourceAddress, unsigned long *overwrittenCount, unsigned long *invalidCount)
 {
 	unsigned int receivedLength;
-	if ((NULL == data) || (NULL == length) || (NULL == overwrittenCount) || (NULL == invalidCount))
+	if ((NULL == data) || (NULL == length) || (NULL == sourceAddress) || (NULL == overwrittenCount) || (NULL == invalidCount))
 	{
 		return 0;
 	}
@@ -82,6 +85,7 @@ int DF_Rod_Communication_TakeReceived(char *data, unsigned int capacity, unsigne
 		return 0;
 	}
 	memcpy(data, DF_Rod_Communication_ReceiveBuffer, receivedLength + 1);
+	memcpy(sourceAddress, DF_Rod_Communication_ReceiveSourceAddress, 6);
 	*length = receivedLength;
 	*overwrittenCount = DF_Rod_Communication_OverwrittenCount;
 	*invalidCount = DF_Rod_Communication_InvalidCount;
@@ -93,10 +97,12 @@ int DF_Rod_Communication_TakeReceived(char *data, unsigned int capacity, unsigne
 }
 
 void btnChangeCallback(String str) {
+	if (DF_Rod_Ota_IsActive()) return;
   eNow.write(DF_Protocol_RodToMain_Button, str);
 }
 
 void rotateChangeCallback(String str) {
+	if (DF_Rod_Ota_IsActive()) return;
   eNow.write(DF_Protocol_RodToMain_Encoder, str);
 }
 
@@ -104,6 +110,7 @@ void rotateChangeCallback(String str) {
 	Send IMU Data By eNOw ( SLAVE -> MAIN )
 ------------------------------------------------------------------------*/
 void imuDataCallback(String pid, String str) {
+	if (DF_Rod_Ota_IsActive()) return;
   eNow.write(pid, str);
 }
 
@@ -184,13 +191,22 @@ void nowRecvHandler()
 {
 	enum { DF_Rod_Communication_HandlerBufferSize = 128 };
 	char receiveBuffer[DF_Rod_Communication_HandlerBufferSize];
+	unsigned char sourceAddress[6];
 	unsigned int receiveLength = 0;
 	unsigned long overwrittenCount = 0;
 	unsigned long invalidCount = 0;
 	int now_rcv_id;
 
 	DF_Rod_Communication_ProcessSendResult();
-	if (!DF_Rod_Communication_TakeReceived(receiveBuffer, sizeof(receiveBuffer), &receiveLength, &overwrittenCount, &invalidCount))
+	if (!DF_Rod_Communication_TakeReceived(receiveBuffer, sizeof(receiveBuffer), &receiveLength, sourceAddress, &overwrittenCount, &invalidCount))
+	{
+		return;
+	}
+	if (DF_Rod_Ota_HandleFrame((const unsigned char *)receiveBuffer, receiveLength, sourceAddress))
+	{
+		return;
+	}
+	if (DF_Rod_Ota_IsActive())
 	{
 		return;
 	}

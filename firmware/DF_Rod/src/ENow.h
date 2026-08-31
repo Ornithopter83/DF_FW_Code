@@ -22,6 +22,7 @@ class ENow
     void init(esp_now_recv_cb_t cb);
     void write(String pid, String str);
     void writeBC(String pid, String str);
+	bool writeRaw(const unsigned char *data, unsigned int length);
 
     void bindTargetAddress();
     String getMyAddress();

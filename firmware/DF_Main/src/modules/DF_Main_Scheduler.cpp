@@ -90,6 +90,7 @@ NoCompress:
 // (V1081) 다운로드 실행 함수
 void Exec_Download(String msg)
 {
+	enum { DF_Main_Download_RodTargetUnsupported = 3 };
 	int act;
 	int retc = 0;
 	int paraNG = 0;		// 0-OK
@@ -97,6 +98,25 @@ void Exec_Download(String msg)
 	int DnDataLen = g_DnSaveLen[g_DnExecIdx];
 	unsigned char sChr;
 	String respMsg;
+
+	if ((3 < msg.length()) && (('R' == msg[3]) || ('r' == msg[3])))
+	{
+		if (g_DnExecFlag || Update.hasError())
+		{
+			Update.end(false);
+		}
+		for (int i = 0; i < DN_MAX_BUF; i++)
+		{
+			g_DnSaveLen[i] = 0;
+		}
+		g_DnExecIdx = g_DnSaveIdx;
+		g_DnExecFlag = 0;
+		respMsg = msg.substring(0, (0 + 7)) + String(DF_Main_Download_RodTargetUnsupported) + "%";
+		Resp2ApPrintln(respMsg);
+		Serial.flush();
+		LogPrintln(" DN] Rod target rejected: use Main-to-Rod OTA relay");
+		return;
+	}
 	
 	LogPrintf(" DN] Exec_Download() : nDataLen(%d) RecvSeq(%d) DataSum(%x)\r\n", DnDataLen, g_DnRecvSeq, g_DnDataSum);
 	if (g_DnRecvSeq == 999) {					// Stop Packet
@@ -1034,6 +1054,10 @@ void nowRecvHandler()
 	{
 		return;
 	}
+	if (DF_Main_RodOtaRelay_HandleRodFrame((const unsigned char *)receiveBuffer, receiveLength, sourceAddress))
+	{
+		return;
+	}
 	String now_msg_str(receiveBuffer);
 	now_rcv_id = now_msg_str.substring(0, 2).toInt();
 	if (0 == now_rcv_id)
@@ -1432,6 +1456,10 @@ void uartRecvHandler()
 	// ANA AP CMD & EXEC
 	// Recv STX String Switch
 	if(0) { /* Dummy */ }
+	else if (DF_Main_RodOtaRelay_HandlePcCommand(msg))
+	{
+		return;
+	}
 
 	//($30) Rod Regist
     else if (msg.startsWith(STX_ROD_REGIST))	// ROD REGIST

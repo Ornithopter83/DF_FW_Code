@@ -29,7 +29,7 @@ class Encoder
     void rotate();
 
     void setRotateCallback(void (*rotateCallback)(String));
-	String fillZero2char(int _count); 
+	String fillZero2char(int _count);
 	int count = 0;
 
   private:

@@ -183,6 +183,15 @@ void ENow::write(String pid, String str)
 
 }
 
+bool ENow::writeRaw(const unsigned char *data, unsigned int length)
+{
+	if ((NULL == data) || (0 == length) || (250 < length))
+	{
+		return false;
+	}
+	return ESP_OK == esp_now_send(slave_board_addr, data, length);
+}
+
 void ENow::writeBC(String pid, String str)
 {
   //now_message msg;

@@ -1,6 +1,6 @@
 # Visual Studio 2022 Build
 
-Updated: 2026-08-27
+Updated: 2026-08-31
 
 ## Solution
 
@@ -71,6 +71,12 @@ Main/Rod NMake project는 `vs/DF_Arduino_ESP32S3.props`를 공유한다. 이 파
 2026-08-27 MSBuild 속성 평가에서 Main/Rod 각각 207개 include 경로가 모두 존재하고 `Update.h`, `FreeRTOSConfig.h`, `FreeRTOS.h`, `esp_now.h`, `ESP32Servo.h`가 해석됨을 확인했다. 실제 compiler와 최종 include 결정은 Arduino CLI가 담당한다. IntelliSense 표시와 firmware compile 결과가 충돌하면 Arduino CLI 결과를 기준으로 한다.
 
 이미 solution을 열어 둔 상태에서 `.vcxproj` 또는 `.props`가 바뀌면 Visual Studio의 project reload 안내에서 `Reload All`을 선택한다. 안내가 없으면 solution을 닫았다 다시 연 뒤 IntelliSense 재분석이 끝날 때까지 기다린다.
+
+### GCC 속성 관련 표시 오류
+
+`IRAM_ATTR` E0070, FreeRTOS `vPortEnterCritical` E0020와 함수 내부 E0065는 GCC 속성 구문을 VS가 해석하지 못할 때 연쇄적으로 나타날 수 있다. `vs/DF_IntelliSense.h`는 공통 NMake forced include의 첫 파일이며, `__INTELLISENSE__`와 `_MSC_VER`가 정의된 분석에서만 `__attribute__((...))`를 생략한다. 실제 ESP32 compile/link에서는 이 헤더를 포함하지 않고 원래 속성과 IRAM 배치를 유지한다. VS의 분석 결과로 구조체 배치나 target ABI를 검증하지 않는다.
+
+설정 변경 후 `Reload All`을 선택하거나 솔루션을 닫았다 다시 열고 IntelliSense 재분석을 기다린다. 필요하면 솔루션의 `Rescan Solution`을 실행한다. Solution Clean은 펌웨어 산출물만 정리하므로 이 설정을 초기화하지 않는다. 오류 표시 기능이나 자동 완성/F12를 비활성화할 필요는 없다.
 
 ## 안전 경계
 

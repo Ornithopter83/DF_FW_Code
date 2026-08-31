@@ -1,6 +1,6 @@
 # DF Firmware 프로젝트 명령서
 
-Updated: 2026-08-28
+Updated: 2026-08-31
 
 ## 기본 경로
 
@@ -99,6 +99,14 @@ $fqbn = 'esp32:esp32:esp32s3:UploadSpeed=921600,USBMode=hwcdc,CDCOnBoot=cdc,MSCO
 .\tools\build-all.cmd
 ```
 
+- 공유 protocol/OTA frame host test:
+
+```powershell
+.\tools\test-protocol.cmd
+```
+
+Host test는 PATH에서 `g++.exe`를 찾아 C++98 모드로 실행하며 결과 실행 파일은 Git 제외 `artifacts/host-tests/`에 둔다.
+
 각 script는 실패 code를 반환하며 필수 flash file의 존재를 검사한다. 인수를 생략하면 `release x64`를 사용하며, 필요하면 `build-all.cmd Debug x64`처럼 지정한다.
 
 Arduino CLI의 전체 중간 산출물은 `artifacts/`에 둔다. 실제 플래시용 배포 결과는 아래 위치에 대상별 4개 파일만 복사한다.
@@ -111,7 +119,27 @@ bin/<configuration>/<platform>/<version>/
 └─ boot_app0.bin
 ```
 
-현재 경로는 `bin/release/x64/Vm1.0.9.0`과 `bin/release/x64/Vr1.0.1.0`이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전을 올릴 때는 `firmware/DF_Main/src/Version.cpp` 또는 `firmware/DF_Rod/src/Version.cpp`와 `tools/firmware-versions.cmd`를 같은 변경에서 함께 갱신한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
+현재 경로는 Main `bin/release/x64/Vm1.0.9.0`, Rod OTA 최초 설치 기준 `bin/release/x64/Vr1.0.1.0`, Rod 현재 복구 `bin/release/x64/Vr1.0.1.3`이다. `Vr1.0.1.2`는 과거 HANDLE LED 시험 산출물이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전을 올릴 때는 `firmware/DF_Main/src/Version.cpp` 또는 `firmware/DF_Rod/src/Version.cpp`와 `tools/firmware-versions.cmd`를 같은 변경에서 함께 갱신한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
+
+## Main 경유 Rod 무선 application 업데이트
+
+최초 한 번 Rod에 OTA 수신기가 포함된 `Vr1.0.1.0` 네 파일을 유선 전체 설치하고, Main에도 현재 `Vm1.0.9.0` 네 파일을 설치한다. 이후 Rod application 하나만 Main USB 포트를 통해 전송한다.
+
+```powershell
+.\tools\upload-rod-ota.cmd '<MAIN_PORT>' '.\bin\release\x64\Vr1.0.1.3\DF_Rod.ino.bin' 'Vr1.0.1.3'
+```
+
+장비 없이 frame 생성, image 크기와 SHA-256 계산만 확인하려면:
+
+```powershell
+.\tools\upload-rod-ota.ps1 -Firmware '.\bin\release\x64\Vr1.0.1.3\DF_Rod.ino.bin' -Version 'Vr1.0.1.3' -DryRun
+```
+
+- 무선 대상은 `.ino.bin` 하나뿐이다. bootloader, partition, `boot_app0.bin`은 기존 유선 네 영역 설치 명령으로만 변경한다.
+- Main에 등록되어 현재 연결된 Rod 한 대만 허용한다. 전송 중단 시 같은 명령을 처음부터 다시 실행한다.
+- 성공 시 `[OTA] Completed`가 출력되고 Rod가 재부팅한다. 실패 상태는 Rod가 보고한 숫자와 frame 종류/sequence로 출력된다.
+- 과거 `Vr1.0.1.2` 시험(현재 `Vr1.0.1.3`에서는 시험 LED 제거): R 버튼을 놓고 Rod HANDLE을 돌린다. 홀센서 입력이 변하면 즉시 점등하며 마지막 변화 후 200ms에 꺼진다. 연속 회전 중에는 계속 켜질 수 있다. 설치 버전 확인 없이 미점등만으로 센서/LED 고장을 판정하지 않는다.
+- 2026-08-31 실제 OTA: 767,072 bytes, 명령 호출 11:16:54~완료 출력 11:19:43(KST), 약 2분 49초. PC 준비/ACK/검증을 포함하고 앞선 유선 설치는 제외한 실행 로그 기준이다. 재부팅 후 version과 사용자 HANDLE LED 점등·소등·연속 점등을 확인했다.
 
 ## Visual Studio 2022
 
@@ -141,13 +169,41 @@ DF_Firmware.sln
 
 ```powershell
 $esptool = '.\toolchain\arduino-data\packages\esp32\tools\esptool_py\4.5.1\esptool.exe'
-$firmwareBin = '.\bin\release\x64\Vm1.0.9.0' # Rod는 Vr1.0.1.0으로 변경
+$firmwareBin = '.\bin\release\x64\Vm1.0.9.0' # Rod 현재 복구는 Vr1.0.1.3으로 변경
 $sketchName = 'DF_Main'                         # Rod는 DF_Rod로 변경
 
 & $esptool --chip esp32s3 --port '<PORT>' --baud 115200 --before default_reset --after hard_reset --no-stub write_flash --flash_mode dio --flash_freq 80m --flash_size 4MB --verify 0x0000 "$firmwareBin\$sketchName.ino.bootloader.bin" 0x8000 "$firmwareBin\$sketchName.ino.partitions.bin" 0xE000 "$firmwareBin\boot_app0.bin" 0x10000 "$firmwareBin\$sketchName.ino.bin"
 ```
 
 2026-08-28 외부 장치가 없는 Main 테스트 보드와 Rod 테스트 보드에서 네 영역의 write/hash/verify와 각 firmware 버전 응답을 확인했다. Main–Rod 상호 등록 뒤 무선 버전 왕복도 확인했다. 999ms 1회 진동 명령에서 사용자가 릴 연동 LED 점멸과 약 1초 실제 진동을 확인했다. 테스트 보드의 물리 flash가 8MB로 검출돼도 제품 FQBN과 partition 기준은 4MB이므로 설정을 변경하지 않는다.
+
+## Rod USB 빠른 업데이트 (2026-08-31 확인)
+
+여기서 빠른 업데이트는 PC와 **Rod USB 직접 연결**이다. Main 경유 OTA가 아니다. 대상 장치/포트를 직접 확인하고 버전 조회 `$10%`에 Rod 응답만 오는지 확인한다. 사용자 승인 범위 밖에서 자동 실행하지 않는다. 시리얼 모니터를 닫고 출력 부하를 안전하게 정지한 상태에서 수행한다.
+
+아래 예시는 현재 Core 2.0.17 default partition이 이미 설치된 Rod의 복구 절차다. 파티션을 읽어 배포 파일과 일치하는 경우에만 otadata와 app0를 기록한다. 이전 OTA가 app1을 선택했을 수 있으므로 app0만 기록하지 않고 otadata도 초기화한다. bootloader/partition/NVS/SPIFFS는 쓰지 않는다. 파티션이 다르거나 최초 설치라면 이 절차를 사용하지 않고 장비 구성을 확인한 뒤 네 영역 설치 절차를 사용한다.
+
+```powershell
+$dfEsptool = '.\toolchain\arduino-data\packages\esp32\tools\esptool_py\4.5.1\esptool.exe'
+$dfRodBin = '.\bin\release\x64\Vr1.0.1.3'
+$dfRodPort = '<ROD_PORT>'  # 실행 직전에 Rod 직접 포트로 바꿈
+$dfPartitionRead = '.\artifacts\rod-partitions-check.bin'
+New-Item -ItemType Directory -Path '.\artifacts' -Force | Out-Null
+
+& $dfEsptool --chip esp32s3 --port $dfRodPort --baud 921600 --before default_reset --after no_reset --no-stub read_flash 0x8000 3072 $dfPartitionRead
+if ($LASTEXITCODE -ne 0) { throw '파티션 읽기 실패: 업로드 중지' }
+if ((Get-FileHash $dfPartitionRead -Algorithm SHA256).Hash -ne (Get-FileHash "$dfRodBin\DF_Rod.ino.partitions.bin" -Algorithm SHA256).Hash) {
+    throw '파티션 불일치: 쓰지 말고 장비 구성을 먼저 확인'
+}
+
+& $dfEsptool --chip esp32s3 --port $dfRodPort --baud 921600 --before no_reset --after hard_reset --no-stub write_flash --compress --verify --flash_mode keep --flash_freq keep --flash_size keep 0xe000 "$dfRodBin\boot_app0.bin" 0x10000 "$dfRodBin\DF_Rod.ino.bin"
+if ($LASTEXITCODE -ne 0) { throw '기록 또는 verify 실패: 성공으로 간주하지 않음' }
+```
+
+- 성공 기준: 두 영역 hash/verify 일치, 재부팅 후 직접 `$10%` 조회에서 `Vr1.0.1.3` 응답. 그 뒤 R 버튼 해제 상태의 HANDLE 회전에서 시험용 LED가 켜지지 않는지 사용자가 확인한다. 원래 버튼·부팅·연결 LED는 유지된다.
+- 읽기/비교 중 중단되면 장비가 ROM 모드에 남을 수 있다. 임의로 다음 쓰기를 진행하지 말고 실패 이유를 확인한다. 고속 연결이 불안정하면 낮은 baud로 처음부터 재시도하며 성공 여부를 다시 검증한다.
+- 이번 실행 결과: application 766,848 bytes → 502,058 bytes 압축, application 기록 약 21.7초. 파티션 확인·기록·검증 전체 33.86초(후속 버전 조회 제외). 두 영역 verify와 `Vr1.0.1.3` 응답은 완료, 물리 LED 관찰은 사용자 대기다.
+- 이번 USB 직접 업로드는 사용자 명시 요청으로 수행했다. 이 절차 기록은 향후 자동 업로드의 상시 승인이 아니다.
 
 ## Git
 

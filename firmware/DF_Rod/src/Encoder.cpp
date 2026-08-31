@@ -26,6 +26,7 @@ void Encoder::setRotateCallback(void (*rotateCallback)(String))
 }
 
 
+
 //
 //
 void Encoder::rotate()

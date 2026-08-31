@@ -28,6 +28,7 @@ class ENow
     //void write(short pid, String str);
     void write(String pid, String str);
 	void writeBC(String pid, String str);
+	bool writeRaw(const unsigned char *data, unsigned int length);
 
     String getMyAddress();
     String getTargetAddress();

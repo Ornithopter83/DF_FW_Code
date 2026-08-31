@@ -1,6 +1,6 @@
 # DF Main/Rod 통합 펌웨어 현재 작업 상태
 
-Updated: 2026-08-28
+Updated: 2026-08-31
 
 ## 기준선
 
@@ -22,7 +22,7 @@ Updated: 2026-08-28
 - Main 의존성/owner 초안: `docs/refactoring/MAIN_DEPENDENCY_INVENTORY.md`
 - Rod 의존성/owner 초안: `docs/refactoring/ROD_DEPENDENCY_INVENTORY.md`
 - 독립 모듈 전환 순서: `docs/refactoring/MODULE_MIGRATION_PLAN.md`
-- 다음 활성 작업서: `tasks/08_독립모듈_상태_Callback_안전성.md`
+- 다음 활성 작업서: `tasks/10_Rod_무선_FW_업데이트.md`
 
 ## 확인된 현재 구현
 
@@ -42,7 +42,7 @@ Updated: 2026-08-28
 - Rod의 원본 폴더/대표 `.ino` 이름 불일치는 빌드 환경 정리 단계에서 clean staging으로 확인했으며, 현재 활성 소스는 정규화된 `firmware/DF_Rod`를 직접 사용한다.
 - Windows GCC 8.4의 긴 경로 문제는 저장소를 `X:`에 자동 매핑해 해결했다.
 - 2026-08-27 재현 build application은 Main 882,320 bytes, Rod 763,552 bytes다. 필수 flash 파일 8개 생성을 확인했으며 upload/flash는 수행하지 않았다.
-- 배포 산출물은 `bin/<configuration>/<platform>/<version>/`에 대상별 플래시 파일 4개만 둔다. 현재 Release 경로는 `Vm1.0.9.0`, `Vr1.0.1.0`으로 분리되며 2026-08-27 VS2022 Rebuild와 SHA-256 일치 검증을 통과했다.
+- 배포 산출물은 `bin/<configuration>/<platform>/<version>/`에 대상별 플래시 파일 4개만 둔다. 현재 Release 경로는 Main `Vm1.0.9.0`, Rod OTA 기준 `Vr1.0.1.0`, Rod 현재 복구 `Vr1.0.1.3`로 분리된다. `Vr1.0.1.2`는 과거 시험 산출물이다.
 - 작업 03~06에서 현재 Variant 단일화, deprecated/legacy 보존, DFProtocol 공유 계약, Main/Rod 기능 경계 1차 분리를 적용했다. 두 `.ino`에는 setup/loop 위임만 남았다.
 - 작업 03~06 변경 이후에는 사용자의 명시적 지시에 따라 build, host test, protocol test 및 장비 smoke를 수행하지 않았다. 직전 성공 산출물은 구조 변경 전 기준일 뿐 현재 소스를 검증하지 않는다.
 - 2026-08-28 활성 `.inc` 16개를 모두 독립 `.cpp/.h`로 전환했다. Main/Rod Application `.cpp`가 각각 setup/loop 구현을 소유하며 VS2022 project에 모든 module source/header가 등록되어 있다.
@@ -51,6 +51,24 @@ Updated: 2026-08-28
 - Main/Rod ESP-NOW callback은 길이를 검사한 뒤 고정 128-byte 단일 슬롯에 복사하고, 문자열 분석과 로그는 loop 문맥에서 수행한다. Main encoder ISR과 task 사이의 다중 필드 snapshot도 임계영역으로 일치시켰다.
 - 외부 장치가 없는 Main 테스트 보드에서 4개 flash 영역 쓰기/재검증, 12초 시리얼 안정성 및 `Vm1.0.9.0` 버전 응답을 확인했다.
 - Rod 테스트 보드에도 현재 배포 파일 4개를 ROM bootloader `--no-stub` 방식으로 기록·재검증했다. `Vr1.0.1.0` 부팅, Main–Rod 상호 등록, 무선 버전 왕복과 999ms 1회 진동 명령/후속 OFF 전송을 확인했다. 사용자는 릴 연동 LED가 점멸 상태로 바뀌고 진동이 약 1초간 동작한 것을 확인했다. BLDC/encoder 부하는 미수행이다.
+
+## Rod 시험 표식 제거·USB 복구·PowerPoint 인수인계 (2026-08-31)
+
+- 사용자 묶음 요청과 “빠른 업데이트는 USB 연결 업로드” 정정에 따라 작업 10-I/J를 추가 수행했다. Main 경유 OTA를 이번 복구에 사용하지 않았다.
+- HANDLE 원시 입력 activity callback, 200ms 시험 LED 상태·처리 및 Application 호출만 제거했다. 기존 encoder 전송, 버튼/부팅/연결 LED 및 OTA 수신기는 유지했다. 변경 전 5개 파일은 `deprecated/rod/handle-led-test-Vr1.0.1.2/`에 보존했다.
+- 현재 Main은 `Vm1.0.9.0`, Rod는 `Vr1.0.1.3`이다. `tools/build-all.cmd Release x64` compile/link와 `tools/test-protocol.cmd`가 exit 0으로 성공했다. Main bin 885,216 bytes, Rod application 766,485 bytes/bin 766,848 bytes, 대상별 배포 4파일이다.
+- 이번 명시적 요청 범위에서 Rod USB 직접 업로드를 수행했다. 대상 버전과 파티션 일치를 먼저 확인하고 ROM `--no-stub`, 921600 baud, 압축 전송으로 `otadata 0xe000`와 `app0 0x10000`만 기록했다. 두 영역 hash/verify 및 재부팅 후 `Vr1.0.1.3` 응답 확인 완료. bootloader/partition/NVS/SPIFFS와 Main은 기록하지 않았다.
+- 파티션 확인·기록·검증은 33.86초, application 전송은 약 21.7초였다. 이후 버전 조회 시간은 제외한다. 근거: `artifacts/rod-restore-20260831/build.log`, `usb-upload.log`, `result.json`.
+- 인수인계 PowerPoint: `docs/handoff/DF_Firmware_Source_Handoff_2026-08-31.pptx` (140장). VS2022/폴더 소스 탐색, 초기화·loop·callback/ISR·USB/OTA 흐름, 활성 경로의 함수 정의 555개(Main 420/Rod 127/공유 8)를 파일별 표로 수록했다. 전체 시그니처와 직접 호출 목록은 발표자 노트에 있다. 빈 함수와 소스 정의 기준이라는 한계를 표시했다.
+- 140장 렌더·개별 시각 검토와 함수 목록 대조 완료. 복구 후 물리 HANDLE LED 관찰 및 VS2022 재분석 화면은 사용자 확인 대기다. 작업 10-H 실패 복구 검증과 기존 장비 게이트를 완료 처리하지 않았다.
+- 잔여 번호 작업 4개(01/08/09/10), 작업 10 잔여 문자 1개(H). I/J의 요청 범위는 완료했다. commit/push는 수행하지 않았다.
+
+## VS2022 표시 오류 보완 (2026-08-31)
+
+- 사용자 화면의 `IRAM_ATTR` E0070, `vPortEnterCritical` E0020 및 후속 E0065에 대해 작업 02-G IntelliSense 설정만 보완했다. 작업 10-H는 재개하지 않았다.
+- `vs/DF_IntelliSense.h`를 `Arduino.h`보다 먼저 강제 포함하며 MSVC IntelliSense에서만 GCC `__attribute__` 구문을 생략한다. 활성 펌웨어와 Core 헤더는 변경하지 않았다.
+- MSBuild 속성 평가로 Main/Rod Debug/Release x64 네 구성의 강제 포함 순서와 파일 존재를 확인했다. `tools/build-all.cmd Release x64` compile/link 성공(exit 0): Main bin 885,216 bytes, Rod bin 767,072 bytes, 대상별 배포 파일 4개. ELF의 `ISR_onTimerHandler()`는 `.iram0.text`에 유지되며 sketch 의존성에 분석 전용 헤더가 없다. VS 화면 재분석 결과는 사용자 확인 대기다.
+- 잔여 번호/문자 작업 수는 기존과 같다. 이번 보완으로 장비 게이트를 완료 처리하지 않는다.
 
 ## 중간정리: 남은 코드 작업
 
@@ -73,7 +91,7 @@ Updated: 2026-08-28
 
 ## 진행
 
-잔여 번호 작업 3개 (01, 08, 09)
+잔여 번호 작업 4개 (01, 08, 09, 10)
 
 작업 01 잔여 문자 3개 (B, C, G)
 
@@ -84,6 +102,8 @@ Updated: 2026-08-28
 작업 07 잔여 문자 0개 (A~G 완료, 문서 분석만 수행)
 
 작업 08 잔여 문자 2개 (J, K)
+
+작업 10 잔여 문자 1개 (H: 실패 복구 검증 및 최종 마감)
 
 ## 작업 정책
 
@@ -103,4 +123,6 @@ Updated: 2026-08-28
 
 ## 다음 작업
 
-08-I ESP-NOW callback, 고정 버퍼와 ISR 경계 안전화 및 Main/Rod clean build와 VS2022 Rebuild를 완료했다. 08-K 중 Main/Rod 테스트 보드 flash, 부팅, 무선 버전 왕복, 릴 연동 LED 점멸 및 약 1초 진동을 통과했다. BLDC/encoder 부하와 기타 실제 입출력은 미확인이다. 다음은 08-J protocol host test/정적 정책 검사다.
+2026-08-31 `Vr1.0.1.2` 최종 VS2022 Release/x64 Rebuild 경고 0/오류 0, protocol host test와 OTA dry run 성공. Main bin 885,216 bytes, Rod bin 767,072 bytes 및 대상별 배포 파일 4개를 확인했다. 이후 사용자 승인으로 기반 유선 설치와 최종 Rod OTA를 수행했다.
+
+10-G 정상 경로 완료: 사용자 승인 후 Main/Rod OTA 기반 유선 설치·verify, Main 경유 Rod `Vr1.0.1.2` OTA, 재부팅 후 무선/직접 버전 조회가 성공했다. OTA 명령 호출~완료 출력은 실행 로그 기준 약 2분 49초(유선 설치 제외)다. 사용자가 HANDLE 점등·정지 후 소등·연속 회전 중 점등 유지까지 확인했다. 다음은 10-H의 전송 중단·재시도·잘못된 이미지 거부·전원 차단/유선 복구 검증과 최종 배포 경계 마감이다. 이후 08-J/K 자동 정책 검사/장비 부하 시험 및 09 통합 릴리스를 진행한다.

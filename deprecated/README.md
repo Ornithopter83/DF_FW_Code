@@ -13,4 +13,6 @@
 | `rod/Version_History.h.txt` | `Vr1.0.1.0/Version.h` | 2026-08-27 | 과거 Rod 버전 선택과 이력 격리 | `firmware/DF_Rod/src/Version.h`, `Version.cpp` |
 | `tools/stage-rod.cmd` | `tools/stage-rod.cmd` | 2026-08-27 | 활성 Rod sketch 경로가 `firmware/DF_Rod`로 정규화되어 staging 불필요 | `tools/build-rod.cmd` 직접 빌드 |
 
+| `rod/handle-led-test-Vr1.0.1.2/` | Rod Application·Encoder·Communication 5개 파일 | 2026-08-31 | 사용자 요청으로 HANDLE 시험 LED 표식 제거; 원본 파일은 `.txt`로 보존 | `firmware/DF_Rod/src/`의 `Vr1.0.1.3` |
+
 전체 변경 전 기준 원본은 `legacy/Vm1.0.9.0`, `legacy/Vr1.0.1.0`에도 변경 금지 상태로 보존한다.
