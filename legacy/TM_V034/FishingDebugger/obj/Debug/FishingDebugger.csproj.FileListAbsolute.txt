@@ -1,0 +1,98 @@
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\bin\Debug\FishingDebugger.exe.config
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\bin\Debug\FishingDebugger.exe
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\bin\Debug\FishingDebugger.pdb
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.csproj.AssemblyReference.cache
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.exe
+C:\PROJECTs\2023\Portents\SourceCode\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.pdb
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\bin\Debug\DF TM.exe.config
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\bin\Debug\DF TM.exe
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\bin\Debug\DF TM.pdb
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.csproj.AssemblyReference.cache
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\obj\Debug\DF TM.exe
+C:\WORK\DigitalFishing\FishingDebugger\FishingDebugger\obj\Debug\DF TM.pdb
+C:\workVs\CP\DFTM\FishingDebugger\bin\Debug\DF TM.exe.config
+C:\workVs\CP\DFTM\FishingDebugger\bin\Debug\DF TM.exe
+C:\workVs\CP\DFTM\FishingDebugger\bin\Debug\DF TM.pdb
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\FishingDebugger.csproj.AssemblyReference.cache
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\DF TM.exe
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\DF TM.pdb
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\bin\Debug\DF TM.exe.config
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\bin\Debug\DF TM.exe
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\bin\Debug\DF TM.pdb
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\obj\Debug\FishingDebugger.csproj.AssemblyReference.cache
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\obj\Debug\DF TM.exe
+C:\Projects\VS\20250306_160937_강필성_(pskang@innos-inc.com)_DF]_테스트모듈_프로그램(TM)제작_협조_요청의_건\FishingDebugger\obj\Debug\DF TM.pdb
+C:\Projects\VS\TestModule_New\FishingDebugger\bin\Debug\DF TM.exe.config
+C:\Projects\VS\TestModule_New\FishingDebugger\bin\Debug\DF TM.exe
+C:\Projects\VS\TestModule_New\FishingDebugger\bin\Debug\DF TM.pdb
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\FishingDebugger.csproj.AssemblyReference.cache
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\DF TM.exe
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\DF TM.pdb
+C:\Projects\VS\TestModule_New\FishingDebugger\bin\Debug\DF TM.exe.manifest
+C:\Projects\VS\TestModule_New\FishingDebugger\bin\Debug\DF TM.application
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\DF TM.exe.manifest
+C:\Projects\VS\TestModule_New\FishingDebugger\obj\Debug\DF TM.application
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\bin\Debug\DF TM.exe.config
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\bin\Debug\DF TM.exe.manifest
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\bin\Debug\DF TM.application
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\bin\Debug\DF TM.exe
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\bin\Debug\DF TM.pdb
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\DF TM.exe.manifest
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\DF TM.application
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\DF TM.exe
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V023_4\FishingDebugger\obj\Debug\DF TM.pdb
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\bin\Debug\DF TM.exe.config
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\bin\Debug\DF TM.exe.manifest
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\bin\Debug\DF TM.application
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\bin\Debug\DF TM.exe
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\bin\Debug\DF TM.pdb
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\DF TM.exe.manifest
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\DF TM.application
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\DF TM.exe
+C:\Users\SUHO_DEV_PC\Downloads\TestModule_V0_2_4\FishingDebugger\obj\Debug\DF TM.pdb
+C:\workVs\CP\DFTM\FishingDebugger\bin\Debug\DF TM.exe.manifest
+C:\workVs\CP\DFTM\FishingDebugger\bin\Debug\DF TM.application
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\DF TM.exe.manifest
+C:\workVs\CP\DFTM\FishingDebugger\obj\Debug\DF TM.application
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\bin\Debug\DFTM_V~.exe.config
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\bin\Debug\DFTM_V~.exe.manifest
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\bin\Debug\DFTM_V~.application
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\bin\Debug\DFTM_V~.exe
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\bin\Debug\DFTM_V~.pdb
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\FishingDebugger.csproj.AssemblyReference.cache
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\FishingDebugger.FishingDebugger.resources
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\FishingDebugger.Properties.Resources.resources
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\FishingDebugger.csproj.GenerateResource.cache
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\FishingDebugger.csproj.CoreCompileInputs.cache
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\DFTM_V~.exe.manifest
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\DFTM_V~.application
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\DFTM_V~.exe
+C:\data\StudyProject\01_ReFiSys\41.TM_GPS\zip_V025_0\TestModule_V0_2_5\FishingDebugger\obj\Debug\DFTM_V~.pdb

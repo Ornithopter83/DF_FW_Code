@@ -1,0 +1,1 @@
+﻿2026-03-19_16:59:16:077 Com Port Connected : True

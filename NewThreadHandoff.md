@@ -1,6 +1,6 @@
 # DF Firmware 스레드 이주 명령서
 
-Updated: 2026-08-31
+Updated: 2026-09-01
 
 ## 인수인계 요청
 
@@ -10,7 +10,7 @@ Updated: 2026-08-31
 
 - 저장소 루트: `C:\Projects\VS\DF_FW_Code\CodexManage`
 - 원격 저장소: `https://github.com/Ornithopter83/DF_FW_Code.git`
-- 읽는 순서: `AGENTS.md` → `DF_FIRMWARE_INTEGRATED_REFACTORING_PLAN.md` → `CurrentWork.md` → `PROJECT_COMMANDS.md` → `tasks/10_Rod_무선_FW_업데이트.md`
+- 읽는 순서: `AGENTS.md` → `DF_FIRMWARE_INTEGRATED_REFACTORING_PLAN.md` → `CurrentWork.md` → `PROJECT_COMMANDS.md` → `tasks/11_독립형_TestModule_프로그램.md`
 - 초기 commit/push는 완료되어 있다. 현재 OTA/HANDLE 관련 소스·도구·문서에는 수정 및 미추적 파일이 남아 있다. 새 스레드에서는 실제 Git 상태를 읽기 전용으로 확인하고 기존 변경을 보존한다.
 - 작업서의 과거 결과와 최신 결과를 구분한다. 현재 버전·장비 결과는 아래 2026-08-31 기록을 기준으로 인수인계한다.
 
@@ -26,6 +26,19 @@ Updated: 2026-08-31
 - 2026-08-31 직접 업로드 승인은 완료된 해당 시험에 한정된다. 새 스레드에 상시 업로드 권한이 부여된 것이 아니다.
 - 명시적인 요청 없이 commit, push, flash, 배포 및 외부 시스템 변경을 하지 않는다. 비밀정보와 개인 장비 주소를 기록하지 않는다.
 
+## 최신 TestModule 상태 (2026-09-01)
+
+- 독립형 TestModule은 testModule에 있고 표준 출력은 bin/testmodule/Release/win-x64/DFTestModule.exe 단일 파일이다. 루트 솔루션에 포함되지만 펌웨어 프로젝트와 참조 관계는 없다.
+- 최초 MAIN 시리얼 연결은 릴 연결 시도와 함께 IMU 출력 OFF $080%를 보낸다.
+- 업데이트 화면은 MAIN, ROD 무선, ROD 유선, ROD 등록 네 버튼이다. 폴더에서 대상 application BIN과 내부 버전을 검증한다.
+- MAIN은 연결 해제를 확인한 뒤 $DN M; ROD 무선은 MAIN/ROD 연결 후 $OR DFRO OTA; ROD 유선은 팝업 포트 선택 후 별도 $DN R; 등록은 $3001% 후 ROD 왼쪽 버튼 장기 누름과 $3003~$3005 상태를 처리한다.
+- LM JIG 과거 구현은 legacy/TM_V034/FishingDebugger/LM_JIG_Settings.cs 및 DFTMmainForm.cs에 있으나 #if(false) 상태다. 현재 활성 Main도 관련 설정 0 및 빈 분석 함수로 비활성이다.
+- MAIN 업데이트에도 포트 선택 팝업을 적용했다. COM4가 존재하면 기본 선택한다. 상단 포트 목록도 COM4 우선이며 창 높이는 50px 늘어난 900px이다.
+- MAIN 업데이트 진행률 100% 후 soft reset된 기존 COM 객체로 초기 명령을 보내던 timeout을 수정했다. 완료 후 포트를 닫고 최대 12초 재등장을 기다려 다시 열며, 최대 6초 동안 선택 BIN의 Vm 버전을 확인한다.
+- 후속 재시험의 약 6초 실패는 32KiB 첫 블록과 abort가 각각 3초 write timeout된 문제로 확인했다. 실제 Vm1.0.8.0 BIN의 최대 payload는 31,427 bytes/2.73초였다. $DN 블록을 16KiB로 낮추고 WriteTimeout을 10초로 늘려 MAIN/ROD 유선에 적용했다.
+- COM4와 COM3가 모두 ESP32-S3 USB 직렬 장치라 MAIN 업데이트 전에 $10%/Vm 응답으로 대상을 확인한다. 16KiB protocol frame은 유지하고 .NET SerialPort.Write를 1KiB씩 나눠 단일 대용량 write 정지를 방지했다.
+- 후속 사용자 지시로 MAIN 사전 검사와 업데이트 후 자동 재연결·반복 버전 확인을 제거했다. 115200bps, 500ms write timeout, 3초 단일 ACK 대기이며 초기 연결은 첫 write 실패에서 팝업 없이 중단한다. 완료 뒤 연결은 사용자가 수동으로 수행한다.
+- Release compile/self-test/단일 EXE 게시 성공. 71,755,983 bytes, SHA-256 C96566198AD6992A15CCEE8F68B4F4548E5CFDFE051010E2A606FF47FE03F31D. 장비 재시험은 수행하지 않았다. 작업 11은 I 장비 gate 1개가 남아 있다.
 ## BLDC 처리 완료 (2026-08-31)
 
 - 사용자가 최신 코드가 옳다고 확인하고 분석 중지 및 해결 완료 처리를 요청했다. 해당 건은 해결 완료이며 미해결 이슈와 추가 분석·로그 요청은 제거했다.
@@ -90,3 +103,47 @@ Updated: 2026-08-31
 ## 이전 이주 문서 정리 이력
 
 2026-08-31: 기존 인수인계서를 현재 정책·완료 결과 중심으로 갱신했다. 후속 작업 목록은 제외했다. 이번 변경은 이 문서에 한정되며 코드 수정, 재빌드, 업로드, commit/push는 수행하지 않았다. 이주 문서 작성 범위의 잔여 작업은 0개다.
+
+
+
+
+
+
+
+
+
+
+## 2026-09-01 MAIN 복구 업데이트 최신 상태
+
+- MAIN 업데이트는 더 이상 $DN application OTA를 사용하지 않는다. 불완전 설치·부팅 반복 상태에서도 동작하도록 내장 esptool_V4.5.1.exe로 ROM bootloader 직접 기록한다.
+- update.bat 기준으로 포트 선택 후 921600bps, default_reset/hard_reset, 0x0 bootloader, 0x8000 partitions, 0xe000 boot_app0, 0x10000 application을 한 번 기록한다. 일반 시리얼은 115200bps다.
+- MAIN 폴더에는 DF_Main.ino.bootloader.bin, DF_Main.ino.partitions.bin, boot_app0.bin, DF_Main.ino.bin 네 파일이 필요하다.
+- 최종 Release EXE: bin/testmodule/Release/win-x64/DFTestModule.exe, 78,441,820 bytes, SHA-256 9EE409FC59B56091C731C1F77F2A27C093C1FFC080C87262E5D1BE1928A0A56C. build/self-test 성공, 실제 flash는 미수행이다.
+
+
+## 2026-09-01 TestModule 최신 보완
+
+- MAIN 버튼에서 (복구) 표기를 제거했지만 내장 esptool 네 영역 기록 기능은 유지한다.
+- 1초 연결 polling은 유지하며 $00%와 $1800% 반복 정상 프레임은 로그에 표시하지 않는다. 다른 $18 상태는 계속 표시한다.
+- ROD 유선도 내장 esptool로 변경했다. ROD 폴더에 DF_Rod.ino.bootloader.bin, DF_Rod.ino.partitions.bin, boot_app0.bin, DF_Rod.ino.bin 네 파일이 필요하다. ROD 무선은 기존 방식이다.
+- 최종 Release EXE: bin/testmodule/Release/win-x64/DFTestModule.exe, 78,442,332 bytes, SHA-256 D977F582EF97003B77E45E347DA3574935820768302EE1CD907E2F2A6BAEE7B0. build/self-test 성공, 실제 ROD flash는 미수행이다.
+
+## 2026-09-01 $1800 처리 정정
+
+- $1800%는 MAIN이 AP에 보내는 PC 종료 요청이다. TestModule은 수신과 송신을 모두 로그에 남기고 연결당 한 번 같은 $1800%로 응답한다. 숨김 필터는 제거했다.
+- MAIN의 (복구) 표기는 제거했다. MAIN/ROD 유선은 모두 내장 esptool 네 영역 기록이며 ROD 무선만 기존 OTA다.
+- 최종 EXE: bin/testmodule/Release/win-x64/DFTestModule.exe, 78,442,332 bytes, SHA-256 856148C7E06CE948B70F0BFCF80CE7345C8B0E7DE58414CECAC4F45BAC3E6248. 실제 ROD flash는 미수행이다.
+
+## 2026-09-01 첫 연결 초기화 최신 상태
+
+- 업데이트 후 첫 연결에서 ROD/IMU 상태가 누락된 원인은 포트 오픈 직후 초기 명령 8개를 연속 송신해 MAIN의 단일 rcved_flag 대기 버퍼에서 후속 명령이 유실된 것이다.
+- 연결은 레거시와 같이 500ms 간격 3단계로 초기화한다. 각 단계 내부는 60ms 간격이며 초기화 완료 뒤 2초 polling을 시작한다.
+- $1800%는 MAIN의 AP 종료 요청으로 계속 표시하고 연결당 한 번 응답한다.
+- 최종 EXE: bin/testmodule/Release/win-x64/DFTestModule.exe, 78,444,892 bytes, SHA-256 42463DC0003174E03E43099B1D1F29B86F1190B2CFD018D4F478CBD6A41A4450. 실제 장비 첫 연결 검증은 미수행이다.
+## 2026-09-01 첫 연결 로그 재분석 최신 상태
+
+- `DFLOG[202609011503].txt`는 연결 직후 이전 `$2001/$2101/$1800`가 몰려 들어오고, TestModule의 자동 `$1800%` 응답 뒤 `$2211%` MAIN reset이 발생했음을 보여준다. 사용자의 업데이트 후 10초 대기 부족이 원인이 아니다.
+- 포트를 연 직후 남은 입출력 버퍼를 비우고 수신 이벤트를 연결하며 frame decoder도 초기화한다.
+- `$1800%`는 숨기지 않지만 실제 종료하지 않는 TestModule이 완료 ACK를 보내던 처리는 제거했다. 연결당 한 번 경고만 남긴다. 이 항목이 위의 `$1800%` 자동 응답 기록을 대체한다.
+- ROD/IMU 상태 조회를 먼저 수행하고 두 연결 상태를 받거나 최대 2초 대기한 뒤 `$10%`를 한 번 보내므로 초기 `Vs99.99.99/Vi99.99.99` 고정을 방지한다.
+- 최신 표준 EXE: bin/testmodule/Release/win-x64/DFTestModule.exe, 78,445,404 bytes, SHA-256 6F300C57328983138A3790F407CCA86F3E0C49645DFFA738428E998907D64819. build/self-test 성공, 실제 장비 재시험은 미수행이다.

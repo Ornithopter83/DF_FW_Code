@@ -1,6 +1,6 @@
 # DF Firmware 프로젝트 명령서
 
-Updated: 2026-08-31
+Updated: 2026-09-01
 
 ## 기본 경로
 
@@ -221,3 +221,14 @@ https://github.com/Ornithopter83/DF_FW_Code.git
 ```
 
 commit, push 및 tag는 사용자의 명시적 요청이 있을 때만 수행한다.
+
+
+## 독립형 TestModule 단일 EXE
+
+새 프로그램은 루트 `DF_Firmware.sln`의 솔루션에 직접 포함되지만 펌웨어 프로젝트와 독립적이다. 배포 파일은 다음 명령으로 생성한다.
+
+```powershell
+.\tools\build-testmodule.cmd Release
+```
+
+배포 결과는 `bin/testmodule/Release/win-x64/DFTestModule.exe` 하나다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.

@@ -1,6 +1,114 @@
 # DF Main/Rod 통합 펌웨어 현재 작업 상태
 
-Updated: 2026-08-31
+Updated: 2026-09-01
+
+## 작업 11 업데이트 직후 첫 연결 로그 기반 재보완 (2026-09-01)
+
+- `DFLOG[202609011503].txt`에서 포트 연결 직후 과거 `$2001/$2101/$1800` 프레임이 한꺼번에 수신되고, TestModule의 자동 `$1800%` 응답 뒤 `$2211` MAIN reset 통지가 발생한 사실을 확인했다. 사용자가 업데이트 뒤 약 10초 기다린 것과 무관하게 포트/드라이버에 남은 수신 데이터가 새 연결에 전달된 경우다.
+- 포트를 연 직후 입력·출력 버퍼를 비우고 나서 `DataReceived`를 연결하며, 연결할 때마다 frame decoder의 미완성 프레임도 초기화한다.
+- `$1800%`는 숨기지 않고 수신 로그와 연결당 한 번의 경고를 남긴다. TestModule은 실제 Windows 종료를 수행하지 않으므로 종료 완료 ACK를 자동 송신하지 않는다. 아래의 과거 자동 응답 기록은 이 항목으로 대체한다.
+- 초기 명령은 기존 500ms 3단계와 단계 내부 60ms 간격을 유지한다. `$10%` 버전 조회는 첫 단계에서 제거하고 ROD `$20xx`, IMU `$21xx` 상태를 모두 받거나 최대 2초를 기다린 뒤 한 번만 보낸다. 따라서 연결 전 상태의 `Vs99.99.99/Vi99.99.99`가 화면에 고정되는 문제를 줄인다.
+- 표준 Release 단일 EXE 게시와 self-test를 완료했다. `bin/testmodule/Release/win-x64/DFTestModule.exe`, 78,445,404 bytes, SHA-256 `6F300C57328983138A3790F407CCA86F3E0C49645DFFA738428E998907D64819`.
+- 실제 업데이트 직후 장비 재연결 시험은 수행하지 않았다. 작업 11-I 장비 gate와 전체 잔여 번호 5개를 유지한다.
+
+## 작업 11 업데이트 후 첫 연결 초기화 보완 (2026-09-01)
+
+- 업데이트 후 첫 연결에서 ROD/IMU 정보가 없고 $1800%가 반복되지만 재연결하면 정상인 원인을 초기 명령 burst로 확인했다.
+- 새 TestModule은 포트를 열자마자 8개 명령을 연속 송신했다. MAIN parser는 rcved_flag 한 건만 보관하므로 처리 전에 도착한 후속 명령이 버려질 수 있다. 특히 $1101%가 누락되면 PROG_START가 되지 않아 후속 $00%에서 sendCurrentStatus()가 실행되지 않는다.
+- 레거시 TestModule의 500ms 3단계 초기화 흐름을 복원했다. 포트 오픈 후 500ms 대기하고 $00/$290101/$1101, 다음 500ms 후 $00/$10/$080, 다음 500ms 후 $00/$0112/$0110/$1501 순으로 보낸다. 같은 단계 안에서도 60ms 간격을 둔다.
+- 초기화가 끝나기 전에는 일반 2초 polling을 시작하지 않는다. 연결 버튼도 초기화 동안 비활성화한다. 재시도 없이 한 시퀀스만 실행한다.
+- $1800% MAIN→AP 종료 요청은 숨기지 않고 연결당 한 번 $1800%로 응답하는 앞선 처리를 유지한다.
+- Release compile 경고 0/오류 0, self-test exit 0, 단일 EXE 게시 성공. 78,444,892 bytes, SHA-256 42463DC0003174E03E43099B1D1F29B86F1190B2CFD018D4F478CBD6A41A4450.
+- 실제 업데이트 직후 장비 연결 시험은 수행하지 않았다. 작업 11-I 장비 gate와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 AP 종료 응답·ROD 유선 esptool 보완 (2026-09-01)
+
+- MAIN 버튼의 (복구) 표기를 제거했다. MAIN 기능은 내장 esptool 네 영역 직접 기록을 그대로 유지한다.
+- $1800%는 polling 응답이 아니라 MAIN이 AP에 보내는 PC 종료 요청이다. MAIN은 전원 스위치 OFF 또는 자동 재부팅 조건에서 500ms마다 재전송하며 AP의 동일 $1800% 응답을 기다린다.
+- TestModule을 AP로 처리해 연결당 첫 $1800% 수신을 로그에 표시하고 동일 프레임을 한 번 응답한다. RECV $1800%, SEND $1800%와 $00% polling을 숨기지 않는다. Windows 종료 명령은 실행하지 않는다.
+- ROD 유선 업데이트도 기존 $DN application 전송에서 내장 esptool 방식으로 변경했다. ROD 폴더의 bootloader, partitions, boot_app0, application 네 파일과 Vr 버전을 검사하고 0x0/0x8000/0xe000/0x10000에 기록한다.
+- MAIN/ROD 유선 updater와 package 검증 코드를 공통화했다. ROD 무선 업데이트는 기존 MAIN 경유 application OTA를 유지한다.
+- Release compile 경고 0/오류 0, self-test exit 0, 단일 EXE 게시 성공. 78,442,332 bytes, SHA-256 856148C7E06CE948B70F0BFCF80CE7345C8B0E7DE58414CECAC4F45BAC3E6248.
+- 실제 ROD flash와 장비 동작 검증은 수행하지 않았다. 작업 11-I 장비 gate와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 MAIN ROM 복구 업데이트 통합 (2026-09-01)
+
+- 기존 $DN 방식은 실행 중인 MAIN 펌웨어가 정상적으로 시리얼 명령을 처리해야 한다. SPIFFS 초기화 실패나 불완전 설치로 부팅이 반복되면 첫 블록 전송 전에 막히므로 MAIN 업데이트를 ESP32-S3 ROM 부트로더 방식으로 교체했다.
+- testModule/esptool_V4.5.1.exe를 단일 배포 EXE의 내장 리소스로 포함한다. 실행할 때 임시 폴더로 추출하고 종료 후 삭제하므로 배포 폴더에는 DFTestModule.exe 한 파일만 남는다.
+- testModule/update.bat의 핵심 명령을 코드로 이식했다. 선택 포트에 921600bps, default_reset, hard_reset, 압축 쓰기를 사용하고 0x0 bootloader, 0x8000 partitions, 0xe000 boot_app0, 0x10000 application을 한 번만 기록한다. 일반 장비 통신은 기존 115200bps를 유지한다.
+- MAIN 폴더 선택 시 네 파일과 application 내부 Vm 버전을 검사한다. esptool 출력을 우측 로그에 표시하고 기록 퍼센트를 전체 파일 크기에 환산해 프로그레스바에 반영한다. 프로그램은 외부 프로세스를 비동기로 기다리므로 UI를 막지 않는다.
+- Release compile 경고 0/오류 0, self-test exit 0, 단일 EXE 게시 성공. 78,441,820 bytes, SHA-256 9EE409FC59B56091C731C1F77F2A27C093C1FFC080C87262E5D1BE1928A0A56C.
+- 실제 flash 및 장비 검증은 수행하지 않았다. 작업 11-I 장비 gate와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 연결·업데이트 timeout 단순화 (2026-09-01)
+
+- 사용자 지시로 MAIN 사전 $10%/Vm 검사, 업데이트 후 자동 재연결과 반복 버전 확인을 제거했다. 포트 선택 후 한 번만 바로 전송하고 완료 뒤 사용자가 수동 재연결한다.
+- 115200bps는 유지한다. WriteTimeout은 500ms, frame ACK는 재시도 없이 3초다. 초기 연결 명령은 첫 write 실패 시 팝업 없이 중단하고 poll도 정지한다.
+- 16KiB protocol frame/1KiB write chunk는 유지했으며 firmware는 변경하지 않았다.
+- Release compile 경고 0/오류 0, self-test exit 0, 표준 단일 EXE 게시 성공. 71,755,983 bytes, SHA-256 C96566198AD6992A15CCEE8F68B4F4548E5CFDFE051010E2A606FF47FE03F31D.
+- 실제 장비 재시험은 수행하지 않았다. 작업 11 잔여 I 1개와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 유선 업데이트 무진행·포트 식별 보완 (2026-09-01)
+
+- 정확히 약 20초 뒤 실패한 로그는 10초 첫 frame write와 10초 abort write가 모두 막힌 결과다. 진행률 계산 전 단일 Write 단계의 실패로 확인했다.
+- COM4와 COM3가 모두 ESP32-S3 USB 직렬 장치이므로 MAIN 업데이트 전 $10%를 최대 5회 보내 Vm 응답을 확인한다. 응답이 없으면 대용량 frame 없이 잘못된 포트/MAIN 미응답으로 중단한다.
+- 16KiB protocol frame은 유지하고 .NET SerialPort.Write만 1KiB 단위로 나눴다. firmware protocol과 활성 firmware는 변경하지 않았다.
+- Release compile 경고 0/오류 0, self-test exit 0, 표준 단일 EXE 게시 성공. 71,757,374 bytes, SHA-256 B11BE3A2ECA583CB2C7B8EE81C1DF95CA2AC136EC9BF64E39856EC20189FBC2A.
+- 실제 장비 재시험은 수행하지 않았다. 작업 11 잔여 I 1개와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 유선 업데이트 첫 블록 timeout 보완 (2026-09-01)
+
+- Vm1.0.8.0 실제 BIN 분석에서 32KiB LZ payload 최대 31,427 bytes, 115200bps 선로 시간 2.73초로 확인됐다. 기존 write timeout 3초와 여유가 없어 첫 쓰기와 abort 쓰기가 각각 timeout되는 약 6초 실패였다.
+- $DN 블록을 수신 한도 32KiB보다 작은 16KiB로 낮췄다. 최대 선로 시간은 1.38초, 전체 순수 전송시간은 58.7초로 계산됐다. WriteTimeout도 10초로 늘렸으며 MAIN/ROD 유선 경로에 공통 적용된다.
+- 외부 Vm1.0.8.0과 활성 펌웨어는 수정하지 않았다. Release compile 경고 0/오류 0, self-test exit 0, 표준 단일 EXE 게시 성공. 71,756,812 bytes, SHA-256 CFC19DAF83E0D466314F01DEFA5252135B896E2689F6D157690BEA66D86DAE5B.
+- 실제 장비 재시험은 수행하지 않았다. 작업 11 잔여 I 1개와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 MAIN 업데이트 후 COM timeout 보완 (2026-09-01)
+
+- 진행률 100% 뒤 MAIN soft reset으로 기존 COM4 핸들이 무효화된 상태에서 초기 명령을 보내 발생한 timeout을 확인했다. 데이터 전송 단계가 아니라 업데이트 후 재연결 단계의 문제다.
+- 완료 프레임 뒤 기존 포트를 닫고 최대 12초 동안 같은 COM 포트 재등장을 기다려 새로 연다. 이후 초기 명령을 보내고 최대 6초 동안 선택 BIN의 Vm 버전을 확인한다.
+- 재연결 실패, 버전 미확인, 버전 확인 완료를 서로 다른 결과로 표시한다. 활성 펌웨어는 변경하지 않았다.
+- Release compile 경고 0/오류 0, self-test exit 0, 표준 단일 EXE 게시 성공. 71,756,811 bytes, SHA-256 380EBECB30CC18CC7A5EF5E4FD12F868C0D7498BFE32B774520DC14F28506108.
+- 실제 장비 재시험은 수행하지 않았다. 작업 11 잔여 I 1개와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 MAIN 포트 선택·화면 높이 보완 (2026-09-01)
+
+- MAIN 업데이트에 통신포트 선택 팝업을 추가했다. COM4가 존재하면 기본 선택한다. 상단 일반 포트 목록도 COM4를 우선 표시한다.
+- 창 기본/최소 높이를 각각 50px 늘려 900/770px로 변경하고 릴/IMU 메뉴 표시 공간을 확보했다.
+- Release compile 경고 0/오류 0, UI self-test exit 0, 표준 단일 EXE 게시 성공. 71,755,876 bytes, SHA-256 9ADE69D520030D9D5DCBDFFDAE5E0700E903513D0596FCA9DACA24B0FDB4EEC8.
+- 실제 COM 및 장비 시험은 수행하지 않았다. 작업 11 잔여 I 1개와 전체 잔여 번호 5개를 유지한다.
+## 작업 11 연결 초기화·업데이트 경로 보완 (2026-09-01)
+
+- 최초 MAIN 연결 시 IMU 출력은 $080%로 OFF 초기화한다.
+- 업데이트를 MAIN, ROD 무선, ROD 유선, ROD 등록 네 버튼으로 분리했다. MAIN은 기존 포트를 확인 후 닫고 폴더 선택, ROD 무선은 MAIN/ROD 연결 조건과 DFRO OTA, ROD 유선은 포트 팝업 후 폴더 선택과 별도 $DN R, 등록은 $3001% 후 왼쪽 버튼 장기 누름 및 $3003~$3005 상태 표시를 적용한다.
+- DF_Main.ino.bin/DF_Rod.ino.bin과 BIN 내부 Vm/Vr 버전을 검사한다. LM JIG 레거시 $99, $0750~$0754, 직접 제어 코드를 확인했으나 레거시 UI와 현재 활성 Main 모두 비활성 상태다.
+- TestModule Release compile 경고 0/오류 0, 폴더/DFRO/UI self-test exit 0, 표준 단일 EXE 게시 성공. bin/testmodule/Release/win-x64/DFTestModule.exe 71,755,726 bytes, SHA-256 3107CBB8E0BF293F7BB731134F79B3D7DED2F1CF5D02BA9F68C1324F2E68A3BC.
+- 장비 연결·전송은 수행하지 않았다. 작업 11 잔여 문자 1개(I 장비 gate), 전체 잔여 번호 5개를 유지한다.
+## 작업 11 입력 탭 제거·LM JIG 구성 (2026-09-01)
+
+- 입력/전원 탭을 제거하고 LM JIG 탭으로 교체했다. $14 엔코더 회전 카운트와 $2703-03 수신 시작/정지는 릴/IMU 탭으로 이동했다.
+- 레거시에서 LM 직접 제어 $071dddtttt%/$072dddtttt%/$070%, 위치 제어 $0750%~$0754ddd% 및 $99 레벨 파라미터 형식을 확인했다.
+- 새 탭에는 직접 CW/CCW Duty/시간, 정지, 전체 정지, 홈, 좌/우 이동, 홈 복귀를 구성했다. 복잡한 $99 파라미터 편집은 포함하지 않았다.
+- 현재 활성 Main은 CONF_LM_JIG=0, IO_LM_MOT=0, FUNC_FW_CONT_LM_MOT=0이며 ana_LmMotControl()도 빈 함수다. 따라서 탭에 현재 펌웨어 미지원 경고를 표시한다.
+- compile과 표준 경로 단일 EXE 게시 성공. 크기 71,749,660 bytes, SHA-256 A96E2CBDAFF65BA2845D6FB362A455A3678A016EE5FEB41C77869B125DC104A9, self-test 종료 코드 0이다.
+- 실행 중이던 기존 창 종료 후 표준 bin/testmodule/Release/win-x64 경로 재게시까지 완료했다. 장비 송신은 수행하지 않았다.
+## 작업 11 UI/IF 사양 보완 (2026-09-01)
+
+- 연결 버튼을 재검색보다 앞으로 옮기고 우측 고정 영역을 500px로 넓혔다. 수동 명령 제목 행과 입력 폭을 확대했다.
+- 시리얼 연결 직후 릴 활성화용 게임 시작 $1101%를 자동 송신한다. IMU 초기 명령은 후속 요청에 따라 $080% OFF로 변경했으며, $20XX%/$21XX% 자발 상태를 받아 릴/IMU 연결 상태를 표시한다.
+- 릴 버튼 기본 배경을 옅은 회색으로 변경했다. 눌림 상태는 사용자 지정대로 왼쪽 빨강, 오른쪽 파랑을 유지한다.
+- LED 위치를 중앙(0)/왼쪽(1)/오른쪽(2)/하단(3), 표시 액션을 꺼짐(0)/켜짐(1)/점멸(2)/디밍(3), 색상을 01~14 콤보로 변경했다. 밝기 입력은 10~100%로 제한했다.
+- 참고 근거는 DF_IF_Spec_AP2FW_K34_260517.xlsx CmdSts A75:H83, A103:H126, A196:H211이다. 첨부 사양은 읽기만 했고 수정하지 않았다.
+- Release 단일 EXE 게시 및 UI control tree/프로토콜 자체 검사 성공. 배포 파일은 1개, 크기 71,748,646 bytes, SHA-256 4847A0D0A1ACFCAC88E266EA80F4BCFEDA145145249CBE51DDE03D567E4EB92D, self-test 종료 코드 0이다.
+- computer-use helper가 Windows sandbox helper_unknown_error로 두 차례 종료되어 실제 창 screenshot 검증은 수행하지 못했다. 장비 연결과 송신은 수행하지 않았다.
+## 작업 11-B~H: TestModule 화면과 장비 기능 구현 완료 (2026-09-01)
+
+- 합의한 화면대로 상단 고정 연결/버전, 좌측 5개 카테고리, 우측 고정 수동 명령/로그를 구현했다. 에이징·설정/제조 메뉴는 제외했다.
+- 시리얼 재검색·115200 연결·초기 버전 조회, Main/BLDC 동시출력, 릴/IMU, LED, 입력/전원, ZIP firmware package 검증 및 기존 $DN 다운로드 흐름을 연결했다.
+- 공식 System.IO.Ports 8.0.0을 단일 EXE에 포함한다. legacy/TM_V034는 읽기만 했고 수정하지 않았다.
+- 장비 없는 자체 검사는 명령 문자열, frame 분할, download checksum, LZ 압축/복원, ZIP 대상 판별과 전체 WinForms control tree 생성을 확인한다. 실제 장비 연결·명령·firmware 전송은 수행하지 않았다.
+- 11-B~H 완료, 11-I는 장비 확인만 남는다. 작업 11 잔여 문자 1개(I).
+## 작업 11-A: 독립 TestModule 기반 구성 완료 (2026-09-01)
+
+- 사용자 요청으로 `legacy/TM_V034`를 참조하는 새 독립 프로그램 작업 11을 추가하고 우선 활성화했다. 원본 legacy는 변경하지 않았다.
+- `testModule`은 .NET 8 WinForms, Windows x64, self-contained single-file 프로젝트다. 루트 `DF_Firmware.sln`에 직접 포함되지만 Main/Rod 및 기존 TestModule과 프로젝트 참조가 없다.
+- 사용자 지정 관리 경로 `testModule`로 솔루션·빌드 스크립트·문서를 통일했다. 게시 경로 `bin/testmodule`은 유지했으며 이동 전 `apps/DFTestModule` 캐시는 0건이다.
+- 최종 tools/build-testmodule.cmd Release 게시 성공: 오류 0. bin/testmodule/Release/win-x64에는 DFTestModule.exe 한 파일만 있으며 크기 71,748,646 bytes, SHA-256 4847A0D0A1ACFCAC88E266EA80F4BCFEDA145145249CBE51DDE03D567E4EB92D이다.
+- 최종 EXE --self-test 종료 코드 0을 확인했다. UI와 장비 기능은 구현했으며 실제 COM 연결·명령 송신·장비 업데이트 시험은 대기다.
+- 11-A~H 완료, 11-I 장비 gate 대기. 잔여 번호 작업은 5개(01, 08, 09, 10, 11)다.
 
 ## BLDC 처리 완료 (2026-08-31)
 
@@ -36,7 +144,7 @@ Updated: 2026-08-31
 - Main 의존성/owner 초안: `docs/refactoring/MAIN_DEPENDENCY_INVENTORY.md`
 - Rod 의존성/owner 초안: `docs/refactoring/ROD_DEPENDENCY_INVENTORY.md`
 - 독립 모듈 전환 순서: `docs/refactoring/MODULE_MIGRATION_PLAN.md`
-- 다음 활성 작업서: `tasks/10_Rod_무선_FW_업데이트.md`
+- 다음 활성 작업서: `tasks/11_독립형_TestModule_프로그램.md`
 
 ## 확인된 현재 구현
 
@@ -105,7 +213,7 @@ Updated: 2026-08-31
 
 ## 진행
 
-잔여 번호 작업 4개 (01, 08, 09, 10)
+잔여 번호 작업 5개 (01, 08, 09, 10, 11)
 
 작업 01 잔여 문자 3개 (B, C, G)
 
@@ -118,6 +226,8 @@ Updated: 2026-08-31
 작업 08 잔여 문자 2개 (J, K)
 
 작업 10 잔여 문자 1개 (H: 실패 복구 검증 및 최종 마감)
+
+작업 11 잔여 문자 1개 (I 장비 gate)
 
 ## 작업 정책
 
