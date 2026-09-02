@@ -245,9 +245,7 @@ internal sealed class MainForm : Form
     {
         Panel page = Page(); FlowLayoutPanel content = Column();
         content.Controls.Add(SectionTitle("LM JIG"));
-        Label warning = Note("현재 활성 Main 펌웨어는 LM JIG 기능이 비활성 상태입니다. 아래 명령은 레거시/IF 사양 확인용이며 현재 펌웨어에서는 동작하지 않습니다.");
-        warning.ForeColor = Color.DarkRed; warning.BackColor = Color.MistyRose; warning.Padding = new Padding(10);
-        content.Controls.Add(warning);
+        content.Controls.Add(Note("MAIN 보드가 LM JIG 구성으로 판별된 경우에만 $07 명령이 동작합니다. 위치 이동은 센서 감지 또는 3초 안전 타임아웃에서 정지합니다."));
 
         content.Controls.Add(SectionTitle("LM 모터 직접 제어"));
         NumericUpDown duty = Number(0, 255, 13), time = Number(0, 9999, 0);
@@ -551,15 +549,32 @@ internal sealed class MainForm : Form
         if (!serial.IsOpen || !mainVersion.Text.StartsWith("Vm", StringComparison.OrdinalIgnoreCase)) { MessageBox.Show("ROD 무선 업데이트는 MAIN 시리얼 연결이 필요합니다."); return; }
         if (!rodConnected) { MessageBox.Show("MAIN에 ROD가 연결된 상태인지 확인하세요."); return; }
         FirmwarePackage? package = SelectFirmwareFolder((byte)'R'); if (package == null) return;
-        if (MessageBox.Show("MAIN을 통해 ROD를 무선 업데이트합니다. 진행 중에는 전원을 끄지 마세요.", "ROD 무선 업데이트", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK) return;
         SetFirmwareBusy(true, "ROD 무선 업데이트 중"); pollTimer.Stop();
         try {
             Progress<int> progress = new(value => firmwareProgress.Value = value);
             await wirelessUpdater.DownloadAsync(package, progress, CancellationToken.None);
-            AppendLog("SYSTEM", "ROD 무선 펌웨어 전송 완료"); await Task.Delay(1800); TrySend("$10%");
-            MessageBox.Show("ROD 무선 업데이트를 완료했습니다.");
+            AppendLog("SYSTEM", "ROD 무선 펌웨어 전송 완료");
+            rodConnected = false;
+            SetConnectionIndicator(reelConnectionState, false, "릴");
+            ResumeMainPolling();
+            int reconnectWait = 0;
+            while (serial.IsOpen && !rodConnected && reconnectWait < 120) {
+                await Task.Delay(100);
+                reconnectWait++;
+            }
+            if (serial.IsOpen) TrySend("$10%", false);
+            string reconnectResult = rodConnected ? "ROD 재연결도 확인했습니다." : "ROD 재연결은 아직 확인되지 않았습니다.";
+            AppendLog("SYSTEM", reconnectResult);
+            MessageBox.Show("ROD 무선 업데이트를 완료했습니다.\r\n" + reconnectResult, "ROD 무선 업데이트 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
         } catch (Exception ex) { AppendLog("ERROR", ex.Message); MessageBox.Show(ex.Message, "ROD 무선 업데이트 실패"); }
-        finally { if (serial.IsOpen) pollTimer.Start(); SetFirmwareBusy(false, firmwareInfo.Text); }
+        finally { ResumeMainPolling(); SetFirmwareBusy(false, firmwareInfo.Text); }
+    }
+
+    private void ResumeMainPolling()
+    {
+        if (!serial.IsOpen) return;
+        TrySend("$00%", false);
+        pollTimer.Start();
     }
 
     private async Task UpdateRodWiredAsync()

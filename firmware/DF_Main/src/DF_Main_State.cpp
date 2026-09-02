@@ -2279,8 +2279,11 @@ void DC24V_B_off()
 void ledoff_BoardLedAllOff()
 {
 	digitalWrite(BD_LED2_PIN, LOW);
-	digitalWrite(BD_LED3_PIN, LOW);
-	digitalWrite(BD_LED4_PIN, LOW);
+	if(DF_CONFIG_LMJIG != dfConfig)
+	{
+		digitalWrite(BD_LED3_PIN, LOW);
+		digitalWrite(BD_LED4_PIN, LOW);
+	}
 }
 
 //--- External LED OFF---
@@ -2360,6 +2363,7 @@ void bbnBldcOff()
 //
 void lmMotOff()
 {
+	lmMotor.offBldc();
 }
 
 #define ROD_BREAK_OFF_STR_DATA	"000"

@@ -627,7 +627,15 @@ void t10ms_Process_Exec()
 	// Reel now SEND step
 	//if(reelOut_AllOff_Flag)	{ reelAllOff_SendControl(); }	// 10ms Interval NOW SEND to ROD
 
-	//LM-JIG
+	// LM-JIG 위치 제어는 LM JIG 보드에서만 실행한다.
+	if(DF_CONFIG_LMJIG == dfConfig)
+	{
+		if(lmHome_Flag) { lmHome_Control(); }
+		else if(LM_PRIORITY_LEFT == lmPriority && lmLeft_Flag) { lmLeft_Control(); }
+		else if(LM_PRIORITY_RIGHT == lmPriority && lmRight_Flag) { lmRight_Control(); }
+		else if(lmLeft_Flag) { lmLeft_Control(); }
+		else if(lmRight_Flag) { lmRight_Control(); }
+	}
 
 	// 낚시줄 에이징 테스트
 	if(wireAgingTest_Flag)
@@ -1548,6 +1556,11 @@ void uartRecvHandler()
 		ana_BobbinControl_Check(msg);
     }
 
+	// $07 - LM JIG motor control. Reserved on a normal MAIN board.
+	else if((DF_CONFIG_LMJIG == dfConfig) && msg.startsWith(STX_RESERVE07))
+	{
+		ana_LineMotControl_Check(msg);
+	}
 
 	// $06 - LED CONT CMD
 	else if (msg.startsWith(STX_LED_CONT))
@@ -3992,6 +4005,14 @@ void read_input_1ms()
 	sensor1ms[SENSOR_1].curr =  (digitalRead(BBN_ENC_B_DT_PIN) << SNS_bbnEncB) |
 								(digitalRead(BBN_ENC_A_CK_PIN) << SNS_bbnEncA) |
 								(digitalRead(BLDC_FG_PIN) << SNS_bbnMotFg);
+	if(DF_CONFIG_LMJIG == dfConfig)
+	{
+		sensor1ms[SENSOR_1].curr |= (digitalRead(LM_HOME_SEN_PIN) << SNS_LM_HOME) |
+									(digitalRead(LM_LEFT_SEN_PIN) << SNS_LM_LEFT) |
+									(digitalRead(LM_RIGHT_SEN_PIN) << SNS_LM_RIGHT) |
+									(digitalRead(LM_ENC_SEN_PIN) << SNS_LM_ENC) |
+									(digitalRead(LM_MOT_FG_PIN) << SNS_LMMOT_FG);
+	}
 	//sensor1ms[SENSOR_1].curr |= ((digitalRead(PWROFF_SWC_PIN)) << SNS_PwrOffSwc);	// Low Active
 	//sensor1ms[SENSOR_1].curr |= (digitalRead(PC_USB5V_PIN) << SNS_usb5V);
 	//sensor1ms[SENSOR_1].curr |= ((!digitalRead(BOOT_MODE_PIN)) << SNS_boot);		// Low Active
@@ -4033,6 +4054,14 @@ void read_input_10ms()
 								(digitalRead(PC_USB5V_PIN) << SNS_usb5V) |
 								(digitalRead(BOOT_MODE_PIN) << SNS_boot) |			// Low Active
 								(digitalRead(SUB_ACOFF_PIN) << SNS_AcOff);			// Low Active(V108)
+	if(DF_CONFIG_LMJIG == dfConfig)
+	{
+		sensor10ms[SENSOR_1].curr |= (digitalRead(LM_HOME_SEN_PIN) << SNS_LM_HOME) |
+									 (digitalRead(LM_LEFT_SEN_PIN) << SNS_LM_LEFT) |
+									 (digitalRead(LM_RIGHT_SEN_PIN) << SNS_LM_RIGHT) |
+									 (digitalRead(LM_ENC_SEN_PIN) << SNS_LM_ENC) |
+									 (digitalRead(LM_MOT_FG_PIN) << SNS_LMMOT_FG);
+	}
 
 
 	// 2) 연산
@@ -4302,17 +4331,33 @@ void ioPinSetting()
 	// 보드타입(IN)
 		
 		// WDT(OUT)
-		pinMode(WDT_OUT_PIN, OUTPUT);
-		digitalWrite(WDT_OUT_PIN, HIGH);	// 
-		digitalWrite(WDT_OUT_PIN, LOW); 	// 
-		digitalWrite(WDT_OUT_PIN, HIGH);	//	미사용포트, 출력, HIGH유지
+		if(DF_CONFIG_LMJIG != dfConfig)
+		{
+			pinMode(WDT_OUT_PIN, OUTPUT);
+			digitalWrite(WDT_OUT_PIN, HIGH);	//
+			digitalWrite(WDT_OUT_PIN, LOW); 	//
+			digitalWrite(WDT_OUT_PIN, HIGH);	//	미사용포트, 출력, HIGH유지
+		}
 	
 
 	//	보드 LED
 	pinMode(BD_LED2_PIN, OUTPUT);	  // SET Pin OUT
 	
-	pinMode(BD_LED3_PIN, OUTPUT);		// IO-40
-	pinMode(BD_LED4_PIN, OUTPUT);		// IO-41
+	pinMode(BD_LED3_PIN, OUTPUT);		// IO-40 / LM_MOT_ON
+	pinMode(BD_LED4_PIN, OUTPUT);		// IO-41 / LM_MOT_DIR
+
+	if(DF_CONFIG_LMJIG == dfConfig)
+	{
+		pinMode(LM_HOME_SEN_PIN, INPUT_PULLUP);
+		pinMode(LM_LEFT_SEN_PIN, INPUT_PULLUP);
+		pinMode(LM_RIGHT_SEN_PIN, INPUT_PULLUP);
+		pinMode(LM_ENC_SEN_PIN, INPUT_PULLUP);
+		pinMode(LM_MOT_FG_PIN, INPUT_PULLUP);
+		pinMode(LM_24VON_PIN, OUTPUT);
+		pinMode(LM_MOT_PWM_PIN, OUTPUT);
+		pinMode(LM_MOT_ON_PIN, OUTPUT);
+		pinMode(LM_MOT_DIR_PIN, OUTPUT);
+	}
 
 	// TORQ PORT
 	pinMode(TORQ_SS, OUTPUT);				   // PIN SET to SS =OUT

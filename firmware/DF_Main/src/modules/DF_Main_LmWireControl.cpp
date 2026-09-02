@@ -184,6 +184,9 @@ void ana_BobbinControl_Check(String msg)
 static String reqLmMotMsg;
 void ana_LineMotControl_Check(String msg)
 {
+	if(DF_CONFIG_LMJIG != dfConfig) { return; }
+	reqLmMotMsg = msg;
+	ana_LmMotControl(msg);
 }
 
 //
@@ -258,6 +261,91 @@ void ana_BobbinControl(String msg)
 //-----------------------------------------------
 void ana_LmMotControl(String msg)
 {
+	int act;
+	int duty;
+	int onTime;
+	int action;
+	int fish;
+	int power;
+
+	if(DF_CONFIG_LMJIG != dfConfig) { return; }
+	act = msg.substring(3, 4).toInt();
+	if(AP_LM_CMD_OFF == act)
+	{
+		diagLmMotor_TimeOutStop();
+		lmHome_Control_Stop();
+		lmLeft_Control_Stop();
+		lmRight_Control_Stop();
+		lmReturn_Control_Stop();
+		lmPriority = LM_PRIORITY_NO;
+		lmMotor.offBldc();
+	}
+	else if((AP_LM_CMD_CW == act) || (AP_LM_CMD_CCW == act))
+	{
+		diagLmMotor_TimeOutStop();
+		lmHome_Control_Stop();
+		lmLeft_Control_Stop();
+		lmRight_Control_Stop();
+		lmReturn_Control_Stop();
+		lmPriority = LM_PRIORITY_NO;
+		duty = msg.substring(4, 7).toInt();
+		onTime = msg.substring(7, 11).toInt();
+		if(0 > duty) { duty = 0; }
+		else if(255 < duty) { duty = 255; }
+		if(0 > onTime) { onTime = 0; }
+		lmMotor.onBldc((AP_LM_CMD_CW == act) ? LM_MOT_CW : LM_MOT_CCW, duty);
+		if(0 < onTime) { diagLmMotor_TimeoutStart((unsigned int)onTime); }
+	}
+	else if(AP_LM_CMD_ACT == act)
+	{
+		diagLmMotor_TimeOutStop();
+		action = msg.substring(4, 5).toInt();
+		if(0 == action)
+		{
+			diagLmMotor_TimeOutStop();
+			lmHome_Control_Stop();
+			lmLeft_Control_Stop();
+			lmRight_Control_Stop();
+			lmReturn_Control_Stop();
+			lmPriority = LM_PRIORITY_NO;
+			lmMotor.offBldc();
+		}
+		else if(1 == action)
+		{
+			lmLeft_Control_Stop();
+			lmRight_Control_Stop();
+			lmReturn_Control_Stop();
+			lmPriority = LM_PRIORITY_NO;
+			lmHome_Control_Start(1, END_TM_DUTY_OFF);
+		}
+		else if((2 == action) || (3 == action))
+		{
+			fish = msg.substring(5, 6).toInt();
+			power = msg.substring(6, 7).toInt();
+			if(FISH_LVL_1 > fish) { fish = FISH_LVL_1; }
+			else if(FISH_LVL_3 < fish) { fish = FISH_LVL_3; }
+			if(MOT_PWR_LVL_a > power) { power = MOT_PWR_LVL_a; }
+			else if(MOT_PWR_LVL_c < power) { power = MOT_PWR_LVL_c; }
+			if(2 == action)
+			{
+				lmRight_Control_Stop();
+				lmLeft_Control_Start(fish, power, reqTorqueMotor);
+			}
+			else
+			{
+				lmLeft_Control_Stop();
+				lmRight_Control_Start(fish, power, reqTorqueMotor);
+			}
+		}
+		else if(4 == action)
+		{
+			duty = msg.substring(5, 8).toInt();
+			if(0 > duty) { duty = 0; }
+			else if(PWM_MAX_DUTY < duty) { duty = PWM_MAX_DUTY; }
+			lmReturn_Control_Start(duty);
+		}
+	}
+	Resp2ApPrintln(msg + "%");
 }
 
 
@@ -333,11 +421,12 @@ void lmCenter_Control_Stop()
 
 void lmReturn_Control_Start(int pwr)
 {
-	stLmReturnTbl.lm = pwr;		// Return LM Duty SET
-	if(0) {}
-	else if(LM_POSI_RIGHT <= lmPosi) { lmRightStep = LM_RIGHT_HOME_RETURN; }
-	else if(LM_POSI_LEFT <= lmPosi) { lmLeftStep = LM_LEFT_HOME_RETURN; }
-	else { lmHome_Control_Start(0, reqTorqueMotor); }		
+	stLmReturnTbl.lm = pwr;
+	lmReturn_Flag = 1;
+	lmLeft_Control_Stop();
+	lmRight_Control_Stop();
+	lmPriority = LM_PRIORITY_NO;
+	lmHome_Control_Start(0, reqTorqueMotor);
 }
 void lmReturn_Control_Stop()
 {
@@ -510,6 +599,51 @@ void lmHome_Control_2()		//_ak : Action Kind
 //
 void lmHome_Control()		//_ak : Action Kind
 {
+	static unsigned long lmHomeTimeout;
+	int duty;
+
+	switch(lmHomeStep)
+	{
+		case STEP_IDLE:
+			break;
+		case STEP_START:
+			lmHomeNG_Flag = 0;
+			lmPosition_Set(LM_POSI_HOMEMOVE);
+			if(LM_HOME_SEN_ON == lev10_lmHome)
+			{
+				lmHomeStep = STEP_OK_END;
+				break;
+			}
+			duty = lmReturn_Flag ? stLmReturnTbl.lm : stLmHomeTbl.lm;
+			if(0 >= duty) { duty = LM_HOME_MOVE_DUTY; }
+			if(LM_RIGHT_SEN_ON == lev10_lmRight) { lmMotor.onBldc(LM_MOT_LEFT, duty); }
+			else { lmMotor.onBldc(LM_MOT_RIGHT, duty); }
+			setTO(lmHomeTimeout);
+			lmHomeStep = 20;
+			break;
+		case 20:
+			if(LM_HOME_SEN_ON == lev10_lmHome) { lmHomeStep = STEP_OK_END; }
+			else if(checkTO(lmHomeTimeout, LM_MOVE_TO_TIME)) { lmHomeStep = STEP_NG_END; }
+			break;
+		case STEP_NG_END:
+			lmHomeNG_Flag = 1;
+			lmMotor.offBldc();
+			lmReturn_Control_Stop();
+			lmHome_Control_Stop();
+			break;
+		case STEP_OK_END:
+			lmMotor.offBldc();
+			lmPosition_Set(LM_POSI_HOME);
+			lmReturn_Control_Stop();
+			lmHome_Control_Stop();
+			break;
+		default:
+			lmMotor.offBldc();
+			lmHomeNG_Flag = 1;
+			lmReturn_Control_Stop();
+			lmHome_Control_Stop();
+			break;
+	}
 }
 
 void lmPosition_Set(int posi)
@@ -529,6 +663,46 @@ static unsigned int lmLeftPulseCnt = LEFT_MOVE_PULSE;
 // CONTROL - 좌측(CW)
 void lmLeft_Control()
 {
+	static unsigned long lmLeftTimeout;
+	int duty;
+
+	switch(lmLeftStep)
+	{
+		case STEP_IDLE:
+			break;
+		case STEP_START:
+			lmLeftNG_Flag = 0;
+			lmPosition_Set(LM_POSI_LEFTMOVE);
+			if(LM_LEFT_SEN_ON == lev10_lmLeft) { lmLeftStep = STEP_OK_END; break; }
+			duty = stLmDutyTbl[lmFishLevel][lmLeftDuty].lm;
+			if(0 >= duty) { duty = LM_HOME_MOVE_DUTY; }
+			lmMotor.onBldc(LM_MOT_LEFT, duty);
+			setTO(lmLeftTimeout);
+			lmLeftStep = 20;
+			break;
+		case 20:
+			if(LM_LEFT_SEN_ON == lev10_lmLeft) { lmLeftStep = STEP_OK_END; }
+			else if(checkTO(lmLeftTimeout, LM_MOVE_TO_TIME)) { lmLeftStep = STEP_NG_END; }
+			break;
+		case STEP_NG_END:
+			lmLeftNG_Flag = 1;
+			lmMotor.offBldc();
+			lmPriority = LM_PRIORITY_NO;
+			lmLeft_Control_Stop();
+			break;
+		case STEP_OK_END:
+			lmMotor.offBldc();
+			lmPosition_Set(LM_POSI_LEFT);
+			lmPriority = LM_PRIORITY_NO;
+			lmLeft_Control_Stop();
+			break;
+		default:
+			lmMotor.offBldc();
+			lmLeftNG_Flag = 1;
+			lmPriority = LM_PRIORITY_NO;
+			lmLeft_Control_Stop();
+			break;
+	}
 }
 
 #define RIGHT_MOVE_PULSE		46
@@ -538,6 +712,46 @@ static unsigned int lmRightPulseCnt = RIGHT_MOVE_PULSE;
 
 void lmRight_Control()
 {
+	static unsigned long lmRightTimeout;
+	int duty;
+
+	switch(lmRightStep)
+	{
+		case STEP_IDLE:
+			break;
+		case STEP_START:
+			lmRightNG_Flag = 0;
+			lmPosition_Set(LM_POSI_RIGHTMOVE);
+			if(LM_RIGHT_SEN_ON == lev10_lmRight) { lmRightStep = STEP_OK_END; break; }
+			duty = stLmDutyTbl[lmFishLevel][lmRightDuty].lm;
+			if(0 >= duty) { duty = LM_HOME_MOVE_DUTY; }
+			lmMotor.onBldc(LM_MOT_RIGHT, duty);
+			setTO(lmRightTimeout);
+			lmRightStep = 20;
+			break;
+		case 20:
+			if(LM_RIGHT_SEN_ON == lev10_lmRight) { lmRightStep = STEP_OK_END; }
+			else if(checkTO(lmRightTimeout, LM_MOVE_TO_TIME)) { lmRightStep = STEP_NG_END; }
+			break;
+		case STEP_NG_END:
+			lmRightNG_Flag = 1;
+			lmMotor.offBldc();
+			lmPriority = LM_PRIORITY_NO;
+			lmRight_Control_Stop();
+			break;
+		case STEP_OK_END:
+			lmMotor.offBldc();
+			lmPosition_Set(LM_POSI_RIGHT);
+			lmPriority = LM_PRIORITY_NO;
+			lmRight_Control_Stop();
+			break;
+		default:
+			lmMotor.offBldc();
+			lmRightNG_Flag = 1;
+			lmPriority = LM_PRIORITY_NO;
+			lmRight_Control_Stop();
+			break;
+	}
 }
 
 void lmReturn_Control()

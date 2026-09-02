@@ -179,6 +179,10 @@ void DF_Main_Application_Setup()
 
 	curr_ms_tick = millis();
 	mainEnc.init();
+	if(DF_CONFIG_LMJIG == dfConfig)
+	{
+		lmMotor.init();
+	}
     //--- Defien Callback
 	curr_ms_tick = millis();
     mainEnc.setRotateCallback(rotateChangeCallback);
@@ -219,9 +223,12 @@ void DF_Main_Application_Setup()
 	}
 	//digitalWrite(BD_LED2_PIN, LOW);
 
-	digitalWrite(BD_LED4_PIN, HIGH);	// MAIN BOARD POWER ON
-	delay(200);		// LED Blink
-	digitalWrite(BD_LED4_PIN, LOW);	// MAIN BOARD POWER OFF
+	if(DF_CONFIG_LMJIG != dfConfig)
+	{
+		digitalWrite(BD_LED4_PIN, HIGH);	// MAIN BOARD POWER ON
+		delay(200);		// LED Blink
+		digitalWrite(BD_LED4_PIN, LOW);	// MAIN BOARD POWER OFF
+	}
 
 	//== 22) Input Filtering at Power ON (3 times)
 	// 1ms Input처리

@@ -38,7 +38,7 @@ legacy/TM_V034를 기준 자료로만 사용하고, 새 TestModule을 testModule
 
 ## 진행
 
-잔여 작업 1개 (I 장비 gate)
+잔여 작업 0개
 
 
 ## 2026-09-01 UI/사양 보완
@@ -153,3 +153,29 @@ legacy/TM_V034를 기준 자료로만 사용하고, 새 TestModule을 testModule
 - `$10%`는 ROD와 IMU 연결 상태를 모두 받거나 최대 2초가 지난 뒤 한 번만 보낸다. 초기 상태 조회와 일반 polling의 단계적 송신 및 무재시도 정책은 유지한다.
 - Release build와 self-test를 완료했다. 표준 단일 EXE는 78,445,404 bytes, SHA-256 `6F300C57328983138A3790F407CCA86F3E0C49645DFFA738428E998907D64819`이다.
 - 실제 업데이트 직후 장비 재연결 시험은 I 장비 gate로 유지한다. 잔여 작업은 I 1개다.
+## 2026-09-02 활성 범위 재정리
+
+### J. 무선 업데이트 보완 (완료: 2026-09-02)
+
+- 시작 전 경고 제거, 허용 범위의 전송 속도 최대화, 업데이트 후 재연결 시 MAIN/AP `$00%` polling 복구, 성공 완료 팝업을 구현한다.
+
+### K. LM JIG 실제 제어 (완료: 2026-09-02)
+
+- 현재 UI의 LM 직접/위치 명령을 활성 MAIN 펌웨어가 실제 처리하도록 런타임 LM JIG 판별, 핀/PWM, 명령 라우팅, 센서 기반 안전 정지를 구현했다.
+
+- 기존 I 포괄 장비 gate와 그 밖의 프로젝트 검증·마감은 2026-09-02 사용자 지시로 활성 범위에서 제외했다.
+- 11-J/K 완료. 활성 잔여 작업은 0개다.
+## 2026-09-02 J 결과
+
+- 시작 전 확인 경고를 제거하고 전송 직후 MAIN `$00%` polling을 완료 팝업보다 먼저 복구했다.
+- 최대 12초 ROD 재연결을 확인한 뒤 버전을 조회하며, 완료 팝업에 재연결 확인 여부를 표시한다. 실패 시에도 열린 MAIN 연결의 polling을 복구한다.
+- 현재 96-byte payload/프레임별 ACK에는 정상 전송 인위적 지연이 없다. 128-byte 펌웨어 수신 경계와 기존 설치 image 호환성을 유지하기 위해 protocol frame은 변경하지 않았다.
+- Release build와 self-test 성공. 단일 EXE 78,445,404 bytes, SHA-256 `8B7AF98AA7094EFF6C2A403A4505460B5911E5D9FDE979B15E2682E9FED11F68`.
+
+## 2026-09-02 K 결과
+
+- 기존 `setConfig()`의 런타임 LM JIG 판별을 사용해 일반 MAIN과 LM JIG를 한 firmware에서 분리했다. 새 제품 Variant 전처리 분기는 추가하지 않았다.
+- 레거시 LM 핀, PWM driver, `$07` 라우팅, 직접 구동과 센서 기반 홈/좌/우/복귀 제어를 활성 코드에 복구했다.
+- 위치 이동은 센서 도달 또는 3초 timeout에서 정지한다. 일반 MAIN의 GPIO 40/41 LED와 GPIO 47 WDT 동작은 유지하고 LM JIG일 때만 공유 핀의 LM 용도를 우선한다.
+- MAIN clean build 성공(application 888,768 bytes, SHA-256 `A64B04C4F304E02B2573BE6236302CF93E78757EDC019BFF430260C8BDDE122C`). TestModule Release 단일 EXE build와 self-test exit 0, EXE 78,445,404 bytes, SHA-256 `18D1A23EF32B78C91CAFF134CE441C065ED1DFD08B82D29AF3CB7AB517F6D289`.
+- 플래시·물리 LM JIG 시험은 수행하지 않았다. 활성 구현 잔여 작업은 0개다.

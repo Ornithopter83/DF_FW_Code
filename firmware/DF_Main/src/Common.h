@@ -71,6 +71,17 @@
 
 #define DF_CONFIG_PIN		1		//	LM-JIG or NORMAL구분
 
+// LM JIG 전용 핀. DF_CONFIG_PIN 판별 후 DF_CONFIG_LMJIG일 때만 사용한다.
+#define LM_24VON_PIN		DF_CONFIG_PIN
+#define LM_MOT_PWM_PIN		2
+#define LM_MOT_FG_PIN		35
+#define LM_LEFT_SEN_PIN 	36
+#define LM_RIGHT_SEN_PIN	37
+#define LM_MOT_ON_PIN		40
+#define LM_MOT_DIR_PIN		41
+#define LM_ENC_SEN_PIN		47
+#define LM_HOME_SEN_PIN		48
+
 #define STRAPP_PSRAM_35	35
 #define STRAPP_PSRAM_36	36
 #define STRAPP_PSRAM_37	37
