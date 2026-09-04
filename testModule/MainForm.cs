@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Globalization;
 using System.Text;
 
 namespace DFTestModule;
@@ -36,10 +37,18 @@ internal sealed class MainForm : Form
     private readonly Label bootButtonState = Indicator("부트");
     private readonly Label reelConnectionState = Indicator("릴 연결 대기");
     private readonly Label imuConnectionState = Indicator("IMU 연결 대기");
+    private readonly ImuOrientationView imuOrientation = new() { Width = 300, Height = 150, Margin = new Padding(18, 0, 0, 0) };
+    private readonly Button imuZeroButton = SmallButton("0점 보정", 100);
+    private readonly Button imuChargeCalibrationButton = SmallButton("충전 기준 보정", 115);
+    private readonly Label imuCalibrationState = ValueLabel("보정 전");
+    private readonly Label imuVirtualRollValue = ValueLabel("-");
+    private readonly Label imuGameRollValue = ValueLabel("-");
+    private readonly ImuGameInputProcessor imuGameInput = new();
     private bool motorsRunning;
     private bool firmwareBusy;
     private bool rodConnected;
     private bool imuConnected;
+    private bool imuDataEnabled;
     private bool powerOffRequestObserved;
     private bool registrationWaiting;
 
@@ -47,7 +56,7 @@ internal sealed class MainForm : Form
     {
         downloader = new FirmwareDownloader(serial);
         wirelessUpdater = new RodWirelessUpdater(serial);
-        Text = "DF TestModule";
+        Text = Application.ProductName;
         StartPosition = FormStartPosition.CenterScreen;
         MinimumSize = new Size(1280, 770);
         ClientSize = new Size(1440, 900);
@@ -71,7 +80,7 @@ internal sealed class MainForm : Form
     {
         Panel top = new() { Dock = DockStyle.Top, Height = 76, BackColor = Color.White, Padding = new Padding(16, 13, 16, 10) };
         FlowLayoutPanel row = new() { Dock = DockStyle.Fill, WrapContents = false, FlowDirection = FlowDirection.LeftToRight };
-        Label title = new() { Text = "DF TestModule", AutoSize = true, Font = new Font("맑은 고딕", 15F, FontStyle.Bold), Margin = new Padding(0, 5, 30, 0) };
+        Label title = new() { Text = Application.ProductName, AutoSize = true, Font = new Font("맑은 고딕", 15F, FontStyle.Bold), Margin = new Padding(0, 5, 30, 0) };
         Button refresh = new() { Text = "재검색", Width = 76, Height = 30 };
         refresh.Click += (_, _) => RefreshPorts();
         connectButton.Height = 30;
@@ -194,15 +203,47 @@ internal sealed class MainForm : Form
         content.Controls.Add(ToggleRow("왼쪽 버튼 LED", DeviceProtocol.ReelLeftLed));
         content.Controls.Add(ToggleRow("오른쪽 버튼 LED", DeviceProtocol.ReelRightLed));
         content.Controls.Add(SectionTitle("IMU 센서"));
-        content.Controls.Add(ToggleRow("IMU 데이터 출력", DeviceProtocol.Imu));
-        TableLayoutPanel imu = new() { Width = 520, Height = 110, ColumnCount = 4, RowCount = 3 };
+        imuZeroButton.Enabled = false;
+        imuChargeCalibrationButton.Enabled = false;
+        imuZeroButton.Click += (_, _) => {
+            if (!imuDataEnabled) return;
+            if (!imuOrientation.SetCurrentAsZero()) {
+                MessageBox.Show("IMU 자세값이 수신된 뒤 0점 보정을 실행하세요.", "IMU 0점 보정");
+            }
+        };
+        imuChargeCalibrationButton.Click += (_, _) => {
+            if (!imuDataEnabled) return;
+            imuGameInput.StartCalibration();
+            UpdateImuGameDisplay();
+        };
+        FlowLayoutPanel imuToggle = ToggleRow("IMU 데이터 출력", DeviceProtocol.Imu, enabled => {
+            imuDataEnabled = enabled;
+            imuZeroButton.Enabled = enabled;
+            imuChargeCalibrationButton.Enabled = enabled;
+            if (!enabled) {
+                imuGameInput.CancelCalibration();
+                UpdateImuGameDisplay();
+            }
+        });
+        imuToggle.Width = 665;
+        imuToggle.Controls.Add(imuZeroButton);
+        imuToggle.Controls.Add(imuChargeCalibrationButton);
+        content.Controls.Add(imuToggle);
+        FlowLayoutPanel imuArea = new() { Width = 665, Height = 155, WrapContents = false };
+        TableLayoutPanel imu = new() { Width = 315, Height = 150, ColumnCount = 4, RowCount = 5 };
         string[] keys = { "Roll", "Pitch", "Yaw", "AX", "AY", "AZ" };
         for (int i = 0; i < keys.Length; i++) {
             Label name = Caption(keys[i]); Label value = ValueLabel("-");
             statusLabels["IMU_" + keys[i]] = value;
             imu.Controls.Add(name, (i % 2) * 2, i / 2); imu.Controls.Add(value, (i % 2) * 2 + 1, i / 2);
         }
-        content.Controls.Add(imu);
+        imu.Controls.Add(Caption("가상 Roll"), 0, 3); imu.Controls.Add(imuVirtualRollValue, 1, 3);
+        imu.Controls.Add(Caption("게임 좌우"), 2, 3); imu.Controls.Add(imuGameRollValue, 3, 3);
+        imu.Controls.Add(Caption("보정 상태"), 0, 4); imu.Controls.Add(imuCalibrationState, 1, 4);
+        imu.SetColumnSpan(imuCalibrationState, 3);
+        imuArea.Controls.Add(imu);
+        imuArea.Controls.Add(imuOrientation);
+        content.Controls.Add(imuArea);
         content.Controls.Add(SectionTitle("엔코더 회전"));
         FlowLayoutPanel encoderMonitor = ToggleRow("회전값 수신", on => DeviceProtocol.InputMonitor("메인엔코더", on));
         content.Controls.Add(encoderMonitor);
@@ -295,15 +336,15 @@ internal sealed class MainForm : Form
         page.Controls.Add(content); return page;
     }
 
-    private FlowLayoutPanel ToggleRow(string caption, Func<bool, string> command)
+    private FlowLayoutPanel ToggleRow(string caption, Func<bool, string> command, Action<bool>? changed = null)
     {
         FlowLayoutPanel row = new() { Width = 560, Height = 40, WrapContents = false };
         Label name = new() { Text = caption, Width = 180, TextAlign = ContentAlignment.MiddleLeft, Height = 30 };
         RadioButton on = new() { Text = "ON", Width = 70, AutoSize = false, Height = 30 };
         RadioButton off = new() { Text = "OFF", Width = 70, AutoSize = false, Height = 30, Checked = true };
         bool ready = false;
-        on.CheckedChanged += (_, _) => { if (ready && on.Checked) TrySend(command(true)); };
-        off.CheckedChanged += (_, _) => { if (ready && off.Checked) TrySend(command(false)); };
+        on.CheckedChanged += (_, _) => { if (ready && on.Checked && TrySend(command(true))) { changed?.Invoke(true); } };
+        off.CheckedChanged += (_, _) => { if (ready && off.Checked && TrySend(command(false))) { changed?.Invoke(false); } };
         row.Controls.Add(name); row.Controls.Add(on); row.Controls.Add(off); ready = true;
         return row;
     }
@@ -378,6 +419,19 @@ internal sealed class MainForm : Form
             string[] values = frame.Substring(3).TrimStart(',').TrimEnd('%').Split(',');
             string[] keys = { "Roll", "Pitch", "Yaw", "AX", "AY", "AZ" };
             for (int i = 0; i < Math.Min(keys.Length, values.Length); i++) SetStatus("IMU_" + keys[i], values[i], null);
+            if (imuDataEnabled && values.Length >= 3 &&
+                float.TryParse(values[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float roll) &&
+                float.TryParse(values[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float pitch) &&
+                float.TryParse(values[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float yaw)) {
+                imuOrientation.SetAngles(roll, pitch, yaw);
+                if (values.Length >= 6 &&
+                    float.TryParse(values[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float gyroX) &&
+                    float.TryParse(values[4], NumberStyles.Float, CultureInfo.InvariantCulture, out float gyroY) &&
+                    float.TryParse(values[5], NumberStyles.Float, CultureInfo.InvariantCulture, out float gyroZ)) {
+                    imuGameInput.Update(roll, pitch, gyroX, gyroY, gyroZ);
+                    UpdateImuGameDisplay();
+                }
+            }
         } else if (frame.StartsWith("$13", StringComparison.Ordinal) && frame.Length >= 5) {
             string code = frame.Substring(3, 2);
             if (code == "10") SetButtonIndicator(leftButtonState, true, Color.Red); else if (code == "11") SetButtonIndicator(leftButtonState, false, Color.Gray);
@@ -413,6 +467,14 @@ internal sealed class MainForm : Form
         string code = body.Substring(0, comma); string value = body.Substring(comma + 1);
         string? key = code switch { "01-02" => "부트", "03-01" => "EncA", "03-02" => "EncB", "03-05" => "FG", "05-02" => "USB", "05-01" => "전원", "03-03" => "엔코더", _ => null };
         if (key != null) SetStatus(key, value, value == "0" ? Color.LightGray : Color.LightGreen);
+    }
+
+    private void UpdateImuGameDisplay()
+    {
+        imuCalibrationState.Text = imuGameInput.StatusText;
+        imuVirtualRollValue.Text = imuGameInput.HasCalibration ? imuGameInput.VirtualRoll.ToString("0.0", CultureInfo.InvariantCulture) : "-";
+        imuGameRollValue.Text = imuGameInput.HasCalibration ? imuGameInput.GameRoll.ToString("0.0", CultureInfo.InvariantCulture) : "-";
+        imuCalibrationState.BackColor = imuGameInput.HasCalibration ? Color.LightGreen : Color.FromArgb(239, 241, 244);
     }
 
     private void SendManual(string message)
@@ -476,7 +538,7 @@ internal sealed class MainForm : Form
     private void DisconnectMain()
     {
         pollTimer.Stop(); serial.Close(); connectButton.Text = "연결"; connectionState.Text = "연결 안 됨"; connectionState.ForeColor = Color.DimGray;
-        rodConnected = false; imuConnected = false; powerOffRequestObserved = false; registrationWaiting = false; rodRegisterButton.Text = "ROD 등록";
+        rodConnected = false; imuConnected = false; imuDataEnabled = false; imuZeroButton.Enabled = false; imuChargeCalibrationButton.Enabled = false; imuOrientation.ClearZero(); imuGameInput.Reset(); UpdateImuGameDisplay(); powerOffRequestObserved = false; registrationWaiting = false; rodRegisterButton.Text = "ROD 등록";
         mainVersion.Text = "Vm -"; rodVersion.Text = "Vr -"; imuVersion.Text = "IMU -";
         SetConnectionIndicator(reelConnectionState, false, "릴"); SetConnectionIndicator(imuConnectionState, false, "IMU");
     }

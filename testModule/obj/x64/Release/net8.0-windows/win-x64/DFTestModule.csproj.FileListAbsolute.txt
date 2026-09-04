@@ -1,7 +1,3 @@
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule.exe
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule.deps.json
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule.runtimeconfig.json
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule.dll
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\Microsoft.CSharp.dll
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\Microsoft.VisualBasic.Core.dll
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\Microsoft.Win32.Primitives.dll
@@ -466,9 +462,13 @@ C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule.AssemblyInfo.cs
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule.csproj.CoreCompileInputs.cache
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestMo.8D795A1E.Up2Date
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule.dll
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\refint\DFTestModule.dll
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule.genruntimeconfig.cache
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\ref\DFTestModule.dll
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\System.IO.Ports.dll
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule.csproj.AssemblyReference.cache
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.exe
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.deps.json
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.runtimeconfig.json
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.dll
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.dll
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\refint\DFTestModule_V045.dll
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\ref\DFTestModule_V045.dll

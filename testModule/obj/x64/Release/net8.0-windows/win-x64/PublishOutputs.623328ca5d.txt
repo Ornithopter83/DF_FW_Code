@@ -1,1 +1,1 @@
-C:\Projects\VS\DF_FW_Code\CodexManage\bin\testmodule\Release\win-x64\DFTestModule.exe
+C:\Projects\VS\DF_FW_Code\CodexManage\bin\testmodule\Release\win-x64\DFTestModule_V045.exe

@@ -231,4 +231,6 @@ commit, push 및 tag는 사용자의 명시적 요청이 있을 때만 수행한
 .\tools\build-testmodule.cmd Release
 ```
 
-배포 결과는 `bin/testmodule/Release/win-x64/DFTestModule.exe` 하나다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.
+TM 버전은 `testModule/DFTestModule.csproj`의 `TmVersion`에서 관리한다. 현재 소스 값은 `V045`이며 게시 시 `bin/testmodule/Release/win-x64/DFTestModule_V045.exe`가 생성된다. V045 게시 전 마지막 생성 파일은 V040이다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.
+
+Visual Studio에서는 솔루션 탐색기의 `DFTestModule` 프로젝트를 우클릭해 `게시`를 선택하고 `FolderProfile`로 게시한다. 프로필의 `PublishUrl`과 `PublishDir`은 `C:\Projects\VS\DF_FW_Code\CodexManage\bin\testmodule\Release\win-x64\`로 고정되어 있다.
