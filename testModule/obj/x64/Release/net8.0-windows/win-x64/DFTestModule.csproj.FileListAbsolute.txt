@@ -465,10 +465,10 @@ C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule.genruntimeconfig.cache
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\System.IO.Ports.dll
 C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule.csproj.AssemblyReference.cache
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.exe
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.deps.json
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.runtimeconfig.json
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.dll
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule_V045.dll
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\refint\DFTestModule_V045.dll
-C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\ref\DFTestModule_V045.dll
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V041.exe
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V041.deps.json
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V041.runtimeconfig.json
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\bin\x64\Release\net8.0-windows\win-x64\DFTestModule_V041.dll
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\DFTestModule_V041.dll
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\refint\DFTestModule_V041.dll
+C:\Projects\VS\DF_FW_Code\CodexManage\testModule\obj\x64\Release\net8.0-windows\win-x64\ref\DFTestModule_V041.dll

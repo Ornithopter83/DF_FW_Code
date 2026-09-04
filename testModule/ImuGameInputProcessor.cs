@@ -18,15 +18,9 @@ internal sealed class ImuGameInputProcessor
     private double stableSeconds;
     private double sampleSeconds;
     private int sampleCount;
-    private double rollSinSum;
-    private double rollCosSum;
-    private double pitchSinSum;
-    private double pitchCosSum;
     private double gyroXSum;
     private double gyroYSum;
     private double gyroZSum;
-    private float rollZero;
-    private float pitchZero;
     private float gyroXBias;
     private float gyroYBias;
     private float gyroZBias;
@@ -108,7 +102,7 @@ internal sealed class ImuGameInputProcessor
                 return;
             }
 
-            AddSample(roll, pitch, gyroX, gyroY, gyroZ);
+            AddSample(gyroX, gyroY, gyroZ);
             sampleSeconds += deltaSeconds;
             StatusText = string.Format(System.Globalization.CultureInfo.InvariantCulture,
                 "보정값 수집 {0:0.0}/2.0초", Math.Min(sampleSeconds, SampleRequiredSeconds));
@@ -116,8 +110,8 @@ internal sealed class ImuGameInputProcessor
             return;
         }
 
-        CorrectedRoll = HasCalibration ? Wrap180(roll - rollZero) : roll;
-        CorrectedPitch = HasCalibration ? Wrap180(pitch - pitchZero) : pitch;
+        CorrectedRoll = roll;
+        CorrectedPitch = pitch;
         if (!HasCalibration)
         {
             VirtualRoll = 0;
@@ -141,14 +135,8 @@ internal sealed class ImuGameInputProcessor
         GameRoll = Math.Clamp(CorrectedRoll + VirtualRoll, -GameRollLimit, GameRollLimit);
     }
 
-    private void AddSample(float roll, float pitch, float gyroX, float gyroY, float gyroZ)
+    private void AddSample(float gyroX, float gyroY, float gyroZ)
     {
-        double rollRadians = roll * Math.PI / 180.0;
-        double pitchRadians = pitch * Math.PI / 180.0;
-        rollSinSum += Math.Sin(rollRadians);
-        rollCosSum += Math.Cos(rollRadians);
-        pitchSinSum += Math.Sin(pitchRadians);
-        pitchCosSum += Math.Cos(pitchRadians);
         gyroXSum += gyroX;
         gyroYSum += gyroY;
         gyroZSum += gyroZ;
@@ -157,8 +145,6 @@ internal sealed class ImuGameInputProcessor
 
     private void FinishCalibration()
     {
-        rollZero = CircularAverageDegrees(rollSinSum, rollCosSum);
-        pitchZero = CircularAverageDegrees(pitchSinSum, pitchCosSum);
         gyroXBias = (float)(gyroXSum / sampleCount);
         gyroYBias = (float)(gyroYSum / sampleCount);
         gyroZBias = (float)(gyroZSum / sampleCount);
@@ -169,30 +155,16 @@ internal sealed class ImuGameInputProcessor
         HasCalibration = true;
         mode = CalibrationMode.Calibrated;
         StatusText = string.Format(System.Globalization.CultureInfo.InvariantCulture,
-            "완료 R{0:0.0} P{1:0.0} GZ{2:0.00}", rollZero, pitchZero, gyroZBias);
+            "완료 GX{0:0.00} GY{1:0.00} GZ{2:0.00}", gyroXBias, gyroYBias, gyroZBias);
     }
 
     private void ResetSamples()
     {
         sampleSeconds = 0;
         sampleCount = 0;
-        rollSinSum = 0;
-        rollCosSum = 0;
-        pitchSinSum = 0;
-        pitchCosSum = 0;
         gyroXSum = 0;
         gyroYSum = 0;
         gyroZSum = 0;
-    }
-
-    private static float CircularAverageDegrees(double sinSum, double cosSum) =>
-        (float)(Math.Atan2(sinSum, cosSum) * 180.0 / Math.PI);
-
-    private static float Wrap180(float value)
-    {
-        while (value > 180.0f) value -= 360.0f;
-        while (value <= -180.0f) value += 360.0f;
-        return value;
     }
 
     private enum CalibrationMode

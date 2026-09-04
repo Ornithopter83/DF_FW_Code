@@ -861,6 +861,7 @@ void checkRodTimer()
 		// ROD연결 변화시, 무조건 배터리 충전 : 변화없음 통지
 		batMsg = STX_BAT_LVL + BAT_STR_CHAGER_NOCHANGE;
 		StsSendPrintln(batMsg); // SEND to PC		
+		DF_Main_ImuGame_SetCharging(0);
 
 		old_rod_conn_status = rod_conn_status;	// Save Change Status
 	}
@@ -907,6 +908,7 @@ void checkRodTimer()
 					//respMsg = STX_BAT_LVL + "-4%";	// 2 char
 					batMsg = STX_BAT_LVL + BAT_STR_CHAGER_CHANGING;
 					StsSendPrintln(batMsg);	// SEND to PC
+					DF_Main_ImuGame_SetCharging(1);
 				}
 				//else if((UNKNOWN != oldibatteryLvl) && ((oldibatteryLvl-1) > ibatteryLvl))	// - 사용중 (-2이상 변화)
 				else if((UNKNOWN != ibatChargeLvl) && ((ibatChargeLvl-1) > ibatteryLvl))	// - 사용중 (-2이상 변화)
@@ -916,6 +918,7 @@ void checkRodTimer()
 					//respMsg = STX_BAT_LVL + "-5%";	// 2 char
 					batMsg = STX_BAT_LVL + BAT_STR_CHAGER_USE;
 					StsSendPrintln(batMsg);	// SEND to PC
+					DF_Main_ImuGame_SetCharging(0);
 				}
 			}	
 

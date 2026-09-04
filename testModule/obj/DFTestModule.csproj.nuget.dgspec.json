@@ -5,10 +5,10 @@
   },
   "projects": {
     "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\DFTestModule.csproj": {
-      "version": "0.4.5",
+      "version": "0.4.1",
       "restore": {
         "projectUniqueName": "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\DFTestModule.csproj",
-        "projectName": "DFTestModule_V045",
+        "projectName": "DFTestModule_V041",
         "projectPath": "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\DFTestModule.csproj",
         "packagesPath": "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\",
         "outputPath": "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\obj\\",

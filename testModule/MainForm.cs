@@ -44,7 +44,6 @@ internal sealed class MainForm : Form
     private readonly Label imuVirtualRollValue = ValueLabel("-");
     private readonly Label imuGameRollValue = ValueLabel("-");
     private readonly ImuGameInputProcessor imuGameInput = new();
-    private bool motorsRunning;
     private bool firmwareBusy;
     private bool rodConnected;
     private bool imuConnected;
@@ -163,27 +162,59 @@ internal sealed class MainForm : Form
     {
         Panel page = Page();
         FlowLayoutPanel content = Column();
-        content.Controls.Add(SectionTitle("모터 동시 제어"));
-        NumericUpDown torque = Number(0, 255, 70); NumericUpDown bldc = Number(0, 255, 20); NumericUpDown time = Number(0, 9999, 3000);
-        RadioButton cw = new() { Text = "CW", Checked = true, AutoSize = true }; RadioButton ccw = new() { Text = "CCW", AutoSize = true };
-        content.Controls.Add(FieldRow("메인 모터 Duty", torque));
-        content.Controls.Add(FieldRow("BLDC Duty", bldc));
-        FlowLayoutPanel direction = FieldRow("BLDC 방향", cw); direction.Controls.Add(ccw); content.Controls.Add(direction);
-        content.Controls.Add(FieldRow("동작 시간(ms)", time));
-        Button output = new() { Text = "동시출력 시작", Width = 180, Height = 48, BackColor = Color.FromArgb(27, 126, 96), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Margin = new Padding(125, 18, 0, 0) };
-        output.Click += (_, _) => {
+        content.Controls.Add(SectionTitle("메인 모터"));
+        NumericUpDown torque = Number(0, 255, 70);
+        TrackBar torqueSlider = DutySlider(70, 210);
+        LinkDutyControls(torque, torqueSlider);
+        FlowLayoutPanel torqueRow = new() { Width = 720, Height = 48, WrapContents = false };
+        Button torqueOutput = MotorButton("출력", Color.FromArgb(27, 126, 96), 82);
+        Button torqueStop = MotorButton("정지", Color.Firebrick, 82);
+        torqueOutput.Click += (_, _) => TrySend(DeviceProtocol.Torque((int)torque.Value, 0));
+        torqueStop.Click += (_, _) => { torque.Value = 0; TrySend(DeviceProtocol.TorqueOff()); };
+        torqueRow.Controls.Add(new Label { Text = "메인 모터 Duty", Width = 110, Height = 36, TextAlign = ContentAlignment.MiddleLeft });
+        torque.Width = 65; torqueRow.Controls.Add(torque); torqueRow.Controls.Add(SliderBorder(torqueSlider));
+        content.Controls.Add(torqueRow);
+        FlowLayoutPanel torqueActions = MotorActionRow();
+        torqueActions.Controls.Add(torqueOutput); torqueActions.Controls.Add(torqueStop);
+        content.Controls.Add(torqueActions);
+
+        content.Controls.Add(SectionTitle("BLDC 모터"));
+        RadioButton cw = new() { Text = "CW", Checked = true, AutoSize = true, Margin = new Padding(3, 7, 3, 0) };
+        RadioButton ccw = new() { Text = "CCW", AutoSize = true, Margin = new Padding(3, 7, 8, 0) };
+        NumericUpDown bldc = Number(0, 255, 20);
+        TrackBar bldcSlider = DutySlider(20, 210);
+        NumericUpDown bldcTime = Number(0, 9999, 3000);
+        LinkDutyControls(bldc, bldcSlider);
+        Button bldcOutput = MotorButton("출력", Color.FromArgb(27, 126, 96), 76);
+        Button bldcStop = MotorButton("정지", Color.Firebrick, 76);
+        bldcOutput.Click += (_, _) => TrySend(DeviceProtocol.Bldc(cw.Checked, (int)bldc.Value, (int)bldcTime.Value));
+        bldcStop.Click += (_, _) => { bldc.Value = 0; TrySend(DeviceProtocol.BldcOff()); };
+        FlowLayoutPanel bldcDirectionRow = FieldRow("방향", cw);
+        bldcDirectionRow.Controls.Add(ccw);
+        content.Controls.Add(bldcDirectionRow);
+        FlowLayoutPanel bldcDutyRow = new() { Width = 560, Height = 48, WrapContents = false };
+        bldcDutyRow.Controls.Add(new Label { Text = "Duty", Width = 125, Height = 36, TextAlign = ContentAlignment.MiddleLeft });
+        bldc.Width = 65; bldcDutyRow.Controls.Add(bldc); bldcDutyRow.Controls.Add(SliderBorder(bldcSlider));
+        content.Controls.Add(bldcDutyRow);
+        bldcTime.Width = 80;
+        content.Controls.Add(FieldRow("시간(ms)", bldcTime));
+
+        FlowLayoutPanel bldcActions = MotorActionRow();
+        bldcActions.Controls.Add(bldcOutput); bldcActions.Controls.Add(bldcStop);
+        content.Controls.Add(bldcActions);
+
+        Button simultaneousOutput = MotorButton("동시 출력", Color.FromArgb(35, 105, 190), 120);
+        simultaneousOutput.Margin = new Padding(0, 2, 0, 2);
+        simultaneousOutput.Click += (_, _) => {
             if (!RequireConnection()) return;
-            if (!motorsRunning) {
-                TrySend(DeviceProtocol.Torque((int)torque.Value, (int)time.Value));
-                TrySend(DeviceProtocol.Bldc(cw.Checked, (int)bldc.Value, (int)time.Value));
-                motorsRunning = true; output.Text = "동시출력 정지"; output.BackColor = Color.Firebrick;
-            } else {
-                TrySend(DeviceProtocol.TorqueOff()); TrySend(DeviceProtocol.BldcOff());
-                motorsRunning = false; output.Text = "동시출력 시작"; output.BackColor = Color.FromArgb(27, 126, 96);
-            }
+            TrySend(DeviceProtocol.Torque((int)torque.Value, 0));
+            TrySend(DeviceProtocol.Bldc(cw.Checked, (int)bldc.Value, (int)bldcTime.Value));
         };
-        content.Controls.Add(output);
-        content.Controls.Add(Note("메인 모터와 BLDC를 순서대로 출력합니다. Duty 범위는 0~255입니다."));
+        FlowLayoutPanel simultaneousActions = MotorActionRow();
+        simultaneousActions.Margin = new Padding(0, 0, 0, 6);
+        simultaneousActions.Controls.Add(simultaneousOutput);
+        content.Controls.Add(simultaneousActions);
+        content.Controls.Add(Note("정지 버튼은 해당 Duty를 0으로 바꾸고 0 출력 명령을 보냅니다. Duty 범위는 0~255입니다."));
         page.Controls.Add(content); return page;
     }
 
@@ -739,6 +770,21 @@ internal sealed class MainForm : Form
         ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 180 }; box.Items.AddRange(items); box.SelectedIndex = selectedIndex; return box;
     }
     private static NumericUpDown Number(int min, int max, int value) => new() { Minimum = min, Maximum = max, Value = value, Width = 110 };
+    private static TrackBar DutySlider(int value, int width) => new() { Minimum = 0, Maximum = 255, Value = value, Width = width, Height = 38, TickFrequency = 25, SmallChange = 1, LargeChange = 10, AutoSize = false };
+    private static Panel SliderBorder(TrackBar slider)
+    {
+        Panel border = new() { Width = slider.Width + 4, Height = 40, BorderStyle = BorderStyle.FixedSingle, Padding = new Padding(1), Margin = new Padding(3, 0, 6, 0) };
+        slider.Dock = DockStyle.Fill; slider.Margin = Padding.Empty;
+        border.Controls.Add(slider);
+        return border;
+    }
+    private static void LinkDutyControls(NumericUpDown number, TrackBar slider)
+    {
+        number.ValueChanged += (_, _) => { if (slider.Value != (int)number.Value) slider.Value = (int)number.Value; };
+        slider.ValueChanged += (_, _) => { if (number.Value != slider.Value) number.Value = slider.Value; };
+    }
+    private static FlowLayoutPanel MotorActionRow() => new() { Width = 560, Height = 40, WrapContents = false, Margin = new Padding(0, 0, 0, 2) };
+    private static Button MotorButton(string text, Color color, int width) => new() { Text = text, Width = width, Height = 34, BackColor = color, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Margin = new Padding(0, 2, 8, 2) };
     private static Button SmallButton(string text, int width = 72) => new() { Text = text, Width = width, Height = 29, FlatStyle = FlatStyle.System };
     private static Button UpdateButton(string text) => new() { Text = text, Width = 290, Height = 40, FlatStyle = FlatStyle.System, Margin = new Padding(0, 3, 0, 3) };
     private static FlowLayoutPanel FieldRow(string caption, Control control)

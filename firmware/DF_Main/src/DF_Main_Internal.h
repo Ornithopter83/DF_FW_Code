@@ -11,3 +11,4 @@
 #include "modules/DF_Main_Diagnostics.h"
 #include "modules/DF_Main_Scheduler.h"
 #include "modules/DF_Main_RodOtaRelay.h"
+#include "modules/DF_Main_ImuGameControl.h"

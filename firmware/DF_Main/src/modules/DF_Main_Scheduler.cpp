@@ -1139,7 +1139,8 @@ void nowRecvHandler()
     	// send tp PC ($09 + EulerData + ',' + message String + %)
       //String imuStr = STX_IMU_DATA_STS + eulerStr + "," + now_msg_str + "%";
       
-      String imuStr = STX_IMU_DATA_STS + now_cmd_data + "%";
+      String imuPayload = DF_Main_ImuGame_ProcessPayload(now_cmd_data, (AP_IS_DF == apType));
+      String imuStr = STX_IMU_DATA_STS + imuPayload + "%";
       //String imuStr = STX_IMU_DATA_STS + "#__" + now_msg_str + "__#";	// TEST
       ApPrintln(imuStr);		// Send to PC
 

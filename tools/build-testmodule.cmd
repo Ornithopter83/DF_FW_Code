@@ -14,5 +14,5 @@ set "DF_TM_PROJECT=%~dp0..\testModule\DFTestModule.csproj"
 dotnet publish "%DF_TM_PROJECT%" -c "%DF_TM_CONFIGURATION%" -p:Platform=x64 -r win-x64 --self-contained true
 if errorlevel 1 exit /b %errorlevel%
 
-echo [DFTestModule] Single EXE: %~dp0..\bin\testmodule\%DF_TM_CONFIGURATION%\win-x64\DFTestModule_V045.exe
+echo [DFTestModule] Single EXE: %~dp0..\bin\testmodule\%DF_TM_CONFIGURATION%\win-x64\DFTestModule_V041.exe
 exit /b 0

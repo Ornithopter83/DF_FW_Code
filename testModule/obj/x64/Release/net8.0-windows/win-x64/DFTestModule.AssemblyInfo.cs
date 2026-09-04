@@ -11,13 +11,13 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("DFTestModule_V045")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("DFTestModule_V041")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("0.4.5.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("V045+965eddf78ff3cbe27681d1bd35262d846abf59f3")]
-[assembly: System.Reflection.AssemblyProductAttribute("DF TestModule V045")]
-[assembly: System.Reflection.AssemblyTitleAttribute("DFTestModule_V045")]
-[assembly: System.Reflection.AssemblyVersionAttribute("0.4.5.0")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("0.4.1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("V041+372e02cc6feac63c9183743c2248ab11e6deaebb")]
+[assembly: System.Reflection.AssemblyProductAttribute("DF TestModule V041")]
+[assembly: System.Reflection.AssemblyTitleAttribute("DFTestModule_V041")]
+[assembly: System.Reflection.AssemblyVersionAttribute("0.4.1.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]
 

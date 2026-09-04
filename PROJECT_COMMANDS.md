@@ -119,9 +119,9 @@ bin/<configuration>/<platform>/<version>/
 └─ boot_app0.bin
 ```
 
-출력 경로는 저장된 소스 버전을 따른다. 현재 사용자 변경값은 Main `Vm1.0.10.0`, Rod `Vr1.0.2.0`이므로 Release 출력은 각각 `bin/release/x64/Vm1.0.10.0`, `bin/release/x64/Vr1.0.2.0`이다. 앞선 설치/복구 기준 `Vm1.0.9.0`, `Vr1.0.1.3` 및 Rod OTA 최초 설치 기준 `Vr1.0.1.0`은 과거 산출물로 구분한다. `Vr1.0.1.2`는 과거 HANDLE LED 시험 산출물이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전은 해당 `firmware/DF_Main/src/Version.cpp`의 `mainVer` 또는 `firmware/DF_Rod/src/Version.cpp`의 `rodVer`만 수정하고 저장한다. `tools/firmware-versions.cmd` → `firmware-versions.ps1`이 매 build/clean 실행 때 소스 값을 읽으므로 별도 버전값 동기화는 필요 없다. 형식은 Main `Vm숫자.숫자.숫자.숫자`, Rod `Vr숫자.숫자.숫자.숫자`이며 최대 24자다. 누락·중복·조건부 정의·잘못된 형식은 이전 값으로 대체하지 않고 build/clean을 중단한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
+출력 경로는 저장된 소스 버전을 따른다. 현재 사용자 변경값은 Main `Vm1.0.11.0`, Rod `Vr1.0.2.0`이므로 Release 출력은 각각 `bin/release/x64/Vm1.0.11.0`, `bin/release/x64/Vr1.0.2.0`이다. 앞선 설치/복구 기준 `Vm1.0.9.0`, `Vr1.0.1.3` 및 Rod OTA 최초 설치 기준 `Vr1.0.1.0`은 과거 산출물로 구분한다. `Vr1.0.1.2`는 과거 HANDLE LED 시험 산출물이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전은 해당 `firmware/DF_Main/src/Version.cpp`의 `mainVer` 또는 `firmware/DF_Rod/src/Version.cpp`의 `rodVer`만 수정하고 저장한다. `tools/firmware-versions.cmd` → `firmware-versions.ps1`이 매 build/clean 실행 때 소스 값을 읽으므로 별도 버전값 동기화는 필요 없다. 형식은 Main `Vm숫자.숫자.숫자.숫자`, Rod `Vr숫자.숫자.숫자.숫자`이며 최대 24자다. 누락·중복·조건부 정의·잘못된 형식은 이전 값으로 대체하지 않고 build/clean을 중단한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
 
-주의: 2026-08-31 동적 경로 수정 전에 사용자가 소스 버전만 바꾸어 빌드한 결과, 이전 `Vm1.0.9.0`/`Vr1.0.1.3` 폴더의 app에 새 버전 내용이 들어가 있었다. 해당 폴더를 과거 기준 image로 간주하지 않는다. 아래 과거 복구 명령을 재사용할 때도 image 버전과 hash를 확인한다. 현재 빌드 결과는 `Vm1.0.10.0`/`Vr1.0.2.0` 폴더에 있다.
+주의: 2026-08-31 동적 경로 수정 전에 사용자가 소스 버전만 바꾸어 빌드한 결과, 이전 `Vm1.0.9.0`/`Vr1.0.1.3` 폴더의 app에 새 버전 내용이 들어가 있었다. 해당 폴더를 과거 기준 image로 간주하지 않는다. 아래 과거 복구 명령을 재사용할 때도 image 버전과 hash를 확인한다. 현재 빌드 결과는 `Vm1.0.11.0`/`Vr1.0.2.0` 폴더에 있다.
 
 ## Main 경유 Rod 무선 application 업데이트
 
@@ -231,6 +231,6 @@ commit, push 및 tag는 사용자의 명시적 요청이 있을 때만 수행한
 .\tools\build-testmodule.cmd Release
 ```
 
-TM 버전은 `testModule/DFTestModule.csproj`의 `TmVersion`에서 관리한다. 현재 소스 값은 `V045`이며 게시 시 `bin/testmodule/Release/win-x64/DFTestModule_V045.exe`가 생성된다. V045 게시 전 마지막 생성 파일은 V040이다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.
+TM 버전은 `testModule/DFTestModule.csproj`의 `TmVersion`에서 관리한다. 현재 사용자 지정 값은 `V041`이며 별도 지시 전까지 변경하지 않는다. 게시 시 `bin/testmodule/Release/win-x64/DFTestModule_V041.exe`가 생성된다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.
 
 Visual Studio에서는 솔루션 탐색기의 `DFTestModule` 프로젝트를 우클릭해 `게시`를 선택하고 `FolderProfile`로 게시한다. 프로필의 `PublishUrl`과 `PublishDir`은 `C:\Projects\VS\DF_FW_Code\CodexManage\bin\testmodule\Release\win-x64\`로 고정되어 있다.

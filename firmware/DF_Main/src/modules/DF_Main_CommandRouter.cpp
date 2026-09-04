@@ -674,6 +674,7 @@ void anaGameStatus(String msg)
 	switch(msgKind)
 	{
 		case 1 :		// PROGRAM Start
+			DF_Main_ImuGame_SetCharging(0);
 			//torqMotor.setValue(torqMotor.defaultVal);
 			//motor_AllDefault();						// (V108) delete 토크 모터 기본값 출력 생략
 			motor_AllOff();								// (V108) replace 모든 모터 off 시킴

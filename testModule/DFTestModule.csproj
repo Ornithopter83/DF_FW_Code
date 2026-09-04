@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TmVersion>V045</TmVersion>
+    <TmVersion>V041</TmVersion>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
@@ -10,9 +10,9 @@
     <PlatformTarget>x64</PlatformTarget>
     <AssemblyName>DFTestModule_$(TmVersion)</AssemblyName>
     <Product>DF TestModule $(TmVersion)</Product>
-    <Version>0.4.5</Version>
-    <FileVersion>0.4.5.0</FileVersion>
-    <AssemblyVersion>0.4.5.0</AssemblyVersion>
+    <Version>0.4.1</Version>
+    <FileVersion>0.4.1.0</FileVersion>
+    <AssemblyVersion>0.4.1.0</AssemblyVersion>
     <InformationalVersion>$(TmVersion)</InformationalVersion>
     <RootNamespace>DFTestModule</RootNamespace>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
