@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Globalization;
 using System.Text;
 
 namespace DFTestModule;
@@ -36,10 +37,12 @@ internal sealed class MainForm : Form
     private readonly Label bootButtonState = Indicator("부트");
     private readonly Label reelConnectionState = Indicator("릴 연결 대기");
     private readonly Label imuConnectionState = Indicator("IMU 연결 대기");
-    private bool motorsRunning;
+    private readonly ImuOrientationView imuOrientation = new() { Width = 300, Height = 150, Margin = new Padding(18, 0, 0, 0) };
+    private readonly Button imuZeroButton = SmallButton("0점 보정", 100);
     private bool firmwareBusy;
     private bool rodConnected;
     private bool imuConnected;
+    private bool imuDataEnabled;
     private bool powerOffRequestObserved;
     private bool registrationWaiting;
 
@@ -47,10 +50,11 @@ internal sealed class MainForm : Form
     {
         downloader = new FirmwareDownloader(serial);
         wirelessUpdater = new RodWirelessUpdater(serial);
-        Text = "DF TestModule";
+        Text = Application.ProductName;
         StartPosition = FormStartPosition.CenterScreen;
         MinimumSize = new Size(1280, 770);
-        ClientSize = new Size(1440, 900);
+        ClientSize = new Size(1500, 980);
+        WindowState = FormWindowState.Maximized;
         Font = new Font("맑은 고딕", 9F);
         BuildLayout();
         serial.BytesReceived += OnBytesReceived;
@@ -71,7 +75,7 @@ internal sealed class MainForm : Form
     {
         Panel top = new() { Dock = DockStyle.Top, Height = 76, BackColor = Color.White, Padding = new Padding(16, 13, 16, 10) };
         FlowLayoutPanel row = new() { Dock = DockStyle.Fill, WrapContents = false, FlowDirection = FlowDirection.LeftToRight };
-        Label title = new() { Text = "DF TestModule", AutoSize = true, Font = new Font("맑은 고딕", 15F, FontStyle.Bold), Margin = new Padding(0, 5, 30, 0) };
+        Label title = new() { Text = Application.ProductName, AutoSize = true, Font = new Font("맑은 고딕", 15F, FontStyle.Bold), Margin = new Padding(0, 5, 30, 0) };
         Button refresh = new() { Text = "재검색", Width = 76, Height = 30 };
         refresh.Click += (_, _) => RefreshPorts();
         connectButton.Height = 30;
@@ -154,27 +158,59 @@ internal sealed class MainForm : Form
     {
         Panel page = Page();
         FlowLayoutPanel content = Column();
-        content.Controls.Add(SectionTitle("모터 동시 제어"));
-        NumericUpDown torque = Number(0, 255, 70); NumericUpDown bldc = Number(0, 255, 20); NumericUpDown time = Number(0, 9999, 3000);
-        RadioButton cw = new() { Text = "CW", Checked = true, AutoSize = true }; RadioButton ccw = new() { Text = "CCW", AutoSize = true };
-        content.Controls.Add(FieldRow("메인 모터 Duty", torque));
-        content.Controls.Add(FieldRow("BLDC Duty", bldc));
-        FlowLayoutPanel direction = FieldRow("BLDC 방향", cw); direction.Controls.Add(ccw); content.Controls.Add(direction);
-        content.Controls.Add(FieldRow("동작 시간(ms)", time));
-        Button output = new() { Text = "동시출력 시작", Width = 180, Height = 48, BackColor = Color.FromArgb(27, 126, 96), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Margin = new Padding(125, 18, 0, 0) };
-        output.Click += (_, _) => {
+        content.Controls.Add(SectionTitle("메인 모터"));
+        NumericUpDown torque = Number(0, 255, 70);
+        TrackBar torqueSlider = DutySlider(70, 210);
+        LinkDutyControls(torque, torqueSlider);
+        FlowLayoutPanel torqueRow = new() { Width = 720, Height = 48, WrapContents = false };
+        Button torqueOutput = MotorButton("출력", Color.FromArgb(27, 126, 96), 82);
+        Button torqueStop = MotorButton("정지", Color.Firebrick, 82);
+        torqueOutput.Click += (_, _) => TrySend(DeviceProtocol.Torque((int)torque.Value, 0));
+        torqueStop.Click += (_, _) => { torque.Value = 0; TrySend(DeviceProtocol.TorqueOff()); };
+        torqueRow.Controls.Add(new Label { Text = "메인 모터 Duty", Width = 110, Height = 36, TextAlign = ContentAlignment.MiddleLeft });
+        torque.Width = 65; torqueRow.Controls.Add(torque); torqueRow.Controls.Add(SliderBorder(torqueSlider));
+        content.Controls.Add(torqueRow);
+        FlowLayoutPanel torqueActions = MotorActionRow();
+        torqueActions.Controls.Add(torqueOutput); torqueActions.Controls.Add(torqueStop);
+        content.Controls.Add(torqueActions);
+
+        content.Controls.Add(SectionTitle("BLDC 모터"));
+        RadioButton cw = new() { Text = "CW", Checked = true, AutoSize = true, Margin = new Padding(3, 7, 3, 0) };
+        RadioButton ccw = new() { Text = "CCW", AutoSize = true, Margin = new Padding(3, 7, 8, 0) };
+        NumericUpDown bldc = Number(0, 255, 20);
+        TrackBar bldcSlider = DutySlider(20, 210);
+        NumericUpDown bldcTime = Number(0, 9999, 3000);
+        LinkDutyControls(bldc, bldcSlider);
+        Button bldcOutput = MotorButton("출력", Color.FromArgb(27, 126, 96), 76);
+        Button bldcStop = MotorButton("정지", Color.Firebrick, 76);
+        bldcOutput.Click += (_, _) => TrySend(DeviceProtocol.Bldc(cw.Checked, (int)bldc.Value, (int)bldcTime.Value));
+        bldcStop.Click += (_, _) => { bldc.Value = 0; TrySend(DeviceProtocol.BldcOff()); };
+        FlowLayoutPanel bldcDirectionRow = FieldRow("방향", cw);
+        bldcDirectionRow.Controls.Add(ccw);
+        content.Controls.Add(bldcDirectionRow);
+        FlowLayoutPanel bldcDutyRow = new() { Width = 560, Height = 48, WrapContents = false };
+        bldcDutyRow.Controls.Add(new Label { Text = "Duty", Width = 125, Height = 36, TextAlign = ContentAlignment.MiddleLeft });
+        bldc.Width = 65; bldcDutyRow.Controls.Add(bldc); bldcDutyRow.Controls.Add(SliderBorder(bldcSlider));
+        content.Controls.Add(bldcDutyRow);
+        bldcTime.Width = 80;
+        content.Controls.Add(FieldRow("시간(ms)", bldcTime));
+
+        FlowLayoutPanel bldcActions = MotorActionRow();
+        bldcActions.Controls.Add(bldcOutput); bldcActions.Controls.Add(bldcStop);
+        content.Controls.Add(bldcActions);
+
+        Button simultaneousOutput = MotorButton("동시 출력", Color.FromArgb(35, 105, 190), 120);
+        simultaneousOutput.Margin = new Padding(0, 2, 0, 2);
+        simultaneousOutput.Click += (_, _) => {
             if (!RequireConnection()) return;
-            if (!motorsRunning) {
-                TrySend(DeviceProtocol.Torque((int)torque.Value, (int)time.Value));
-                TrySend(DeviceProtocol.Bldc(cw.Checked, (int)bldc.Value, (int)time.Value));
-                motorsRunning = true; output.Text = "동시출력 정지"; output.BackColor = Color.Firebrick;
-            } else {
-                TrySend(DeviceProtocol.TorqueOff()); TrySend(DeviceProtocol.BldcOff());
-                motorsRunning = false; output.Text = "동시출력 시작"; output.BackColor = Color.FromArgb(27, 126, 96);
-            }
+            TrySend(DeviceProtocol.Torque((int)torque.Value, 0));
+            TrySend(DeviceProtocol.Bldc(cw.Checked, (int)bldc.Value, (int)bldcTime.Value));
         };
-        content.Controls.Add(output);
-        content.Controls.Add(Note("메인 모터와 BLDC를 순서대로 출력합니다. Duty 범위는 0~255입니다."));
+        FlowLayoutPanel simultaneousActions = MotorActionRow();
+        simultaneousActions.Margin = new Padding(0, 0, 0, 6);
+        simultaneousActions.Controls.Add(simultaneousOutput);
+        content.Controls.Add(simultaneousActions);
+        content.Controls.Add(Note("정지 버튼은 해당 Duty를 0으로 바꾸고 0 출력 명령을 보냅니다. Duty 범위는 0~255입니다."));
         page.Controls.Add(content); return page;
     }
 
@@ -194,15 +230,31 @@ internal sealed class MainForm : Form
         content.Controls.Add(ToggleRow("왼쪽 버튼 LED", DeviceProtocol.ReelLeftLed));
         content.Controls.Add(ToggleRow("오른쪽 버튼 LED", DeviceProtocol.ReelRightLed));
         content.Controls.Add(SectionTitle("IMU 센서"));
-        content.Controls.Add(ToggleRow("IMU 데이터 출력", DeviceProtocol.Imu));
-        TableLayoutPanel imu = new() { Width = 520, Height = 110, ColumnCount = 4, RowCount = 3 };
-        string[] keys = { "Roll", "Pitch", "Yaw", "AX", "AY", "AZ" };
+        imuZeroButton.Enabled = false;
+        imuZeroButton.Click += (_, _) => {
+            if (!imuDataEnabled) return;
+            if (!imuOrientation.SetCurrentAsZero()) {
+                MessageBox.Show("IMU 자세값이 수신된 뒤 0점 보정을 실행하세요.", "IMU 0점 보정");
+            }
+        };
+        FlowLayoutPanel imuToggle = ToggleRow("IMU 데이터 출력", DeviceProtocol.Imu, enabled => {
+            imuDataEnabled = enabled;
+            imuZeroButton.Enabled = enabled;
+        });
+        imuToggle.Width = 665;
+        imuToggle.Controls.Add(imuZeroButton);
+        content.Controls.Add(imuToggle);
+        FlowLayoutPanel imuArea = new() { Width = 665, Height = 155, WrapContents = false };
+        TableLayoutPanel imu = new() { Width = 315, Height = 110, ColumnCount = 4, RowCount = 3 };
+        string[] keys = { "Roll", "Pitch", "Yaw", "GX", "GY", "GZ" };
         for (int i = 0; i < keys.Length; i++) {
             Label name = Caption(keys[i]); Label value = ValueLabel("-");
             statusLabels["IMU_" + keys[i]] = value;
             imu.Controls.Add(name, (i % 2) * 2, i / 2); imu.Controls.Add(value, (i % 2) * 2 + 1, i / 2);
         }
-        content.Controls.Add(imu);
+        imuArea.Controls.Add(imu);
+        imuArea.Controls.Add(imuOrientation);
+        content.Controls.Add(imuArea);
         content.Controls.Add(SectionTitle("엔코더 회전"));
         FlowLayoutPanel encoderMonitor = ToggleRow("회전값 수신", on => DeviceProtocol.InputMonitor("메인엔코더", on));
         content.Controls.Add(encoderMonitor);
@@ -295,15 +347,15 @@ internal sealed class MainForm : Form
         page.Controls.Add(content); return page;
     }
 
-    private FlowLayoutPanel ToggleRow(string caption, Func<bool, string> command)
+    private FlowLayoutPanel ToggleRow(string caption, Func<bool, string> command, Action<bool>? changed = null)
     {
         FlowLayoutPanel row = new() { Width = 560, Height = 40, WrapContents = false };
         Label name = new() { Text = caption, Width = 180, TextAlign = ContentAlignment.MiddleLeft, Height = 30 };
         RadioButton on = new() { Text = "ON", Width = 70, AutoSize = false, Height = 30 };
         RadioButton off = new() { Text = "OFF", Width = 70, AutoSize = false, Height = 30, Checked = true };
         bool ready = false;
-        on.CheckedChanged += (_, _) => { if (ready && on.Checked) TrySend(command(true)); };
-        off.CheckedChanged += (_, _) => { if (ready && off.Checked) TrySend(command(false)); };
+        on.CheckedChanged += (_, _) => { if (ready && on.Checked && TrySend(command(true))) { changed?.Invoke(true); } };
+        off.CheckedChanged += (_, _) => { if (ready && off.Checked && TrySend(command(false))) { changed?.Invoke(false); } };
         row.Controls.Add(name); row.Controls.Add(on); row.Controls.Add(off); ready = true;
         return row;
     }
@@ -376,8 +428,14 @@ internal sealed class MainForm : Form
             }
         } else if (frame.StartsWith("$09", StringComparison.Ordinal)) {
             string[] values = frame.Substring(3).TrimStart(',').TrimEnd('%').Split(',');
-            string[] keys = { "Roll", "Pitch", "Yaw", "AX", "AY", "AZ" };
+            string[] keys = { "Roll", "Pitch", "Yaw", "GX", "GY", "GZ" };
             for (int i = 0; i < Math.Min(keys.Length, values.Length); i++) SetStatus("IMU_" + keys[i], values[i], null);
+            if (imuDataEnabled && values.Length >= 3 &&
+                float.TryParse(values[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float roll) &&
+                float.TryParse(values[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float pitch) &&
+                float.TryParse(values[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float yaw)) {
+                imuOrientation.SetAngles(roll, pitch, yaw);
+            }
         } else if (frame.StartsWith("$13", StringComparison.Ordinal) && frame.Length >= 5) {
             string code = frame.Substring(3, 2);
             if (code == "10") SetButtonIndicator(leftButtonState, true, Color.Red); else if (code == "11") SetButtonIndicator(leftButtonState, false, Color.Gray);
@@ -436,7 +494,7 @@ internal sealed class MainForm : Form
         return new string[][] {
             new string[] { "$00%", "$290101%", "$1101%" },
             new string[] { "$00%", "$080%" },
-            new string[] { "$00%", "$0112%", "$0110%", "$1501%" }
+            new string[] { "$00%", "$0112%", "$0110%", "$0115%", "$0117%", "$1501%" }
         };
     }
     private async Task<bool> InitializeConnectedMainAsync()
@@ -476,7 +534,7 @@ internal sealed class MainForm : Form
     private void DisconnectMain()
     {
         pollTimer.Stop(); serial.Close(); connectButton.Text = "연결"; connectionState.Text = "연결 안 됨"; connectionState.ForeColor = Color.DimGray;
-        rodConnected = false; imuConnected = false; powerOffRequestObserved = false; registrationWaiting = false; rodRegisterButton.Text = "ROD 등록";
+        rodConnected = false; imuConnected = false; imuDataEnabled = false; imuZeroButton.Enabled = false; imuOrientation.ClearZero(); powerOffRequestObserved = false; registrationWaiting = false; rodRegisterButton.Text = "ROD 등록";
         mainVersion.Text = "Vm -"; rodVersion.Text = "Vr -"; imuVersion.Text = "IMU -";
         SetConnectionIndicator(reelConnectionState, false, "릴"); SetConnectionIndicator(imuConnectionState, false, "IMU");
     }
@@ -665,7 +723,7 @@ internal sealed class MainForm : Form
     }
 
     private static Panel Page() => new() { Dock = DockStyle.Fill, BackColor = Color.White };
-    private static FlowLayoutPanel Column() => new() { Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(22) };
+    private static FlowLayoutPanel Column() => new() { Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(22, 22, 22, 70) };
     private static Label SectionTitle(string text) => new() { Text = text, Font = new Font("맑은 고딕", 13F, FontStyle.Bold), AutoSize = true, Margin = new Padding(0, 6, 0, 14) };
     private static Label Caption(string text) => new() { Text = text, AutoSize = true, TextAlign = ContentAlignment.MiddleLeft, Margin = new Padding(7, 7, 7, 0) };
     private static Label ValueLabel(string text) => new() { Text = text, AutoSize = true, BackColor = Color.FromArgb(239, 241, 244), Padding = new Padding(8, 5, 8, 5), Margin = new Padding(4, 2, 4, 0) };
@@ -677,6 +735,21 @@ internal sealed class MainForm : Form
         ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 180 }; box.Items.AddRange(items); box.SelectedIndex = selectedIndex; return box;
     }
     private static NumericUpDown Number(int min, int max, int value) => new() { Minimum = min, Maximum = max, Value = value, Width = 110 };
+    private static TrackBar DutySlider(int value, int width) => new() { Minimum = 0, Maximum = 255, Value = value, Width = width, Height = 38, TickFrequency = 25, SmallChange = 1, LargeChange = 10, AutoSize = false };
+    private static Panel SliderBorder(TrackBar slider)
+    {
+        Panel border = new() { Width = slider.Width + 4, Height = 40, BorderStyle = BorderStyle.FixedSingle, Padding = new Padding(1), Margin = new Padding(3, 0, 6, 0) };
+        slider.Dock = DockStyle.Fill; slider.Margin = Padding.Empty;
+        border.Controls.Add(slider);
+        return border;
+    }
+    private static void LinkDutyControls(NumericUpDown number, TrackBar slider)
+    {
+        number.ValueChanged += (_, _) => { if (slider.Value != (int)number.Value) slider.Value = (int)number.Value; };
+        slider.ValueChanged += (_, _) => { if (number.Value != slider.Value) number.Value = slider.Value; };
+    }
+    private static FlowLayoutPanel MotorActionRow() => new() { Width = 560, Height = 40, WrapContents = false, Margin = new Padding(0, 0, 0, 2) };
+    private static Button MotorButton(string text, Color color, int width) => new() { Text = text, Width = width, Height = 34, BackColor = color, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Margin = new Padding(0, 2, 8, 2) };
     private static Button SmallButton(string text, int width = 72) => new() { Text = text, Width = width, Height = 29, FlatStyle = FlatStyle.System };
     private static Button UpdateButton(string text) => new() { Text = text, Width = 290, Height = 40, FlatStyle = FlatStyle.System, Margin = new Padding(0, 3, 0, 3) };
     private static FlowLayoutPanel FieldRow(string caption, Control control)
