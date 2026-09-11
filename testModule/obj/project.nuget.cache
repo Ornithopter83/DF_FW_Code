@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "l8wW0BgVxPU=",
+  "dgSpecHash": "bY03er23wM4=",
   "success": true,
-  "projectFilePath": "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\DFTestModule.csproj",
+  "projectFilePath": "C:\\Projects\\AI-AGENTS\\DF_Project\\DF_FW_Code\\testModule\\DFTestModule.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.25\\microsoft.net.illink.tasks.8.0.25.nupkg.sha512",
     "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\runtime.linux-arm.runtime.native.system.io.ports\\8.0.0\\runtime.linux-arm.runtime.native.system.io.ports.8.0.0.nupkg.sha512",

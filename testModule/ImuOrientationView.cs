@@ -1,27 +1,22 @@
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Globalization;
 
 namespace DFTestModule;
 
 internal sealed class ImuOrientationView : Control
 {
-    private readonly Point3[] model =
-    {
-        new(-0.90f, -0.62f, -0.55f), new(0.90f, -0.62f, -0.55f),
-        new(0.90f, 0.62f, -0.55f), new(-0.90f, 0.62f, -0.55f),
-        new(-0.90f, -0.62f, 0.55f), new(0.90f, -0.62f, 0.55f),
-        new(0.90f, 0.62f, 0.55f), new(-0.90f, 0.62f, 0.55f)
-    };
+    private const float RightScale = 0.90f;
+    private const float TopScale = 0.50f;
+    private const float FrontScale = 1.20f;
+    private const float HandleStepDegrees = 18.0f;
 
-    private readonly Face[] faces =
-    {
-        new(new[] { 0, 1, 2, 3 }, Color.FromArgb(168, 178, 190), ""),
-        new(new[] { 4, 5, 6, 7 }, Color.FromArgb(205, 183, 145), ""),
-        new(new[] { 0, 4, 7, 3 }, Color.FromArgb(159, 176, 194), ""),
-        new(new[] { 1, 5, 6, 2 }, Color.FromArgb(176, 188, 199), ""),
-        new(new[] { 0, 1, 5, 4 }, Color.FromArgb(151, 164, 179), ""),
-        new(new[] { 3, 2, 6, 7 }, Color.FromArgb(220, 205, 164), "")
-    };
+    private readonly Point3[] model;
+    private readonly Face[] faces;
+    private readonly Point3[] handleModel;
+    private readonly Face[] handleFaces;
+    private readonly Image? reelTopImage;
+    private readonly Image? reelBottomImage;
 
     private readonly Point3 camera = new(3.2f, 2.4f, 6.5f);
     private readonly Point3 cameraForward;
@@ -35,11 +30,15 @@ internal sealed class ImuOrientationView : Control
     private float zeroRoll;
     private float zeroPitch;
     private float zeroYaw;
+    private float handleAngle;
     private bool hasData;
     private bool hasZero;
 
     public ImuOrientationView()
     {
+        BuildReelModel(out model, out faces, out handleModel, out handleFaces);
+        reelTopImage = LoadEmbeddedImage("DFTestModule.Assets.reel-top-v2.png");
+        reelBottomImage = LoadEmbeddedImage("DFTestModule.Assets.reel-bottom.png");
         DoubleBuffered = true;
         SetStyle(ControlStyles.ResizeRedraw, true);
         BackColor = Color.FromArgb(247, 248, 250);
@@ -70,6 +69,12 @@ internal sealed class ImuOrientationView : Control
         return true;
     }
 
+    public void AdvanceHandleCounterClockwise()
+    {
+        handleAngle = (handleAngle + HandleStepDegrees) % 360.0f;
+        Invalidate();
+    }
+
     public void ClearZero()
     {
         hasZero = false;
@@ -89,8 +94,31 @@ internal sealed class ImuOrientationView : Control
         float shownYaw = hasZero ? Wrap180(yaw - zeroYaw) : yaw;
         Matrix3 displayOrientation = CreateOrientation(shownRoll, shownPitch, shownYaw);
         Point3[] rotated = model.Select(point => displayOrientation.Transform(point)).ToArray();
+        DrawModel(e.Graphics, rotated, faces);
+        DrawPhotoSurface(e.Graphics, displayOrientation);
+
+        float handleRadians = DegreesToRadians(-handleAngle);
+        Point3[] rotatedHandle = handleModel
+            .Select(point => RotateHandleAroundRightAxis(point, handleRadians))
+            .Select(point => displayOrientation.Transform(point))
+            .ToArray();
+        DrawModel(e.Graphics, rotatedHandle, handleFaces);
+        DrawAxes(e.Graphics, displayOrientation);
+
+        using Font angleFont = new("Consolas", 8F);
+        using Brush angleBrush = new SolidBrush(Color.DimGray);
+        string prefix = hasZero ? "ZERO  " : "RAW   ";
+        e.Graphics.DrawString(string.Format(CultureInfo.InvariantCulture,
+            "{0}R {1,6:0.0}  P {2,6:0.0}  Y {3,6:0.0}", prefix, shownRoll, shownPitch, shownYaw),
+            angleFont, angleBrush, 5, Height - 19);
+    }
+
+    private void DrawModel(Graphics graphics, Point3[] rotated, Face[] modelFaces)
+    {
         ProjectedPoint[] projected = rotated.Select(Project).ToArray();
-        Face[] orderedFaces = faces.OrderByDescending(face => face.Indices.Average(index => projected[index].Depth)).ToArray();
+        Face[] orderedFaces = modelFaces
+            .OrderByDescending(face => face.Indices.Average(index => projected[index].Depth))
+            .ToArray();
 
         using Pen edge = new(Color.FromArgb(45, 53, 62), 1.8f);
         using Font faceFont = new("맑은 고딕", 8.5F, FontStyle.Bold);
@@ -100,24 +128,251 @@ internal sealed class ImuOrientationView : Control
         {
             PointF[] polygon = face.Indices.Select(index => projected[index].Screen).ToArray();
             using Brush fill = new SolidBrush(Color.FromArgb(225, face.Color));
-            e.Graphics.FillPolygon(fill, polygon);
-            e.Graphics.DrawPolygon(edge, polygon);
-            if (face.Label.Length > 0)
+            graphics.FillPolygon(fill, polygon);
+            graphics.DrawPolygon(edge, polygon);
+            if (face.Label.Length == 0) continue;
+            float x = polygon.Average(point => point.X);
+            float y = polygon.Average(point => point.Y);
+            graphics.DrawString(face.Label, faceFont, textBrush, new PointF(x, y), centered);
+        }
+    }
+
+    private static Point3 RotateHandleAroundRightAxis(Point3 point, float radians)
+    {
+        const float pivotY = -0.02f * TopScale;
+        const float pivotZ = 0.03f * FrontScale;
+        Point3 relative = new(point.X, point.Y - pivotY, point.Z - pivotZ);
+        Point3 rotated = Matrix3.RotateX(radians).Transform(relative);
+        return new Point3(rotated.X, rotated.Y + pivotY, rotated.Z + pivotZ);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            reelTopImage?.Dispose();
+            reelBottomImage?.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+
+    private static Image? LoadEmbeddedImage(string resourceName)
+    {
+        using Stream? stream = typeof(ImuOrientationView).Assembly.GetManifestResourceStream(resourceName);
+        if (stream == null) return null;
+        using Image source = Image.FromStream(stream);
+        // 배경 격자가 이미지에 굳어 들어간 자산은 표시하지 않고 3D 모델로 대체한다.
+        if (!Image.IsAlphaPixelFormat(source.PixelFormat)) return null;
+        return new Bitmap(source);
+    }
+
+    private void DrawPhotoSurface(Graphics graphics, Matrix3 orientation)
+    {
+        Point3 topNormal = orientation.Transform(new Point3(0, 1, 0));
+        float facing = Dot(topNormal, Normalize(camera));
+        Image? image = facing >= 0 ? reelTopImage : reelBottomImage;
+        if (image == null) return;
+
+        float opacity = Math.Clamp((MathF.Abs(facing) - 0.03f) / 0.14f, 0.0f, 1.0f);
+        if (opacity <= 0.01f) return;
+
+        const float minX = -0.92f * RightScale;
+        const float maxX = 1.94f * RightScale;
+        const float minZ = -0.82f * FrontScale;
+        const float maxZ = 0.82f * FrontScale;
+        float surfaceY = (facing >= 0 ? 0.69f : -0.69f) * TopScale;
+
+        PointF[] destination;
+        RectangleF sourceRectangle;
+        if (facing >= 0)
+        {
+            const float bodyFraction = 0.62f;
+            float photoMaxX = minX + (maxX - minX) * bodyFraction;
+            destination = new[]
             {
-                float x = polygon.Average(point => point.X);
-                float y = polygon.Average(point => point.Y);
-                e.Graphics.DrawString(face.Label, faceFont, textBrush, new PointF(x, y), centered);
-            }
+                Project(orientation.Transform(new Point3(minX, surfaceY, minZ))).Screen,
+                Project(orientation.Transform(new Point3(photoMaxX, surfaceY, minZ))).Screen,
+                Project(orientation.Transform(new Point3(minX, surfaceY, maxZ))).Screen
+            };
+            sourceRectangle = new RectangleF(0, 0, image.Width * bodyFraction, image.Height);
+        }
+        else
+        {
+            const float handleFraction = 0.34f;
+            float photoMaxX = maxX - (maxX - minX) * handleFraction;
+            destination = new[]
+            {
+                Project(orientation.Transform(new Point3(photoMaxX, surfaceY, minZ))).Screen,
+                Project(orientation.Transform(new Point3(minX, surfaceY, minZ))).Screen,
+                Project(orientation.Transform(new Point3(photoMaxX, surfaceY, maxZ))).Screen
+            };
+            sourceRectangle = new RectangleF(image.Width * handleFraction, 0,
+                image.Width * (1.0f - handleFraction), image.Height);
         }
 
-        DrawAxes(e.Graphics, displayOrientation);
+        ColorMatrix alpha = new(new[]
+        {
+            new[] { 1.0f, 0, 0, 0, 0 },
+            new[] { 0, 1.0f, 0, 0, 0 },
+            new[] { 0, 0, 1.0f, 0, 0 },
+            new[] { 0, 0, 0, opacity, 0 },
+            new[] { 0, 0, 0, 0, 1.0f }
+        });
+        using ImageAttributes attributes = new();
+        attributes.SetColorMatrix(alpha);
+        graphics.DrawImage(image, destination, sourceRectangle, GraphicsUnit.Pixel, attributes);
+    }
 
-        using Font angleFont = new("Consolas", 8F);
-        using Brush angleBrush = new SolidBrush(Color.DimGray);
-        string prefix = hasZero ? "ZERO  " : "RAW   ";
-        e.Graphics.DrawString(string.Format(CultureInfo.InvariantCulture,
-            "{0}R {1,6:0.0}  P {2,6:0.0}  Y {3,6:0.0}", prefix, shownRoll, shownPitch, shownYaw),
-            angleFont, angleBrush, 5, Height - 19);
+    private static void BuildReelModel(out Point3[] points, out Face[] modelFaces,
+        out Point3[] handlePoints, out Face[] handleModelFaces)
+    {
+        List<Point3> vertices = new();
+        List<Face> surfaces = new();
+        List<Point3> handleVertices = new();
+        List<Face> handleSurfaces = new();
+
+        Color bodyFront = Color.FromArgb(48, 52, 61);
+        Color bodyBack = Color.FromArgb(38, 42, 49);
+        Color bodySide = Color.FromArgb(61, 66, 76);
+        Color black = Color.FromArgb(30, 33, 39);
+        Color blackHighlight = Color.FromArgb(57, 62, 70);
+        Color silver = Color.FromArgb(151, 155, 160);
+        Color screw = Color.FromArgb(205, 210, 215);
+
+        PointF[] bodyProfile =
+        {
+            new(-0.72f, -0.72f), new(0.43f, -0.72f), new(0.72f, -0.48f), new(0.78f, 0.40f),
+            new(0.54f, 0.66f), new(-0.55f, 0.66f), new(-0.78f, 0.43f), new(-0.80f, -0.48f)
+        };
+        AddExtrusion(vertices, surfaces, bodyProfile, -0.49f, 0.49f, bodyFront, bodyBack, bodySide);
+
+        // RIGHT 방향으로 놓인 스풀, 회전축과 핸들
+        AddCylinderX(vertices, surfaces, 0.48f, 1.18f, 0.03f, 0.02f, 0.47f, 14, blackHighlight, black);
+        AddCylinderX(vertices, surfaces, 1.14f, 1.43f, 0.03f, 0.02f, 0.16f, 12, silver, blackHighlight);
+        AddCrankArmX(handleVertices, handleSurfaces, 1.39f, 1.52f, 0.03f, 0.02f, -0.60f, -0.44f, 0.10f, black);
+        AddCylinderX(handleVertices, handleSurfaces, 1.46f, 1.92f, -0.60f, -0.44f, 0.22f, 12, blackHighlight, black);
+
+        // 뒷면 사진의 은색 고정 브래킷과 네 개의 체결부
+        AddBox(vertices, surfaces, -0.22f, 0.22f, -0.62f, 0.58f, 0.50f, 0.57f, silver, silver, Color.FromArgb(105, 109, 115), "BACK");
+        foreach (float screwX in new[] { -0.14f, 0.14f })
+        foreach (float screwY in new[] { -0.43f, 0.39f })
+            AddCylinderZ(vertices, surfaces, 0.57f, 0.62f, screwX, screwY, 0.055f, 8, screw, Color.FromArgb(128, 134, 140));
+
+        // 장착 기준 자세에서는 금색 조작면이 FRONT가 아니라 TOP을 향한다.
+        // RIGHT(X) 축은 그대로 두고 모델만 X축 기준으로 90도 회전한다.
+        points = vertices.Select(point => new Point3(
+            point.X * RightScale,
+            -point.Z * TopScale,
+            point.Y * FrontScale)).ToArray();
+        modelFaces = surfaces.ToArray();
+        handlePoints = handleVertices.Select(point => new Point3(
+            point.X * RightScale,
+            -point.Z * TopScale,
+            point.Y * FrontScale)).ToArray();
+        handleModelFaces = handleSurfaces.ToArray();
+    }
+
+    private static void AddExtrusion(List<Point3> points, List<Face> faces, PointF[] profile,
+        float frontZ, float backZ, Color front, Color back, Color side, string frontLabel = "")
+    {
+        int start = points.Count;
+        points.AddRange(profile.Select(point => new Point3(point.X, point.Y, frontZ)));
+        points.AddRange(profile.Select(point => new Point3(point.X, point.Y, backZ)));
+        int count = profile.Length;
+        faces.Add(new Face(Enumerable.Range(start, count).ToArray(), front, frontLabel));
+        faces.Add(new Face(Enumerable.Range(start + count, count).Reverse().ToArray(), back, ""));
+        for (int i = 0; i < count; i++)
+        {
+            int next = (i + 1) % count;
+            faces.Add(new Face(new[] { start + i, start + next, start + count + next, start + count + i }, side, ""));
+        }
+    }
+
+    private static void AddBox(List<Point3> points, List<Face> faces,
+        float minX, float maxX, float minY, float maxY, float minZ, float maxZ,
+        Color front, Color back, Color side, string backLabel = "")
+    {
+        int start = points.Count;
+        points.AddRange(new[]
+        {
+            new Point3(minX, minY, minZ), new Point3(maxX, minY, minZ),
+            new Point3(maxX, maxY, minZ), new Point3(minX, maxY, minZ),
+            new Point3(minX, minY, maxZ), new Point3(maxX, minY, maxZ),
+            new Point3(maxX, maxY, maxZ), new Point3(minX, maxY, maxZ)
+        });
+        faces.Add(new Face(new[] { start, start + 1, start + 2, start + 3 }, front, ""));
+        faces.Add(new Face(new[] { start + 7, start + 6, start + 5, start + 4 }, back, backLabel));
+        faces.Add(new Face(new[] { start, start + 4, start + 5, start + 1 }, side, ""));
+        faces.Add(new Face(new[] { start + 1, start + 5, start + 6, start + 2 }, side, ""));
+        faces.Add(new Face(new[] { start + 2, start + 6, start + 7, start + 3 }, side, ""));
+        faces.Add(new Face(new[] { start + 3, start + 7, start + 4, start }, side, ""));
+    }
+
+    private static void AddCylinderX(List<Point3> points, List<Face> faces, float minX, float maxX,
+        float centerY, float centerZ, float radius, int segments, Color cap, Color side)
+    {
+        int start = points.Count;
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = MathF.Tau * i / segments;
+            float y = centerY + MathF.Cos(angle) * radius;
+            float z = centerZ + MathF.Sin(angle) * radius;
+            points.Add(new Point3(minX, y, z));
+            points.Add(new Point3(maxX, y, z));
+        }
+        faces.Add(new Face(Enumerable.Range(0, segments).Select(i => start + i * 2).Reverse().ToArray(), cap, ""));
+        faces.Add(new Face(Enumerable.Range(0, segments).Select(i => start + i * 2 + 1).ToArray(), cap, ""));
+        for (int i = 0; i < segments; i++)
+        {
+            int next = (i + 1) % segments;
+            faces.Add(new Face(new[] { start + i * 2, start + next * 2, start + next * 2 + 1, start + i * 2 + 1 }, side, ""));
+        }
+    }
+
+    private static void AddCylinderZ(List<Point3> points, List<Face> faces, float minZ, float maxZ,
+        float centerX, float centerY, float radius, int segments, Color cap, Color side)
+    {
+        int start = points.Count;
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = MathF.Tau * i / segments;
+            float x = centerX + MathF.Cos(angle) * radius;
+            float y = centerY + MathF.Sin(angle) * radius;
+            points.Add(new Point3(x, y, minZ));
+            points.Add(new Point3(x, y, maxZ));
+        }
+        faces.Add(new Face(Enumerable.Range(0, segments).Select(i => start + i * 2).Reverse().ToArray(), cap, ""));
+        faces.Add(new Face(Enumerable.Range(0, segments).Select(i => start + i * 2 + 1).ToArray(), cap, ""));
+        for (int i = 0; i < segments; i++)
+        {
+            int next = (i + 1) % segments;
+            faces.Add(new Face(new[] { start + i * 2, start + next * 2, start + next * 2 + 1, start + i * 2 + 1 }, side, ""));
+        }
+    }
+
+    private static void AddCrankArmX(List<Point3> points, List<Face> faces, float minX, float maxX,
+        float startY, float startZ, float endY, float endZ, float width, Color color)
+    {
+        float dy = endY - startY;
+        float dz = endZ - startZ;
+        float length = MathF.Sqrt(dy * dy + dz * dz);
+        float py = -dz / length * width;
+        float pz = dy / length * width;
+        PointF[] profile =
+        {
+            new(startY + py, startZ + pz), new(endY + py, endZ + pz),
+            new(endY - py, endZ - pz), new(startY - py, startZ - pz)
+        };
+        int start = points.Count;
+        points.AddRange(profile.Select(point => new Point3(minX, point.X, point.Y)));
+        points.AddRange(profile.Select(point => new Point3(maxX, point.X, point.Y)));
+        faces.Add(new Face(new[] { start, start + 1, start + 2, start + 3 }, color, ""));
+        faces.Add(new Face(new[] { start + 7, start + 6, start + 5, start + 4 }, color, ""));
+        for (int i = 0; i < 4; i++)
+        {
+            int next = (i + 1) % 4;
+            faces.Add(new Face(new[] { start + i, start + next, start + 4 + next, start + 4 + i }, color, ""));
+        }
     }
 
     private void DrawReference(Graphics graphics)

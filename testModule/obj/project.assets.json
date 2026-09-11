@@ -350,11 +350,11 @@
   "project": {
     "version": "0.4.1",
     "restore": {
-      "projectUniqueName": "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\DFTestModule.csproj",
+      "projectUniqueName": "C:\\Projects\\AI-AGENTS\\DF_Project\\DF_FW_Code\\testModule\\DFTestModule.csproj",
       "projectName": "DFTestModule_V041",
-      "projectPath": "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\DFTestModule.csproj",
+      "projectPath": "C:\\Projects\\AI-AGENTS\\DF_Project\\DF_FW_Code\\testModule\\DFTestModule.csproj",
       "packagesPath": "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\",
-      "outputPath": "C:\\Projects\\VS\\DF_FW_Code\\CodexManage\\testModule\\obj\\",
+      "outputPath": "C:\\Projects\\AI-AGENTS\\DF_Project\\DF_FW_Code\\testModule\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

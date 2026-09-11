@@ -24,8 +24,13 @@
     <PublishTrimmed>false</PublishTrimmed>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <PublishDir>C:\Projects\VS\DF_FW_Code\CodexManage\bin\testmodule\$(Configuration)\win-x64\</PublishDir>
+    <PublishDir>$(MSBuildProjectDirectory)\..\bin\testmodule\$(Configuration)\</PublishDir>
   </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\reel-top-v2.png" LogicalName="DFTestModule.Assets.reel-top-v2.png" />
+    <EmbeddedResource Include="Assets\reel-bottom.png" LogicalName="DFTestModule.Assets.reel-bottom.png" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
     <EmbeddedResource Include="esptool_V4.5.1.exe" LogicalName="DFTestModule.esptool_V4.5.1.exe" />

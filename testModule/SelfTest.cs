@@ -17,9 +17,9 @@ internal static class SelfTest
             Equal("$075212%", DeviceProtocol.LmMove(true, 1, 2), "LM 왼쪽 이동");
             Equal("$075333%", DeviceProtocol.LmMove(false, 3, 3), "LM 오른쪽 이동");
             Equal("$0754035%", DeviceProtocol.LmReturn(35), "LM 홈 복귀");
-            Equal("$0600%", DeviceProtocol.LedControl(0, 0, 1, 10), "중앙 LED 끄기");
-            Equal("$061114%", DeviceProtocol.LedControl(1, 1, 14, 10), "왼쪽 LED 켜기");
-            Equal("$0622010010%", DeviceProtocol.LedControl(2, 2, 1, 10), "오른쪽 LED 점멸");
+            Equal("$0600%", DeviceProtocol.LedControl(0, 0, 1, 10), "본체 LED 끄기");
+            Equal("$061100%", DeviceProtocol.LedControl(1, 1, 0, 10), "중앙 LED 흰색 켜기");
+            Equal("$061115%", DeviceProtocol.LedControl(1, 1, 15, 10), "중앙 LED 검정 켜기");
             Equal("$0609010%", DeviceProtocol.LedBrightnessWrite(10), "LED 최소 밝기");
             Equal("$0609100%", DeviceProtocol.LedBrightnessWrite(100), "LED 최대 밝기");
             byte[] frame = DeviceProtocol.DownloadFrame((byte)'M', 7, new byte[] { 1, 2, 3 });
@@ -103,7 +103,7 @@ internal static class SelfTest
                 throw new InvalidOperationException("초기 연결 명령 단계 오류");
             using (MainForm form = new MainForm()) {
                 form.CreateControl();
-                if (form.Controls.Count == 0 || form.ClientSize.Height != 900) throw new InvalidOperationException("UI 구성 오류");
+                if (form.Controls.Count == 0 || form.ClientSize.Height != 980) throw new InvalidOperationException("UI 구성 오류");
             }
             return 0;
         }

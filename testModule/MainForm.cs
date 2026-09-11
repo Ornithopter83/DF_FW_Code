@@ -43,6 +43,7 @@ internal sealed class MainForm : Form
     private bool rodConnected;
     private bool imuConnected;
     private bool imuDataEnabled;
+    private bool encoderMonitorEnabled;
     private bool powerOffRequestObserved;
     private bool registrationWaiting;
 
@@ -103,7 +104,7 @@ internal sealed class MainForm : Form
     {
         Panel panel = new() { Dock = DockStyle.Fill, BackColor = Color.FromArgb(38, 45, 56), Padding = new Padding(10, 18, 10, 10) };
         FlowLayoutPanel buttons = new() { Dock = DockStyle.Top, FlowDirection = FlowDirection.TopDown, WrapContents = false, Height = 400 };
-        foreach (string name in new[] { "모터 제어", "릴 / IMU", "LED", "LM JIG", "업데이트" }) {
+        foreach (string name in new[] { "모터 제어", "릴 / IMU", "입력 / 전원", "LED", "LM JIG", "업데이트" }) {
             Button button = new() { Text = name, Width = 138, Height = 48, FlatStyle = FlatStyle.Flat, ForeColor = Color.White, BackColor = Color.FromArgb(51, 61, 75), Margin = new Padding(0, 0, 0, 8) };
             button.FlatAppearance.BorderSize = 0;
             button.Click += (_, _) => ShowPage(name);
@@ -148,6 +149,7 @@ internal sealed class MainForm : Form
     {
         pages["모터 제어"] = BuildMotorPage();
         pages["릴 / IMU"] = BuildReelPage();
+        pages["입력 / 전원"] = BuildInputPage();
         pages["LED"] = BuildLedPage();
         pages["LM JIG"] = BuildLmJigPage();
         pages["업데이트"] = BuildFirmwarePage();
@@ -221,6 +223,11 @@ internal sealed class MainForm : Form
         FlowLayoutPanel connections = new() { Width = 600, Height = 64 };
         connections.Controls.Add(reelConnectionState); connections.Controls.Add(imuConnectionState);
         content.Controls.Add(connections);
+        content.Controls.Add(SectionTitle("릴 상태"));
+        statusLabels["배터리"] = ValueLabel("-");
+        statusLabels["릴 엔코더"] = ValueLabel("-");
+        content.Controls.Add(FieldRow("배터리", statusLabels["배터리"]));
+        content.Controls.Add(FieldRow("릴 엔코더", statusLabels["릴 엔코더"]));
         content.Controls.Add(SectionTitle("릴 버튼 상태"));
         FlowLayoutPanel indicators = new() { Width = 600, Height = 64 };
         indicators.Controls.Add(leftButtonState); indicators.Controls.Add(rightButtonState); indicators.Controls.Add(setupButtonState); indicators.Controls.Add(bootButtonState);
@@ -255,13 +262,34 @@ internal sealed class MainForm : Form
         imuArea.Controls.Add(imu);
         imuArea.Controls.Add(imuOrientation);
         content.Controls.Add(imuArea);
-        content.Controls.Add(SectionTitle("엔코더 회전"));
-        FlowLayoutPanel encoderMonitor = ToggleRow("회전값 수신", on => DeviceProtocol.InputMonitor("메인엔코더", on));
+        page.Controls.Add(content); return page;
+    }
+
+    private Panel BuildInputPage()
+    {
+        Panel page = Page(); FlowLayoutPanel content = Column();
+        content.Controls.Add(SectionTitle("본체 입력 감시"));
+        content.Controls.Add(ToggleRow("보드 입력 수신", on => DeviceProtocol.InputMonitor("부트", on)));
+        content.Controls.Add(ToggleRow("엔코더 / FG 수신", on => DeviceProtocol.InputMonitor("메인", on)));
+        content.Controls.Add(ToggleRow("전원 / USB 수신", on => DeviceProtocol.InputMonitor("릴", on)));
+
+        string[] inputKeys = { "부트", "EncA", "EncB", "FG", "USB", "전원" };
+        string[] inputCaptions = { "BOOT 스위치", "엔코더 A", "엔코더 B", "BLDC FG", "USB 5V", "전원 스위치" };
+        for (int i = 0; i < inputKeys.Length; i++) {
+            statusLabels[inputKeys[i]] = ValueLabel("-");
+            content.Controls.Add(FieldRow(inputCaptions[i], statusLabels[inputKeys[i]]));
+        }
+
+        content.Controls.Add(SectionTitle("본체 엔코더 회전"));
+        FlowLayoutPanel encoderMonitor = ToggleRow("회전값 수신", on => DeviceProtocol.InputMonitor("메인엔코더", on), enabled => {
+            encoderMonitorEnabled = enabled;
+            if (!enabled) SetStatus("본체 엔코더", "-", Color.LightGray);
+        });
         content.Controls.Add(encoderMonitor);
-        statusLabels["엔코더"] = ValueLabel("-");
-        FlowLayoutPanel encoderValue = FieldRow("회전 카운트", statusLabels["엔코더"]);
+        statusLabels["본체 엔코더"] = ValueLabel("-");
+        FlowLayoutPanel encoderValue = FieldRow("방향 / 회전 카운트", statusLabels["본체 엔코더"]);
         Button clearEncoder = SmallButton("표시 초기화", 100);
-        clearEncoder.Click += (_, _) => statusLabels["엔코더"].Text = "-";
+        clearEncoder.Click += (_, _) => SetStatus("본체 엔코더", "-", Color.LightGray);
         encoderValue.Controls.Add(clearEncoder);
         content.Controls.Add(encoderValue);
         page.Controls.Add(content); return page;
@@ -270,24 +298,26 @@ internal sealed class MainForm : Form
     private Panel BuildLedPage()
     {
         Panel page = Page(); FlowLayoutPanel content = Column(); content.Controls.Add(SectionTitle("본체 LED 제어"));
-        ComboBox position = Choice(new[] { "중앙 (0)", "왼쪽 (1)", "오른쪽 (2)", "하단 (3)" }, 0);
+        ComboBox position = Choice(new[] { "꺼짐 (0)", "중앙 (1)", "왼쪽 (2) - 비활성", "오른쪽 (3) - 비활성" }, 1);
         ComboBox action = Choice(new[] { "꺼짐 (0)", "켜짐 (1)", "점멸 (2)", "디밍 (3)" }, 1);
         ComboBox color = Choice(new[] {
-            "01 - Red", "02 - Lime", "03 - Blue", "04 - Yellow", "05 - Cyan", "06 - Magenta", "07 - Maroon",
-            "08 - Olive", "09 - Green", "10 - Purple", "11 - Teal", "12 - Navy", "13 - Silver", "14 - Gray"
-        }, 0);
+            "00 - White", "01 - Red", "02 - Lime", "03 - Blue", "04 - Yellow", "05 - Cyan", "06 - Magenta", "07 - Maroon",
+            "08 - Olive", "09 - Green", "10 - Purple", "11 - Teal", "12 - Navy", "13 - Silver", "14 - Gray", "15 - Black"
+        }, 1);
         NumericUpDown time = Number(10, 9999, 2000), brightness = Number(10, 100, 100);
         content.Controls.Add(FieldRow("위치", position));
         content.Controls.Add(FieldRow("표시 액션", action));
         content.Controls.Add(FieldRow("색상", color));
         content.Controls.Add(FieldRow("표시 시간(ms)", time));
-        Button apply = SmallButton("적용", 110);
+        Button apply = MotorButton("적용", Color.FromArgb(27, 126, 96), 110);
         apply.Margin = new Padding(125, 10, 0, 10);
-        apply.Click += (_, _) => TrySend(DeviceProtocol.LedControl(position.SelectedIndex, action.SelectedIndex, color.SelectedIndex + 1, (int)time.Value));
+        position.SelectedIndexChanged += (_, _) => apply.Enabled = position.SelectedIndex <= 1;
+        apply.Click += (_, _) => TrySend(DeviceProtocol.LedControl(position.SelectedIndex, action.SelectedIndex, color.SelectedIndex, (int)time.Value));
         content.Controls.Add(apply);
+        content.Controls.Add(Note("위치 2(왼쪽)와 3(오른쪽)은 현재 본체에서 비활성이라 명령을 전송하지 않습니다."));
         content.Controls.Add(FieldRow("밝기(%)", brightness));
         FlowLayoutPanel brightActions = new() { Width = 520, Height = 45, Margin = new Padding(125, 2, 0, 0) };
-        Button read = SmallButton("읽기", 90); Button write = SmallButton("쓰기", 90);
+        Button read = MotorButton("읽기", Color.FromArgb(35, 105, 190), 90); Button write = MotorButton("쓰기", Color.FromArgb(27, 126, 96), 90);
         read.Click += (_, _) => TrySend(DeviceProtocol.LedBrightnessRead()); write.Click += (_, _) => TrySend(DeviceProtocol.LedBrightnessWrite((int)brightness.Value));
         brightActions.Controls.Add(read); brightActions.Controls.Add(write); content.Controls.Add(brightActions);
         statusLabels["Brightness"] = ValueLabel("-"); content.Controls.Add(FieldRow("수신 밝기", statusLabels["Brightness"]));
@@ -307,7 +337,7 @@ internal sealed class MainForm : Form
         content.Controls.Add(FieldRow("동작 시간(ms)", time));
         FlowLayoutPanel direction = FieldRow("방향", cw); direction.Controls.Add(ccw); content.Controls.Add(direction);
         FlowLayoutPanel motorActions = new() { Width = 560, Height = 44, Margin = new Padding(125, 8, 0, 0) };
-        Button startMotor = SmallButton("모터 실행", 110), stopMotor = SmallButton("모터 정지", 110);
+        Button startMotor = MotorButton("모터 실행", Color.FromArgb(27, 126, 96), 110), stopMotor = MotorButton("모터 정지", Color.Firebrick, 110);
         startMotor.Click += (_, _) => TrySend(DeviceProtocol.LmMotor(cw.Checked, (int)duty.Value, (int)time.Value));
         stopMotor.Click += (_, _) => TrySend(DeviceProtocol.LmMotorOff());
         motorActions.Controls.Add(startMotor); motorActions.Controls.Add(stopMotor); content.Controls.Add(motorActions);
@@ -320,8 +350,8 @@ internal sealed class MainForm : Form
         content.Controls.Add(FieldRow("출력 레벨", powerLevel));
         content.Controls.Add(FieldRow("복귀 Duty", returnDuty));
         FlowLayoutPanel positionActions = new() { Width = 650, Height = 78, Margin = new Padding(0, 8, 0, 0), WrapContents = true };
-        Button allOff = SmallButton("전체 정지", 100), home = SmallButton("홈", 90), left = SmallButton("왼쪽 이동", 100);
-        Button right = SmallButton("오른쪽 이동", 110), returnButton = SmallButton("홈 복귀", 100);
+        Button allOff = MotorButton("전체 정지", Color.Firebrick, 100), home = MotorButton("홈", Color.FromArgb(35, 105, 190), 90), left = MotorButton("왼쪽 이동", Color.FromArgb(35, 105, 190), 100);
+        Button right = MotorButton("오른쪽 이동", Color.FromArgb(35, 105, 190), 110), returnButton = MotorButton("홈 복귀", Color.FromArgb(35, 105, 190), 100);
         allOff.Click += (_, _) => TrySend(DeviceProtocol.LmAllOff());
         home.Click += (_, _) => TrySend(DeviceProtocol.LmHome());
         left.Click += (_, _) => TrySend(DeviceProtocol.LmMove(true, fishLevel.SelectedIndex + 1, powerLevel.SelectedIndex + 1));
@@ -351,11 +381,19 @@ internal sealed class MainForm : Form
     {
         FlowLayoutPanel row = new() { Width = 560, Height = 40, WrapContents = false };
         Label name = new() { Text = caption, Width = 180, TextAlign = ContentAlignment.MiddleLeft, Height = 30 };
-        RadioButton on = new() { Text = "ON", Width = 70, AutoSize = false, Height = 30 };
-        RadioButton off = new() { Text = "OFF", Width = 70, AutoSize = false, Height = 30, Checked = true };
+        RadioButton on = ToggleButton("ON");
+        RadioButton off = ToggleButton("OFF"); off.Checked = true;
         bool ready = false;
-        on.CheckedChanged += (_, _) => { if (ready && on.Checked && TrySend(command(true))) { changed?.Invoke(true); } };
-        off.CheckedChanged += (_, _) => { if (ready && off.Checked && TrySend(command(false))) { changed?.Invoke(false); } };
+        on.CheckedChanged += (_, _) => {
+            SetToggleButtonState(on, on.Checked, Color.FromArgb(27, 126, 96));
+            if (ready && on.Checked && TrySend(command(true))) changed?.Invoke(true);
+        };
+        off.CheckedChanged += (_, _) => {
+            SetToggleButtonState(off, off.Checked, Color.Firebrick);
+            if (ready && off.Checked && TrySend(command(false))) changed?.Invoke(false);
+        };
+        SetToggleButtonState(on, false, Color.FromArgb(27, 126, 96));
+        SetToggleButtonState(off, true, Color.Firebrick);
         row.Controls.Add(name); row.Controls.Add(on); row.Controls.Add(off); ready = true;
         return row;
     }
@@ -438,10 +476,10 @@ internal sealed class MainForm : Form
             }
         } else if (frame.StartsWith("$13", StringComparison.Ordinal) && frame.Length >= 5) {
             string code = frame.Substring(3, 2);
-            if (code == "10") SetButtonIndicator(leftButtonState, true, Color.Red); else if (code == "11") SetButtonIndicator(leftButtonState, false, Color.Gray);
-            else if (code == "20") SetButtonIndicator(rightButtonState, true, Color.RoyalBlue); else if (code == "21") SetButtonIndicator(rightButtonState, false, Color.Gray);
-            else if (code == "80") SetButtonIndicator(setupButtonState, true, Color.Goldenrod); else if (code == "81") SetButtonIndicator(setupButtonState, false, Color.Gray);
-            else if (code == "90") SetButtonIndicator(bootButtonState, true, Color.Goldenrod); else if (code == "91") SetButtonIndicator(bootButtonState, false, Color.Gray);
+            if (code == "10") SetButtonIndicator(leftButtonState, true, Color.Blue); else if (code == "11") SetButtonIndicator(leftButtonState, false, Color.Gray);
+            else if (code == "20") SetButtonIndicator(rightButtonState, true, Color.Red); else if (code == "21") SetButtonIndicator(rightButtonState, false, Color.Gray);
+            else if (code == "80") SetButtonIndicator(setupButtonState, true, Color.Red); else if (code == "81") SetButtonIndicator(setupButtonState, false, Color.LightYellow);
+            else if (code == "90") SetButtonIndicator(bootButtonState, true, Color.Red); else if (code == "91") SetButtonIndicator(bootButtonState, false, Color.LightYellow);
         } else if (frame.StartsWith("$0608", StringComparison.Ordinal)) {
             SetStatus("Brightness", frame.Substring(5).TrimEnd('%'), null);
         } else if (frame.StartsWith("$27", StringComparison.Ordinal)) {
@@ -455,7 +493,8 @@ internal sealed class MainForm : Form
         } else if (frame.StartsWith("$12", StringComparison.Ordinal)) {
             SetStatus("배터리", frame.Substring(3).TrimEnd('%'), Color.LightGreen);
         } else if (frame.StartsWith("$14", StringComparison.Ordinal)) {
-            SetStatus("엔코더", frame.Substring(3).TrimEnd('%'), Color.LightGreen);
+            SetStatus("릴 엔코더", frame.Substring(3).TrimEnd('%'), Color.LightGreen);
+            imuOrientation.AdvanceHandleCounterClockwise();
         } else if (frame.StartsWith("$30", StringComparison.Ordinal) && frame.Length >= 5) {
             string code = frame.Substring(3, 2);
             if (code == "03") FinishRegistration("등록 취소", Color.LightGray);
@@ -469,7 +508,15 @@ internal sealed class MainForm : Form
         string body = frame.Substring(3).TrimEnd('%');
         int comma = body.IndexOf(','); if (comma < 0) return;
         string code = body.Substring(0, comma); string value = body.Substring(comma + 1);
-        string? key = code switch { "01-02" => "부트", "03-01" => "EncA", "03-02" => "EncB", "03-05" => "FG", "05-02" => "USB", "05-01" => "전원", "03-03" => "엔코더", _ => null };
+        if (code == "03-03") {
+            if (!encoderMonitorEnabled) return;
+            string[] encoder = value.Split(',');
+            if (encoder.Length < 2) return;
+            string direction = encoder[0] == "1" ? "CW" : encoder[0] == "2" ? "CCW" : "방향 오류";
+            SetStatus("본체 엔코더", direction + " / " + encoder[1], Color.LightGreen);
+            return;
+        }
+        string? key = code switch { "01-02" => "부트", "03-01" => "EncA", "03-02" => "EncB", "03-05" => "FG", "05-02" => "USB", "05-01" => "전원", _ => null };
         if (key != null) SetStatus(key, value, value == "0" ? Color.LightGray : Color.LightGreen);
     }
 
@@ -750,8 +797,17 @@ internal sealed class MainForm : Form
     }
     private static FlowLayoutPanel MotorActionRow() => new() { Width = 560, Height = 40, WrapContents = false, Margin = new Padding(0, 0, 0, 2) };
     private static Button MotorButton(string text, Color color, int width) => new() { Text = text, Width = width, Height = 34, BackColor = color, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Margin = new Padding(0, 2, 8, 2) };
-    private static Button SmallButton(string text, int width = 72) => new() { Text = text, Width = width, Height = 29, FlatStyle = FlatStyle.System };
-    private static Button UpdateButton(string text) => new() { Text = text, Width = 290, Height = 40, FlatStyle = FlatStyle.System, Margin = new Padding(0, 3, 0, 3) };
+    private static Button SmallButton(string text, int width = 72) => MotorButton(text, Color.FromArgb(35, 105, 190), width);
+    private static Button UpdateButton(string text)
+    {
+        Button button = MotorButton(text, Color.FromArgb(35, 105, 190), 290); button.Height = 40; button.Margin = new Padding(0, 3, 0, 3); return button;
+    }
+    private static RadioButton ToggleButton(string text) => new() { Text = text, Width = 70, Height = 34, AutoSize = false, Appearance = Appearance.Button, FlatStyle = FlatStyle.Flat, TextAlign = ContentAlignment.MiddleCenter, Margin = new Padding(0, 2, 8, 2) };
+    private static void SetToggleButtonState(RadioButton button, bool selected, Color activeColor)
+    {
+        button.BackColor = selected ? activeColor : Color.FromArgb(230, 230, 230);
+        button.ForeColor = selected ? Color.White : Color.FromArgb(35, 35, 35);
+    }
     private static FlowLayoutPanel FieldRow(string caption, Control control)
     {
         FlowLayoutPanel row = new() { Width = 560, Height = 38, WrapContents = false };

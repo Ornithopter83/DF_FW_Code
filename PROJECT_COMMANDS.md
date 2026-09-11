@@ -5,7 +5,7 @@ Updated: 2026-09-01
 ## 기본 경로
 
 ```text
-Repository : C:\Projects\VS\DF_FW_Code\CodexManage
+Repository : C:\Projects\AI-AGENTS\DF_Project\DF_FW_Code
 Arduino CLI: toolchain\arduino-cli\arduino-cli.exe
 CLI Config : toolchain\arduino-cli.yaml
 Arduino Data: toolchain\arduino-data
@@ -220,6 +220,8 @@ git remote -v
 https://github.com/Ornithopter83/DF_FW_Code.git
 ```
 
+2026-09-09 현재 로컬 `main`은 실패 보정이 제거된 `8b2fd4f`이며 upstream을 해제했다. `origin/main`에는 실패 연구 중간 코드가 있으므로 사용자 지시 없이 pull, merge, reset 또는 push하지 않는다. 실패 연구는 `codex/imu-calibration-experiment-failed`에 보관한다.
+
 commit, push 및 tag는 사용자의 명시적 요청이 있을 때만 수행한다.
 
 
@@ -231,4 +233,4 @@ commit, push 및 tag는 사용자의 명시적 요청이 있을 때만 수행한
 .\tools\build-testmodule.cmd Release
 ```
 
-배포 결과는 `bin/testmodule/Release/win-x64/DFTestModule.exe` 하나다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.
+배포 결과는 `bin/testmodule/Release/DFTestModule_V041.exe` 하나다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.

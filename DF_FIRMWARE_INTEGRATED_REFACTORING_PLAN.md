@@ -1,6 +1,8 @@
 # DF Main/Rod 통합 펌웨어 리팩토링 로드맵
 
-Updated: 2026-09-02
+Updated: 2026-09-09
+
+현재 로컬 `main`은 실패한 IMU 게임 좌우 보정 연구를 제거한 `8b2fd4f`다. 실패 연구는 `codex/imu-calibration-experiment-failed`에 보관하며 로드맵의 활성 작업으로 취급하지 않는다. 활성 구현 잔여 작업은 0개이고, 사용자 지시 전에는 새 작업을 시작하지 않는다.
 
 ## 목표
 
