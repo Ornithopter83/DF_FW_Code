@@ -95,7 +95,7 @@ DF Firmware Repository
 ## 목표 구조
 
 ```text
-CodexManage/
+DF_FW_Code/
 ├─ legacy/                 # 전체 기준 원본
 ├─ deprecated/             # 활성 코드에서 제거한 구 코드, 빌드 제외
 ├─ firmware/

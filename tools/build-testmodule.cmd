@@ -11,6 +11,9 @@ if /I not "%DF_TM_CONFIGURATION%"=="Release" if /I not "%DF_TM_CONFIGURATION%"==
 
 set "DF_TM_PROJECT=%~dp0..\testModule\DFTestModule.csproj"
 set "DF_TM_OUTPUT=%~dp0..\bin\testmodule\%DF_TM_CONFIGURATION%"
+set "DF_TM_EXTERNAL_OUTPUT=C:\Projects\AI-AGENTS\DF_OUTPUT\TestModule"
+set "DF_TM_EXTERNAL_NAME=DFTestModule_V041.exe"
+if /I "%DF_TM_CONFIGURATION%"=="Debug" set "DF_TM_EXTERNAL_NAME=DFTestModule_V041_d.exe"
 
 dotnet publish "%DF_TM_PROJECT%" -c "%DF_TM_CONFIGURATION%" -p:Platform=x64 -r win-x64 --self-contained true -o "%DF_TM_OUTPUT%"
 if errorlevel 1 exit /b %errorlevel%
@@ -20,5 +23,14 @@ if not exist "%DF_TM_OUTPUT%\DFTestModule_V041.exe" (
   exit /b 3
 )
 
+if not exist "%DF_TM_EXTERNAL_OUTPUT%" mkdir "%DF_TM_EXTERNAL_OUTPUT%"
+if errorlevel 1 exit /b %errorlevel%
+copy /y "%DF_TM_OUTPUT%\DFTestModule_V041.exe" "%DF_TM_EXTERNAL_OUTPUT%\%DF_TM_EXTERNAL_NAME%" >nul
+if errorlevel 1 (
+  echo [DFTestModule] Unable to copy EXE to external output: %DF_TM_EXTERNAL_OUTPUT%
+  exit /b 4
+)
+
 echo [DFTestModule] Single EXE: %DF_TM_OUTPUT%\DFTestModule_V041.exe
+echo [DFTestModule] External output: %DF_TM_EXTERNAL_OUTPUT%\%DF_TM_EXTERNAL_NAME%
 exit /b 0

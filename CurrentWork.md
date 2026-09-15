@@ -13,7 +13,7 @@
 - 자동 보정 연구 종료에 맞춰 TM에서 정지 문턱값, Yaw 보정 배율, 가상 Roll, 게임 좌우, 보정 상태와 충전 기준 보정 버튼을 제거했다.
 - 45도 제한을 포함한 TM 게임 좌우 계산 코드와 관련 Main 설정 명령도 제거했다.
 - 장비 확인용 원본 Roll/Pitch/Yaw/GX/GY/GZ, 회전 박스와 TM 전용 0점 보정은 유지했다.
-- 최신 모터 UI, OTA 기능, V041 파일명과 `CodexManage\bin\testmodule\Release\win-x64` 게시 경로는 유지했다.
+- 최신 모터 UI, OTA 기능, V041 파일명과 `DF_FW_Code\bin\testmodule\Release\win-x64` 게시 경로는 유지했다.
 - 빌드·게시·화면 검증은 수행하지 않았다.
 
 Updated: 2026-09-02
@@ -168,9 +168,10 @@ Updated: 2026-09-02
 - source/library 파일과 이전 배포 파일 hash 보존 확인. 이번에는 업로드하지 않았으며 마지막 장비 확인 버전과 소스/빌드 버전은 별개다. 기존 장비 게이트 및 잔여 번호 4개는 그대로다.
 ## 기준선
 
-- 작업공간: `C:\Projects\VS\DF_FW_Code\CodexManage`
+- 작업공간: `C:\Projects\AI-AGENTS\DF_FW_Code`
 - Git 브랜치: `main`
-- 원격 저장소: `https://github.com/Ornithopter83/DF_FW_Code.git`
+- 원격 저장소: `https://github.com/Ornithopter83/DF_FW_Code`
+- `DF_Integration`: 펌웨어와 외부 인터페이스의 연동 설명 및 현재 상황을 기록하는 별도 폴더
 - 최초 기준선 commit/push: 완료 (2026-08-27)
 - 환경 재구성 및 미확정 설정 명령서: `PROJECT_COMMANDS.md`
 - 소스 및 기존 산출물 기준선: `docs/baseline/SOURCE_BASELINE_MANIFEST.md`

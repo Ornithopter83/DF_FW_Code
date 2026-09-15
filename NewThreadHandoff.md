@@ -12,7 +12,8 @@ Updated: 2026-09-09
 
 ## 현재 상태
 
-- 저장소: C:\Projects\VS\DF_FW_Code\CodexManage
+- 저장소: C:\Projects\AI-AGENTS\DF_FW_Code
+- 연동 문서 폴더: C:\Projects\AI-AGENTS\DF_Integration (인터페이스 연동 설명 및 현재 상황 기록)
 - 현재 체크아웃: 로컬 `main`, commit `8b2fd4f` (`Yaw 보정 실패 후 복구`). 자동 보정 이전 펌웨어를 기준으로 TM의 실패 보정 UI도 제거한 상태다.
 - 로컬 `main`은 upstream을 해제했다. `origin/main`에는 실패 연구 중간 코드가 있으므로 사용자 지시 없이 pull, merge, reset 또는 push하지 않는다.
 - 실패 연구 전체는 `codex/imu-calibration-experiment-failed` (`3117e6e`)에 보관했다. 실패 사유는 `roll값과의 회전이 상쇄되거나 가중되어 좌우 대칭으로 회전이 일어나지 않는 문제 해결안됨`이다.

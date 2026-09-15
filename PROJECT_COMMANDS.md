@@ -5,7 +5,7 @@ Updated: 2026-09-01
 ## 기본 경로
 
 ```text
-Repository : C:\Projects\AI-AGENTS\DF_Project\DF_FW_Code
+Repository : C:\Projects\AI-AGENTS\DF_FW_Code
 Arduino CLI: toolchain\arduino-cli\arduino-cli.exe
 CLI Config : toolchain\arduino-cli.yaml
 Arduino Data: toolchain\arduino-data
@@ -119,6 +119,15 @@ bin/<configuration>/<platform>/<version>/
 └─ boot_app0.bin
 ```
 
+빌드가 성공하면 동일한 4개 파일을 연동·배포용 외부 경로에도 복사한다.
+
+```text
+C:\Projects\AI-AGENTS\DF_OUTPUT\FW\Main\<version>\
+C:\Projects\AI-AGENTS\DF_OUTPUT\FW\Rod\<version>\
+C:\Projects\AI-AGENTS\DF_OUTPUT\TestModule\DFTestModule_V041.exe       # Release
+C:\Projects\AI-AGENTS\DF_OUTPUT\TestModule\DFTestModule_V041_d.exe     # Debug
+```
+
 출력 경로는 저장된 소스 버전을 따른다. 현재 사용자 변경값은 Main `Vm1.0.10.0`, Rod `Vr1.0.2.0`이므로 Release 출력은 각각 `bin/release/x64/Vm1.0.10.0`, `bin/release/x64/Vr1.0.2.0`이다. 앞선 설치/복구 기준 `Vm1.0.9.0`, `Vr1.0.1.3` 및 Rod OTA 최초 설치 기준 `Vr1.0.1.0`은 과거 산출물로 구분한다. `Vr1.0.1.2`는 과거 HANDLE LED 시험 산출물이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전은 해당 `firmware/DF_Main/src/Version.cpp`의 `mainVer` 또는 `firmware/DF_Rod/src/Version.cpp`의 `rodVer`만 수정하고 저장한다. `tools/firmware-versions.cmd` → `firmware-versions.ps1`이 매 build/clean 실행 때 소스 값을 읽으므로 별도 버전값 동기화는 필요 없다. 형식은 Main `Vm숫자.숫자.숫자.숫자`, Rod `Vr숫자.숫자.숫자.숫자`이며 최대 24자다. 누락·중복·조건부 정의·잘못된 형식은 이전 값으로 대체하지 않고 build/clean을 중단한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
 
 주의: 2026-08-31 동적 경로 수정 전에 사용자가 소스 버전만 바꾸어 빌드한 결과, 이전 `Vm1.0.9.0`/`Vr1.0.1.3` 폴더의 app에 새 버전 내용이 들어가 있었다. 해당 폴더를 과거 기준 image로 간주하지 않는다. 아래 과거 복구 명령을 재사용할 때도 image 버전과 hash를 확인한다. 현재 빌드 결과는 `Vm1.0.10.0`/`Vr1.0.2.0` 폴더에 있다.
@@ -217,8 +226,16 @@ git remote -v
 원격 저장소:
 
 ```text
-https://github.com/Ornithopter83/DF_FW_Code.git
+https://github.com/Ornithopter83/DF_FW_Code
 ```
+
+연동 문서:
+
+```text
+DF_Integration : C:\Projects\AI-AGENTS\DF_Integration
+```
+
+`DF_Integration`은 펌웨어와 외부 인터페이스의 연동 설명 및 현재 상황을 기록하는 별도 폴더다.
 
 2026-09-09 현재 로컬 `main`은 실패 보정이 제거된 `8b2fd4f`이며 upstream을 해제했다. `origin/main`에는 실패 연구 중간 코드가 있으므로 사용자 지시 없이 pull, merge, reset 또는 push하지 않는다. 실패 연구는 `codex/imu-calibration-experiment-failed`에 보관한다.
 
