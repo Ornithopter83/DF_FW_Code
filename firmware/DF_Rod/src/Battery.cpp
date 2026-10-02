@@ -18,9 +18,9 @@ Battery::Battery()
 void Battery::init()
 {
 	int i = 0;
-	adc_value = analogRead(BATTERY_LVL_PIN);					// (Vr1.0.1.0) 멤버 변수로 공유함.
+	adc_value	= analogRead(BATTERY_LVL_PIN);	// (Vr1.0.1.0) 멤버 변수로 공유함.
 
-	integ_ad = adc_value;		// 초기 누적 Val저장.
+	integ_ad	= adc_value;					// 초기 누적 Val저장.
 
 	sum_ad = 0;
 	for(i=0; i<BAT_BUF_SIZE; i++)

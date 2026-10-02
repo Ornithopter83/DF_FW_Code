@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bY03er23wM4=",
+  "dgSpecHash": "smQC4vCg4q4=",
   "success": true,
-  "projectFilePath": "C:\\Projects\\AI-AGENTS\\DF_Project\\DF_FW_Code\\testModule\\DFTestModule.csproj",
+  "projectFilePath": "C:\\Projects\\AI-AGENTS\\DF_FW_Code\\testModule\\DFTestModule.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.25\\microsoft.net.illink.tasks.8.0.25.nupkg.sha512",
     "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\runtime.linux-arm.runtime.native.system.io.ports\\8.0.0\\runtime.linux-arm.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
@@ -11,10 +11,7 @@
     "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\runtime.native.system.io.ports\\8.0.0\\runtime.native.system.io.ports.8.0.0.nupkg.sha512",
     "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\runtime.osx-arm64.runtime.native.system.io.ports\\8.0.0\\runtime.osx-arm64.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
     "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\runtime.osx-x64.runtime.native.system.io.ports\\8.0.0\\runtime.osx-x64.runtime.native.system.io.ports.8.0.0.nupkg.sha512",
-    "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\system.io.ports\\8.0.0\\system.io.ports.8.0.0.nupkg.sha512",
-    "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.25\\microsoft.aspnetcore.app.runtime.win-x64.8.0.25.nupkg.sha512",
-    "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.25\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.25.nupkg.sha512",
-    "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.25\\microsoft.netcore.app.runtime.win-x64.8.0.25.nupkg.sha512"
+    "C:\\Users\\SUHO_DEV_PC\\.nuget\\packages\\system.io.ports\\8.0.0\\system.io.ports.8.0.0.nupkg.sha512"
   ],
   "logs": []
 }

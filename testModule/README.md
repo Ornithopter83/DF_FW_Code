@@ -1,3 +1,15 @@
+# 현재 개발환경 안내 (2026-10-02)
+
+- TM 전용 VS2022: `DFTestModule.sln` (같은 csproj 사용).
+- TM 전용 VS Code: `DFTestModule.code-workspace`, coreclr Debug 구성.
+- 공통 Debug: `../tools/build-testmodule-debug.cmd`, 루트 `bin/testmodule/Debug/win-x64` DLL/PDB.
+- 공통 Release 게시: `../tools/build-testmodule.cmd Release`, 루트 `bin/testmodule/Release` 버전 단일 EXE.
+- SDK 8.0.419/초기 잠금과 Debug 빌드를 완료했다. Release NU1004 이후 공통 의존성 설정을 수정했으며 잠금 갱신/재빌드는 새 승인 대기다.
+- 상세 절차: [IDE 인수인계](../docs/build/IDE_HANDOFF.md). 수정 전 Debug 빌드 성공, Release/수정 후 빌드 및 실제 디버깅·실행 확인은 남았다.
+- 아래 기존 설명 중 외부 DF_OUTPUT 복사와 Debug 단일 EXE 배포는 현재 명령에 적용하지 않는다.
+
+---
+
 # DF TestModule
 
 legacy/TM_V034의 장비 프로토콜을 기준으로 새로 구성한 독립 WinForms 프로그램이다. 원본 legacy는 변경하지 않는다.

@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "name": "DF Firmware",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "svn.ignoreMissingSvnWarning": true
+  }
+}

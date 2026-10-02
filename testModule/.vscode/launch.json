@@ -1,0 +1,19 @@
+{
+    "version":  "0.2.0",
+    "configurations":  [
+                           {
+                               "args":  [
+
+                                        ],
+                               "console":  "internalConsole",
+                               "type":  "coreclr",
+                               "cwd":  "${workspaceFolder}/..",
+                               "preLaunchTask":  "TM: Debug build",
+                               "justMyCode":  true,
+                               "name":  "TM Debug (shared project)",
+                               "stopAtEntry":  false,
+                               "program":  "${workspaceFolder}/../bin/testmodule/Debug/win-x64/DFTestModule_V041.dll",
+                               "request":  "launch"
+                           }
+                       ]
+}

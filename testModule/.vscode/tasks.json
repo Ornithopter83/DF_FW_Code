@@ -1,0 +1,76 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "TM: Debug build",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/../tools/invoke-development-task.ps1",
+        "-Task",
+        "TMDebug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/.."
+      },
+      "problemMatcher": [
+        "$msCompile"
+      ],
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "TM: Release publish",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/../tools/invoke-development-task.ps1",
+        "-Task",
+        "TMPublish"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/.."
+      },
+      "problemMatcher": [
+        "$msCompile"
+      ],
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "TM: Configure Debugger",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/../tools/configure-vscode.ps1",
+        "-Target",
+        "TM"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/.."
+      },
+      "problemMatcher": []
+    }
+  ]
+}

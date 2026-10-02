@@ -104,21 +104,6 @@ void testHand()
 		execHiting();
 	}
 
-/*
-	else if(exeFight)
-	{
-		//execHiting();
-	}
-
-	else if(exeHoldon)
-	{
-		//execHiting();
-	}
-	else if(exeRanding)
-	{
-		execRanding_Control();		// Include Fight ?
-	}
-*/
 	// Hit는 Success or Fail시 CLEAR되므로, 별도 판단문으로 처리.
 	if(exeSuccessFail)
 	{
@@ -137,15 +122,6 @@ void testHand()
 		// All Out Off
 	    motor_AllDefault();
 
-/*
-		// TBD Break OFF ?
-//		String str = "000";
-//		if(10 > reqBreakMotor)        { str = "00"+ String(reqBreakMotor); }
-//		else if (100 > reqBreakMotor) { str = "0"+ String(reqBreakMotor); }
-//		else                         { str = String(reqBreakMotor); }
-//		str = "$0500000" + str;
-//		eNow.write(PID_ROD_CTRL_NUM, str);	  // Break
-*/
 		//exeGameOver Clear
 		exeGameOver = 0;
 	}
@@ -213,17 +189,6 @@ void diagInputMonitor()
 			oldsensorBootSwc = sensorBootSwc;
 		}
 
-/*
-		// SEL M/S
-		if(diagInFlag_SelectBoard && (oldsensorSelBoard != sensorSelBoard))
-		{
-			ApPrintln(String(STX_DIAG_INPUT) +"01-04" + fillZero2StringSign4Char(sensorSelBoard) + "%");
-			
-			LogPrintln(" LG]" + String(STX_DIAG_INPUT) +"01-04: " + fillZero2StringSign4Char(sensorSelBoard) + " <- old : " + fillZero2StringSign4Char(oldsensorSelBoard)+ "%");
-			oldsensorSelBoard = sensorSelBoard;
-		}
-*/
-
 		if(diagInFlag_PcUsb5V && (oldsensorUsb5V != sensorUsb5V))
 		{
 			String stxMsg;
@@ -258,7 +223,6 @@ void diagInputMonitor()
 			LogPrintln(" LG] IO_in 05-03:" + fillZero2StringSign4Char(oldsensorDoorIlk) + "->" +fillZero2StringSign4Char(sensorDoorIlk));	
 			oldsensorDoorIlk = sensorDoorIlk;
 		}
-
 
 		// BBN Encoder
 		if(diagInFlag_BobbinEncA && (oldsensorBbnEncA != sensorBbnEncA))

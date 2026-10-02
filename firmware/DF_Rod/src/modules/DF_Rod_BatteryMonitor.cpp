@@ -7,8 +7,6 @@ void battChangeCheckSend()
 	int	bat_gap = abs(battery.rest_lvl - battery.old_restLvl);
 	int	bat_dir = bat_gap ? (battery.rest_lvl - battery.old_restLvl) / bat_gap : 0;
 	int bat_chk = checkTO(battery.last_tick, BAT_UPDATE_INTVL) || (battery.chk_cnt && (bat_gap > BAT_UPDATE_GAP*4));
-//	if ((bat_chk && ((bat_gap >= BAT_UPDATE_GAP) || (bat_gap && (battery.rest_lvl==BATTERY_PER_MAX)))) || 
-//		(bat_dir && (bat_dir != battery.old_dir)))
 	if (bat_chk && ((bat_gap >= BAT_UPDATE_GAP) || (bat_gap && (battery.rest_lvl==BATTERY_PER_MAX))))
  	{
 		int	notify_Level;

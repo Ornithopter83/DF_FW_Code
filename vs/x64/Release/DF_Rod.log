@@ -6,4 +6,4 @@
   [ARTIFACT] DF_Rod.ino.bootloader.bin 14032 bytes
   [ARTIFACT] DF_Rod.ino.partitions.bin 3072 bytes
   [ARTIFACT] boot_app0.bin 8192 bytes
-  [OUTPUT] "C:\Projects\VS\DF_FW_Code\CodexManage\bin\release\x64\Vr1.0.2.0"
+  [OUTPUT] "C:\Projects\AI-AGENTS\DF_FW_Code\bin\release\x64\Vr1.0.2.0"

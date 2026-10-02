@@ -20,7 +20,7 @@ if /I not "%DF_BUILD_PLATFORM%"=="x64" (
 )
 set "DF_BUILD_PLATFORM=x64"
 
-rem External firmware output directory for integration and delivery workflows.
-set "DF_FIRMWARE_OUTPUT_ROOT=C:\Projects\AI-AGENTS\DF_OUTPUT\FW"
+rem All delivery artifacts stay under the current repository.
+set "DF_FIRMWARE_OUTPUT_ROOT=%DF_REPO_ROOT%\bin"
 
 exit /b 0

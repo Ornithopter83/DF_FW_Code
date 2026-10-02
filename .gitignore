@@ -12,6 +12,10 @@
 /firmware/DF_Rod/build/
 artifacts/
 /bin/
+**/bin/
+**/obj/
+/vs/x64/
+/legacy/TM_V034/packages/
 *.bin
 *.elf
 *.map
@@ -20,8 +24,19 @@ artifacts/
 # Bundled executable tools and archives
 *.exe
 *.zip
+*.pfx
+
+# Integrated parent repository must retain required project inputs.
+!*.sln
+!**/*.csproj
+!/testModule/esptool_V4.5.1.exe
+!/ESP32Servo-1.1.2.zip
+
+# Superseded image-generation intermediate; reel-top-v2.png is the active asset.
+/testModule/Assets/reel-top.png
 
 # Machine-local settings
+/.vscode/arduino.json
 toolchain/
 local.settings.cmd
 *.local.cmd

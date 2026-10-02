@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DFTestModule": {
+      "commandName": "Project",
+      "workingDirectory": ".."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "*.ino": "cpp"
+  },
+  "files.exclude": {
+    "**/artifacts": true,
+    "**/bin": true,
+    "**/obj": true
+  },
+  "search.exclude": {
+    "**/toolchain": true,
+    "**/artifacts": true,
+    "**/bin": true,
+    "**/obj": true
+  }
+}

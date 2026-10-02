@@ -1,5 +1,28 @@
 # DF Main/Rod 통합 펌웨어 현재 작업 상태
 
+Updated: 2026-10-02
+
+## 현재 작업 12 — 로컬 버전 원격 백업 기준
+
+- 현재 보존 기준: `main` 및 주석 태그 `backup/local-20261002-143949`. 태그는 문서 최신화와 로컬 변경을 포함하는 이번 백업 커밋을 지정한다.
+- 커밋 전 로컬 HEAD는 `0de2d0a`, 원격 main은 `c84be58`이었다. 원격 참조 조회 결과 로컬에만 커밋 1개가 있고 원격에만 있는 커밋은 없었다. fetch/pull/reset/merge는 수행하지 않았다.
+- 백업 범위와 새 폴더 복원 안내: `docs/build/BACKUP_LOCAL_2026-10-02.md`. 앞선 비교 보고서는 백업 전 상태를 기록한다.
+- 복구: codex/restore-before-vscode-20261002-114314 및 artifacts/recovery/before-vscode-20261002-114314. 기존 미커밋 원본 79개 보존.
+- SDK/VS2022 조회·NuGet 명시적 복원 1회, 정적 확인 1회, Main/Rod Release 및 TM Debug/Release 각각 1회를 승인받아 실행했다. 재시도 없음.
+- .NET SDK 8.0.419 / VS2022 17.14.37027.9. global.json과 초기 packages.lock.json 생성.
+- 정적 확인 오류 없음(PS 7/JSON 11/XML 2). Main/Rod Release 성공, 각 버전 폴더 네 파일. Main BIN 888,768 / Rod BIN 766,848 bytes.
+- TM Debug 성공: 경고/오류 0, DLL 및 47,680-byte portable PDB/BSJB 확인.
+- TM Release 실패: NU1004, PublishSingleFile에서 추가되는 ILLink.Tasks 8.0.25가 초기 잠금에 없음.
+- 공통 EnableSingleFileAnalyzer=true를 작성했다. 수정 후 잠금 갱신/재빌드/정적 재확인은 미실행이며 기존 Debug 성공을 수정 후 검증으로 사용하지 않는다.
+- C 부분 완료, H 미완료, I 미실행. 잔여 문자 3개(C/H/I). 다음 NuGet 잠금 재평가 1회 + TM Debug/Release 각각 1회는 새 승인 대기.
+- 실행 결과: docs/build/IDE_COMPATIBILITY_RUN_2026-10-02.md. 근거: artifacts/ide-compat-20261002/.
+- TM 솔루션/workspace와 공통 빌드/Debug/경로 설정은 작성됐다. 실제 두 IDE 중단점·경로 이동·FW 설정 생성 전체 실행은 미확인이다.
+- SDK/초기 잠금은 생성됐으나 현재 프로젝트 기준 잠금 재평가가 필요하므로 TM 실행 준비 완료 상태는 아니다.
+- 2026-10-02 사용자가 문서 최신화, 로컬 버전 commit/push와 백업 지정을 명시적으로 요청했다. 이번 보존에는 기존 사용자 변경과 필수 도구·리소스를 포함한다. 빌드·테스트를 새로 실행하지 않으며 C/H/I와 사용자 제외 장비 범위는 그대로 남는다.
+- PC별 포트 설정은 `.vscode/arduino.json`에 로컬로 유지하고 Git에서 제외한다. toolchain, 루트 bin, artifacts와 개인 설정도 제외된다. 이미 추적 중인 산출물 변경은 현재 스냅샷에 포함하지만 새 검증 결과로 간주하지 않는다.
+
+아래 날짜별 내용은 과거 기록이다. 현재 상태는 이 절을 따른다.
+
 ## 로컬 main 복구·실패 연구 격리 (2026-09-09)
 
 - 현재 로컬 `main`은 `8b2fd4f`이며 upstream을 해제했다. Main `Vm1.0.10.0`, Rod `Vr1.0.2.0`과 실패 보정 UI가 제거된 TM V041이 현재 작업 기준이다.
@@ -16,7 +39,7 @@
 - 최신 모터 UI, OTA 기능, V041 파일명과 `DF_FW_Code\bin\testmodule\Release\win-x64` 게시 경로는 유지했다.
 - 빌드·게시·화면 검증은 수행하지 않았다.
 
-Updated: 2026-09-02
+## 이전 작업 기록 (2026-09-02)
 
 ## 작업 11-K LM JIG 실제 제어 완료 (2026-09-02)
 
@@ -187,7 +210,7 @@ Updated: 2026-09-02
 - Main 의존성/owner 초안: `docs/refactoring/MAIN_DEPENDENCY_INVENTORY.md`
 - Rod 의존성/owner 초안: `docs/refactoring/ROD_DEPENDENCY_INVENTORY.md`
 - 독립 모듈 전환 순서: `docs/refactoring/MODULE_MIGRATION_PLAN.md`
-- 다음 활성 작업서: `tasks/11_독립형_TestModule_프로그램.md`
+- 다음 활성 작업서: `tasks/12_VSCode_VS2022_호환_개발환경.md` (C/H 실행 승인 대기)
 
 ## 확인된 현재 구현
 
@@ -256,14 +279,16 @@ Updated: 2026-09-02
 
 ## 진행
 
-활성 잔여 번호 작업 0개
+잔여 번호 작업 1개 (12)
 
-작업 11 잔여 문자 0개
+작업 12 잔여 문자 3개 (C, H, I)
+
+12-A/B/D/E/F/G 완료: 2026-10-02. C는 부분 완료이며 SDK/잠금 준비가 남았다. 작업 11의 기존 구현 잔여는 0개이며 사용자 제외 게이트는 자동 재개하지 않는다.
 
 ## 작업 정책
 
 - 한 번에 한 문자 작업만 수행한다.
-- compile/link 빌드는 Codex가 직접 실행한다. 플래시와 장비 게이트에서는 사용자에게 필요한 명령과 확인 항목을 전달하고 결과를 기다린다.
+- 빌드(compile/link), 테스트, 반복 검증, 추가 조사는 사용자 명시적 사전 승인 후 수행한다. 플래시와 장비 시험은 사용자가 수동 수행하며 이번 계획에 자동 포함하지 않는다.
 - `deprecated/` 파일은 활성 sketch 폴더 밖에 두고 빌드에서 제외한다.
 - C++11 이후 문법과 제품 Variant 전처리 분기를 추가하지 않는다.
 - 프로토콜과 장비 동작을 파일 이동 작업에서 변경하지 않는다.
@@ -272,11 +297,15 @@ Updated: 2026-09-02
 
 ## 표준 검증
 
-- 확정 FQBN을 사용하는 Arduino CLI 명령은 작업 02의 VS2022 build script에 고정했으며 Codex가 직접 실행한다.
-- 모든 코드 변경의 최소 자동 게이트: Main/Rod 대상 빌드 성공, link 성공, firmware 생성 확인. 문서 초안만 변경하는 작업 07에는 적용하지 않는다.
+- 확정 FQBN을 사용하는 Arduino CLI 명령은 작업 02의 VS2022 build script에 고정되어 있다. Codex의 실행은 사용자 사전 승인 후에만 가능하다.
+- 필요한 검증은 작업별로 준비하되 자동 실행하지 않는다. 작업 12-H/I의 빌드·심볼·IDE·경로 확인은 명시적 승인 후 수행한다. 이번 12-A에서는 미실행이다.
 - 주요 경계 변경 후 수동 smoke test, 프로토콜 변경 후 Main–Rod 통합 시험을 요청한다.
 
 ## 다음 작업
+
+C의 수정 후 NuGet 잠금 갱신 및 H의 TM Debug/Release 재빌드 승인 대기. Main/Rod는 이번 승인 빌드 성공. 이후 I의 두 IDE 중단점/이동 확인. AGENTS.md에 따라 승인 전 실행하지 않는다.
+
+## 과거 다음 작업 기록 (2026-08-31)
 
 2026-08-31 `Vr1.0.1.2` 최종 VS2022 Release/x64 Rebuild 경고 0/오류 0, protocol host test와 OTA dry run 성공. Main bin 885,216 bytes, Rod bin 767,072 bytes 및 대상별 배포 파일 4개를 확인했다. 이후 사용자 승인으로 기반 유선 설치와 최종 Rod OTA를 수행했다.
 

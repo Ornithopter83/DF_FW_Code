@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DFTestModule_V041")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("0.4.1.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("V041+8b2fd4f426ca6468826f84c4581a2e9d1c16a510")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("V041")]
 [assembly: System.Reflection.AssemblyProductAttribute("DF TestModule V041")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DFTestModule_V041")]
 [assembly: System.Reflection.AssemblyVersionAttribute("0.4.1.0")]

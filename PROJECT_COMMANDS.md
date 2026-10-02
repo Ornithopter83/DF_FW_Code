@@ -1,6 +1,15 @@
 # DF Firmware 프로젝트 명령서
 
-Updated: 2026-09-01
+Updated: 2026-10-02
+
+## 현재 계획과 실행 승인
+
+- 현재 Git 보존 기준: `main` 및 `backup/local-20261002-143949`. 백업 전 HEAD `0de2d0a`, 원격 main `c84be58`로 로컬이 1커밋 앞서 있었다. 사용자 요청으로 문서 최신화·commit/push·백업 태그 지정을 수행하는 범위다. 아래 2026-09-09 Git 설명은 과거 기록이다.
+- 백업 범위와 새 폴더 복원: `docs/build/BACKUP_LOCAL_2026-10-02.md`. 이번 보존은 검증된 릴리스 지정이 아니다.
+- 사용자 일괄 구현 지시로 작업 12-B/D/E/F/G를 작성했다. 승인 실행에서 SDK/초기 잠금 준비와 Main/Rod/TM Debug가 성공했고 TM Release 잠금 수정 후 재시도는 새 승인 대기다. 상세: `docs/build/VSCode_VS2022_COMPATIBILITY_PLAN.md`.
+- TM 독립 솔루션, VS Code workspace, Debug 설정과 고정 외부 복사 제거를 구현했다. 사용 안내: `docs/build/IDE_HANDOFF.md`. global.json(8.0.419)과 초기 packages.lock.json을 생성했다. TM Release 잠금 실패 후 공통 analyzer 설정을 수정했으므로 승인된 잠금 재평가가 필요하다.
+- 빌드(compile/link), 테스트, 반복 검증, 추가 조사·탐색은 AGENTS.md에 따라 사용자 명시적 사전 승인 후 실행한다. 명령 문서화나 코드 수정 지시를 실행 승인으로 해석하지 않는다.
+- 다음 작업: 12-C 수정 후 잠금 갱신 및 12-H TM Debug/Release 재시도 승인 대기. 복구 안내: `docs/build/RECOVERY_BEFORE_VSCODE_2026-10-02.md`.
 
 ## 기본 경로
 
@@ -119,14 +128,7 @@ bin/<configuration>/<platform>/<version>/
 └─ boot_app0.bin
 ```
 
-빌드가 성공하면 동일한 4개 파일을 연동·배포용 외부 경로에도 복사한다.
-
-```text
-C:\Projects\AI-AGENTS\DF_OUTPUT\FW\Main\<version>\
-C:\Projects\AI-AGENTS\DF_OUTPUT\FW\Rod\<version>\
-C:\Projects\AI-AGENTS\DF_OUTPUT\TestModule\DFTestModule_V041.exe       # Release
-C:\Projects\AI-AGENTS\DF_OUTPUT\TestModule\DFTestModule_V041_d.exe     # Debug
-```
+고정 외부 DF_OUTPUT 복사를 제거했다. FW는 위 루트 bin 버전 경로, TM은 bin/testmodule/Release를 사용한다. 기존 외부 파일은 보존했다.
 
 출력 경로는 저장된 소스 버전을 따른다. 현재 사용자 변경값은 Main `Vm1.0.10.0`, Rod `Vr1.0.2.0`이므로 Release 출력은 각각 `bin/release/x64/Vm1.0.10.0`, `bin/release/x64/Vr1.0.2.0`이다. 앞선 설치/복구 기준 `Vm1.0.9.0`, `Vr1.0.1.3` 및 Rod OTA 최초 설치 기준 `Vr1.0.1.0`은 과거 산출물로 구분한다. `Vr1.0.1.2`는 과거 HANDLE LED 시험 산출물이다. Configuration은 소문자 `debug` 또는 `release`, 현재 지원 Platform은 `x64`다. 펌웨어 버전은 해당 `firmware/DF_Main/src/Version.cpp`의 `mainVer` 또는 `firmware/DF_Rod/src/Version.cpp`의 `rodVer`만 수정하고 저장한다. `tools/firmware-versions.cmd` → `firmware-versions.ps1`이 매 build/clean 실행 때 소스 값을 읽으므로 별도 버전값 동기화는 필요 없다. 형식은 Main `Vm숫자.숫자.숫자.숫자`, Rod `Vr숫자.숫자.숫자.숫자`이며 최대 24자다. 누락·중복·조건부 정의·잘못된 형식은 이전 값으로 대체하지 않고 build/clean을 중단한다. `bin/`과 `artifacts/`는 Git에서 제외된다.
 
@@ -160,8 +162,8 @@ Solution:
 DF_Firmware.sln
 ```
 
-- Solution에는 실제 firmware project인 `DF_Main`, `DF_Rod`만 둔다.
-- `Build Solution`: Main 다음 Rod 순서로 두 project를 각각 한 번씩 build한다.
+- 현재 Solution에는 `DF_Main`, `DF_Rod` 및 `testModule/DFTestModule.csproj`가 포함되어 있다. 같은 csproj를 참조하는 TM 전용 `testModule/DFTestModule.sln`을 추가했다.
+- `Build Solution`: Main/Rod 및 TM을 선택한 솔루션 구성에 따라 빌드한다. FW만 통합 빌드할 때는 tools/build-all.cmd, TM만 개발할 때는 TM 전용 솔루션을 사용한다.
 - 명령행 통합 build에는 `tools/build-all.cmd`를 사용한다.
 - 자세한 절차와 결과물 위치: `docs/build/VS2022_BUILD.md`
 - Arduino/ESP32-S3 IntelliSense 공통 설정: `vs/DF_Arduino_ESP32S3.props`
@@ -169,7 +171,7 @@ DF_Firmware.sln
 - 공통 protocol library: `libraries/DFProtocol`
 - solution이 열린 상태에서 project 파일이 변경되면 `Reload All`을 선택하거나 solution을 다시 연다.
 - Solution Build는 compile만 수행하고 upload/flash는 수행하지 않는다.
-- Codex는 compile/link 빌드를 직접 실행하고 결과를 기록한다.
+- Codex는 사용자 명시적 사전 승인 후에만 compile/link 빌드를 실행하고 결과를 기록한다.
 - upload, flash 및 장비 검증은 사용자가 수행하며 장비 게이트에서 필요한 명령, 예상 결과와 전달받아야 할 항목을 제시한다.
 
 2026-08-28 callback/ISR 안전화 후 `build-all.cmd Release x64`와 VS2022 `DF_Firmware.sln` Rebuild가 모두 성공했다. 현재 기록은 Main application 882,749 bytes/배포 bin 883,120 bytes, Rod application 762,153 bytes/배포 bin 762,512 bytes이며 대상별 배포 파일 4개가 생성된다. project 파일이 변경되었으므로 열려 있던 VS2022에서는 `Reload All` 또는 solution 재열기를 수행한다.
@@ -237,17 +239,35 @@ DF_Integration : C:\Projects\AI-AGENTS\DF_Integration
 
 `DF_Integration`은 펌웨어와 외부 인터페이스의 연동 설명 및 현재 상황을 기록하는 별도 폴더다.
 
-2026-09-09 현재 로컬 `main`은 실패 보정이 제거된 `8b2fd4f`이며 upstream을 해제했다. `origin/main`에는 실패 연구 중간 코드가 있으므로 사용자 지시 없이 pull, merge, reset 또는 push하지 않는다. 실패 연구는 `codex/imu-calibration-experiment-failed`에 보관한다.
+과거 기록(2026-09-09): 당시 로컬 `main`은 실패 보정이 제거된 `8b2fd4f`이며 upstream을 해제했다. `origin/main`에는 실패 연구 중간 코드가 있으므로 사용자 지시 없이 pull, merge, reset 또는 push하지 않는다. 실패 연구는 `codex/imu-calibration-experiment-failed`에 보관한다.
 
 commit, push 및 tag는 사용자의 명시적 요청이 있을 때만 수행한다.
 
 
 ## 독립형 TestModule 단일 EXE
 
-새 프로그램은 루트 `DF_Firmware.sln`의 솔루션에 직접 포함되지만 펌웨어 프로젝트와 독립적이다. 배포 파일은 다음 명령으로 생성한다.
+TM은 루트 `DF_Firmware.sln`과 전용 `testModule/DFTestModule.sln`에서 같은 csproj를 참조한다. 배포 파일은 다음 명령으로 생성한다. 현재 TM Release는 NU1004 실패 후 수정한 공통 의존성의 잠금 갱신과 재빌드가 남아 있으므로 아래 명령의 현재 성공을 보장하지 않는다.
 
 ```powershell
 .\tools\build-testmodule.cmd Release
 ```
 
 배포 결과는 `bin/testmodule/Release/DFTestModule_V041.exe` 하나다. 일반 `dotnet build`의 개발용 중간 출력이 아니라 이 publish 결과를 배포한다. 대상 PC에 .NET 런타임을 별도로 설치할 필요가 없다.
+
+## TM 개발 및 VS Code 준비 (2026-10-02, 실행 승인 대기)
+
+```powershell
+.\tools\pin-dotnet-sdk.ps1
+.\tools\restore-testmodule.cmd
+.\tools\configure-vscode.ps1 -Target All
+.\tools\build-testmodule-debug.cmd
+.\tools\build-testmodule.cmd Release
+```
+
+최초 두 명령은 SDK/잠금 준비다. SDK 고정과 최초 restore는 완료했으므로 pin 명령을 다시 실행하지 않는다. 현재 ILLink 공통 의존성 수정 후 잠금 재평가는 새 승인 대기다. Debug는 bin/testmodule/Debug/win-x64의 DLL/PDB, Release 게시 결과는 bin/testmodule/Release의 버전 EXE다. build-testmodule.cmd Debug는 개발용 Debug 빌드로 연결한다.
+
+VS Code 진입점은 DF_Firmware.code-workspace와 testModule/DFTestModule.code-workspace다. 앞선 정적 확인과 Main/Rod Release·수정 전 TM Debug 빌드는 성공했다. 공통 analyzer 수정 후 잠금/빌드, 두 IDE 중단점과 경로 이동은 미확인이며 Codex 실행에는 사전 승인이 필요하다.
+
+## 승인 실행 결과 (2026-10-02)
+
+SDK/VS2022 준비 및 정적 확인 완료, Main/Rod Release·TM Debug 성공. TM Release NU1004 실패 후 공통 EnableSingleFileAnalyzer 설정 수정. 잠금 갱신/재빌드는 미실행이며 새 승인 필요. 상세: docs/build/IDE_COMPATIBILITY_RUN_2026-10-02.md.

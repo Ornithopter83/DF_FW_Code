@@ -1,0 +1,12 @@
+{
+  "folders": [
+    {
+      "name": "DF TestModule",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "dotnet.defaultSolution": "DFTestModule.sln",
+    "svn.ignoreMissingSvnWarning": true
+  }
+}

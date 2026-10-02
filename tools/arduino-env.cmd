@@ -17,17 +17,8 @@ if not exist "%DF_ARDUINO_CONFIG%" (
     exit /b 3
 )
 
-if not exist "X:\toolchain\arduino-data\packages\esp32" (
-    if exist "X:\" (
-        echo [ERROR] Drive X: is already in use by another location.
-        exit /b 4
-    )
-    subst X: "%DF_REPO_ROOT%"
-    if errorlevel 1 (
-        echo [ERROR] Unable to map the repository to drive X:.
-        exit /b 5
-    )
-)
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%~dp0ensure-arduino-drive.ps1"
+if errorlevel 1 exit /b %errorlevel%
 
 if not exist "%DF_BOOT_APP%" (
     echo [ERROR] ESP32 Core boot_app0.bin not found: "%DF_BOOT_APP%"

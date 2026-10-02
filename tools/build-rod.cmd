@@ -10,7 +10,6 @@ set "DF_SKETCH=%DF_REPO_ROOT%\firmware\DF_Rod"
 set "DF_BUILD_PATH=%DF_REPO_ROOT%\artifacts\build\DF_Rod"
 set "DF_OUTPUT_PATH=%DF_REPO_ROOT%\artifacts\firmware\DF_Rod"
 set "DF_RELEASE_PATH=%DF_REPO_ROOT%\bin\%DF_BUILD_CONFIGURATION%\%DF_BUILD_PLATFORM%\%DF_ROD_VERSION%"
-set "DF_EXTERNAL_RELEASE_PATH=%DF_FIRMWARE_OUTPUT_ROOT%\Rod\%DF_ROD_VERSION%"
 if not exist "%DF_BUILD_PATH%" mkdir "%DF_BUILD_PATH%"
 if errorlevel 1 exit /b %errorlevel%
 if not exist "%DF_OUTPUT_PATH%" mkdir "%DF_OUTPUT_PATH%"
@@ -37,7 +36,7 @@ for %%F in ("%DF_OUTPUT_PATH%\DF_Rod.ino.bin" "%DF_OUTPUT_PATH%\DF_Rod.ino.bootl
     )
 )
 
-if exist "%DF_RELEASE_PATH%" rmdir /s /q "%DF_RELEASE_PATH%"
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%~dp0remove-output-directory.ps1" -Target "%DF_RELEASE_PATH%"
 if errorlevel 1 exit /b %errorlevel%
 mkdir "%DF_RELEASE_PATH%"
 if errorlevel 1 exit /b %errorlevel%
@@ -50,16 +49,6 @@ for %%F in ("DF_Rod.ino.bin" "DF_Rod.ino.bootloader.bin" "DF_Rod.ino.partitions.
     )
 )
 
-if not exist "%DF_EXTERNAL_RELEASE_PATH%" mkdir "%DF_EXTERNAL_RELEASE_PATH%"
-if errorlevel 1 exit /b %errorlevel%
-for %%F in ("DF_Rod.ino.bin" "DF_Rod.ino.bootloader.bin" "DF_Rod.ino.partitions.bin" "boot_app0.bin") do (
-    copy /y "%DF_RELEASE_PATH%\%%~F" "%DF_EXTERNAL_RELEASE_PATH%\%%~F" >nul
-    if errorlevel 1 (
-        echo [ERROR] Unable to copy Rod artifact to external output: "%%~F"
-        exit /b 12
-    )
-)
-
 for /f %%C in ('dir /b /a-d "%DF_RELEASE_PATH%" ^| find /c /v ""') do set "DF_RELEASE_FILE_COUNT=%%C"
 if not "%DF_RELEASE_FILE_COUNT%"=="4" (
     echo [ERROR] Rod release folder must contain exactly 4 files. Found %DF_RELEASE_FILE_COUNT%.
@@ -69,5 +58,4 @@ if not "%DF_RELEASE_FILE_COUNT%"=="4" (
 echo [DF Rod] Build completed.
 for %%F in ("%DF_RELEASE_PATH%\DF_Rod.ino.bin" "%DF_RELEASE_PATH%\DF_Rod.ino.bootloader.bin" "%DF_RELEASE_PATH%\DF_Rod.ino.partitions.bin" "%DF_RELEASE_PATH%\boot_app0.bin") do echo [ARTIFACT] %%~nxF %%~zF bytes
 echo [OUTPUT] "%DF_RELEASE_PATH%"
-echo [EXTERNAL OUTPUT] "%DF_EXTERNAL_RELEASE_PATH%"
 exit /b 0

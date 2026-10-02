@@ -16,15 +16,28 @@
     <InformationalVersion>$(TmVersion)</InformationalVersion>
     <RootNamespace>DFTestModule</RootNamespace>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <SelfContained>true</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <PublishProfile>FolderProfile</PublishProfile>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <PublishTrimmed>false</PublishTrimmed>
+    <SelfContained Condition="'$(PublishProfile)' == ''">false</SelfContained>
+    <PublishSingleFile Condition="'$(PublishProfile)' == ''">false</PublishSingleFile>
+    <BaseOutputPath>$(MSBuildProjectDirectory)\..\bin\testmodule\</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>true</AppendRuntimeIdentifierToOutputPath>
+    <!-- Keep the SDK ILLink dependency in both Debug and single-file Publish restores. -->
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="Exists('$(MSBuildProjectDirectory)\packages.lock.json')">true</RestoreLockedMode>
+    <PublishDir>$(MSBuildProjectDirectory)\..\bin\testmodule\$(Configuration)\</PublishDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <PublishDir>$(MSBuildProjectDirectory)\..\bin\testmodule\$(Configuration)\</PublishDir>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\reel-top-v2.png" LogicalName="DFTestModule.Assets.reel-top-v2.png" />
