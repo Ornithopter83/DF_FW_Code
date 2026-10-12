@@ -304,15 +304,48 @@ internal sealed class MainForm : Form
             "00 - White", "01 - Red", "02 - Lime", "03 - Blue", "04 - Yellow", "05 - Cyan", "06 - Magenta", "07 - Maroon",
             "08 - Olive", "09 - Green", "10 - Purple", "11 - Teal", "12 - Navy", "13 - Silver", "14 - Gray", "15 - Black"
         }, 1);
+        string[] dimmingColorNames = { "빨강", "초록", "파랑", "노랑", "청록", "자홍" };
+        ComboBox dimmingPattern = Choice(Enumerable.Range(1, DeviceProtocol.LedDimmingMaxPattern)
+            .Select(pattern => pattern.ToString(CultureInfo.InvariantCulture) +
+                (pattern == DeviceProtocol.LedDimmingDefaultPattern ? " (Default)" : ""))
+            .ToArray(), DeviceProtocol.LedDimmingDefaultPattern - 1);
+        dimmingPattern.Width = 108;
+        Label dimmingSequence = new() {
+            Width = 350, Height = 28, TextAlign = ContentAlignment.MiddleLeft,
+            ForeColor = Color.FromArgb(45, 53, 62), Margin = new Padding(10, 0, 0, 0)
+        };
         NumericUpDown time = Number(10, 9999, 2000), brightness = Number(10, 100, 100);
+        FlowLayoutPanel colorRow = FieldRow("색상", color);
+        FlowLayoutPanel dimmingRow = FieldRow("디밍 패턴", dimmingPattern);
+        dimmingRow.Width = 665;
+        dimmingRow.Controls.Add(dimmingSequence);
+        FlowLayoutPanel timeRow = FieldRow("표시 시간(ms)", time);
         content.Controls.Add(FieldRow("위치", position));
         content.Controls.Add(FieldRow("표시 액션", action));
-        content.Controls.Add(FieldRow("색상", color));
-        content.Controls.Add(FieldRow("표시 시간(ms)", time));
+        content.Controls.Add(colorRow);
+        content.Controls.Add(dimmingRow);
+        content.Controls.Add(timeRow);
+
+        void UpdateLedOptions()
+        {
+            bool isDimming = action.SelectedIndex == 3;
+            colorRow.Visible = !isDimming;
+            dimmingRow.Visible = isDimming;
+            int pattern = dimmingPattern.SelectedIndex + 1;
+            dimmingSequence.Text = string.Join(" → ", dimmingColorNames.Take(pattern));
+            timeRow.Controls[0].Text = isDimming ? "디밍 시간(ms)" : "표시 시간(ms)";
+        }
+        action.SelectedIndexChanged += (_, _) => UpdateLedOptions();
+        dimmingPattern.SelectedIndexChanged += (_, _) => UpdateLedOptions();
+        UpdateLedOptions();
+
         Button apply = MotorButton("적용", Color.FromArgb(27, 126, 96), 110);
         apply.Margin = new Padding(125, 10, 0, 10);
         position.SelectedIndexChanged += (_, _) => apply.Enabled = position.SelectedIndex <= 1;
-        apply.Click += (_, _) => TrySend(DeviceProtocol.LedControl(position.SelectedIndex, action.SelectedIndex, color.SelectedIndex, (int)time.Value));
+        apply.Click += (_, _) => {
+            int parameter = action.SelectedIndex == 3 ? dimmingPattern.SelectedIndex + 1 : color.SelectedIndex;
+            TrySend(DeviceProtocol.LedControl(position.SelectedIndex, action.SelectedIndex, parameter, (int)time.Value));
+        };
         content.Controls.Add(apply);
         content.Controls.Add(Note("위치 2(왼쪽)와 3(오른쪽)은 현재 본체에서 비활성이라 명령을 전송하지 않습니다."));
         content.Controls.Add(FieldRow("밝기(%)", brightness));

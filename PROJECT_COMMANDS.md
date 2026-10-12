@@ -1,5 +1,31 @@
 # DF Firmware 프로젝트 명령서
 
+## 최신 BoardWifiConnector (2026-10-02)
+
+최신: 승인된 재시도 1회에서 자체 포함 단일 EXE 게시 성공. .NET 런타임·네이티브 라이브러리·기본 INI 리소스를 포함하며 Release PDB를 만들지 않는다. 출력: bin/BoardWifiConnector/Release/BoardWifiConnector.exe, 161,859,788 bytes. 최초 실행 시 INI 생성. 16-C 완료, 실제 실행/통신/장비 시험은 미실행이다. 아래 실패/재시도 대기 설명은 이전 이력이다.
+
+최신 승인 실행: Main 1회 성공, Connector 명시 복원 1회 성공, Release 게시 1회 CS8510 실패. 소스 예외 순서를 수정했으나 재게시 미실행이다. 다음은 BoardWifiConnector/build.ps1 -Mode Publish 1회만 새 승인 후 실행한다. Main 산출물은 갱신됐고 Connector EXE는 없다. [실행 결과](docs/build/BOARD_WIFI_BUILD_2026-10-02.md). 아래 구현 시점 설명은 이전 이력이다.
+
+작업 16-A/B에서 Main AP/TCP와 트레이 소스를 구현했다. 사용자는 로그온 후 동작이면 충분하다고 확인했다. 빌드/복원/시험/등록/플래시/실제 종료는 미실행이며 새 EXE는 없다. 16-C는 새 승인 대기다. 아래 명령은 제공만 했으며 자동 실행하지 않는다.
+
+```powershell
+.\BoardWifiConnector\build.ps1 -Mode Restore
+.\BoardWifiConnector\build.ps1 -Mode Build
+.\BoardWifiConnector\build.ps1 -Mode Publish
+```
+
+Main 빌드는 기존 tools/build-main.cmd를 사용한다. 출력은 Main의 기존 버전 폴더와 bin/BoardWifiConnector/Debug/win-x64 또는 Release다. 최초 등록/INI/종료 허용 설정은 BoardWifiConnector/README.md를 따른다. 기존 TM 빌드 대기는 별개로 유지한다.
+
+## 최신 릴 그림 수정 (2026-10-02)
+
+작업 14의 공통 깊이·테두리 수정 후 TM Release 게시가 성공했다. 최신 EXE는 bin/testmodule/Release/DFTestModule_V041.exe (83,112,766 bytes). 앞선 FRONT 정렬·손잡이 1.3배는 유지한다. 실제 화면·성능·장비 확인은 미실행이며 수정 후 Debug/두 IDE 확인은 승인 대기다. [현재 실행 결과](docs/build/TM_REEL_RENDERING_FIX_2026-10-02.md). 아래 산출물 수치와 실행 기록은 각 시점의 결과다.
+
+## 최신 상태 — 표시 수정 후 Release 성공 (2026-10-02)
+
+작업 13에서 카메라 기준을 정면으로 조정하고 손잡이 표시 회전량 1.3배를 적용했다. 새 승인에 따른 NuGet 잠금 재평가 1회와 TM Release 게시 1회가 모두 성공해 기존 NU1004는 이번 실행에서 발생하지 않았다. 실행 파일: `bin/testmodule/Release/DFTestModule_V041.exe` (83,103,038 bytes). 수정 후 Debug 빌드·두 IDE/경로 이동·실제 화면/장비 확인은 미실행이다. 잔여 문자 12-H/I 2개. [상세 결과](docs/build/TM_DISPLAY_CORRECTION_2026-10-02.md).
+
+아래 기존 실행 기록은 각 시점의 상태다. 현재 실패·잠금 대기 설명은 위 최신 결과를 우선한다.
+
 Updated: 2026-10-02
 
 ## 현재 계획과 실행 승인

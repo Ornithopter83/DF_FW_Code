@@ -9,7 +9,8 @@ internal sealed class ImuOrientationView : Control
     private const float RightScale = 0.90f;
     private const float TopScale = 0.50f;
     private const float FrontScale = 1.20f;
-    private const float HandleStepDegrees = 18.0f;
+    private const float HandleRotationScale = 1.30f;
+    private const float HandleStepDegrees = 18.0f * HandleRotationScale;
 
     private readonly Point3[] model;
     private readonly Face[] faces;
@@ -17,8 +18,11 @@ internal sealed class ImuOrientationView : Control
     private readonly Face[] handleFaces;
     private readonly Image? reelTopImage;
     private readonly Image? reelBottomImage;
+    private readonly ReelSceneTexture? reelTopTexture;
+    private readonly ReelSceneTexture? reelBottomTexture;
 
-    private readonly Point3 camera = new(3.2f, 2.4f, 6.5f);
+    // Center the camera so the zero-pose FRONT axis has no lateral screen offset.
+    private readonly Point3 camera = new(0.0f, 2.4f, 6.5f);
     private readonly Point3 cameraForward;
     private readonly Point3 cameraRight;
     private readonly Point3 cameraUp;
@@ -39,6 +43,8 @@ internal sealed class ImuOrientationView : Control
         BuildReelModel(out model, out faces, out handleModel, out handleFaces);
         reelTopImage = LoadEmbeddedImage("DFTestModule.Assets.reel-top-v2.png");
         reelBottomImage = LoadEmbeddedImage("DFTestModule.Assets.reel-bottom.png");
+        reelTopTexture = reelTopImage == null ? null : new ReelSceneTexture(reelTopImage);
+        reelBottomTexture = reelBottomImage == null ? null : new ReelSceneTexture(reelBottomImage);
         DoubleBuffered = true;
         SetStyle(ControlStyles.ResizeRedraw, true);
         BackColor = Color.FromArgb(247, 248, 250);
@@ -94,15 +100,13 @@ internal sealed class ImuOrientationView : Control
         float shownYaw = hasZero ? Wrap180(yaw - zeroYaw) : yaw;
         Matrix3 displayOrientation = CreateOrientation(shownRoll, shownPitch, shownYaw);
         Point3[] rotated = model.Select(point => displayOrientation.Transform(point)).ToArray();
-        DrawModel(e.Graphics, rotated, faces);
-        DrawPhotoSurface(e.Graphics, displayOrientation);
 
         float handleRadians = DegreesToRadians(-handleAngle);
         Point3[] rotatedHandle = handleModel
             .Select(point => RotateHandleAroundRightAxis(point, handleRadians))
             .Select(point => displayOrientation.Transform(point))
             .ToArray();
-        DrawModel(e.Graphics, rotatedHandle, handleFaces);
+        DrawScene(e.Graphics, rotated, rotatedHandle, displayOrientation);
         DrawAxes(e.Graphics, displayOrientation);
 
         using Font angleFont = new("Consolas", 8F);
@@ -113,27 +117,41 @@ internal sealed class ImuOrientationView : Control
             angleFont, angleBrush, 5, Height - 19);
     }
 
-    private void DrawModel(Graphics graphics, Point3[] rotated, Face[] modelFaces)
+    private void DrawScene(Graphics graphics, Point3[] body, Point3[] handle, Matrix3 orientation)
     {
-        ProjectedPoint[] projected = rotated.Select(Project).ToArray();
-        Face[] orderedFaces = modelFaces
-            .OrderByDescending(face => face.Indices.Average(index => projected[index].Depth))
-            .ToArray();
+        List<SceneFace> sceneFaces = new();
+        AddSceneFaces(sceneFaces, body, faces);
+        AddSceneFaces(sceneFaces, handle, handleFaces);
+        ReelSceneRenderer renderer = new(Width, Height);
 
-        using Pen edge = new(Color.FromArgb(45, 53, 62), 1.8f);
+        // Every component and photo surface shares the same per-pixel depth buffer.
+        foreach (SceneFace face in sceneFaces)
+            renderer.FillPolygon(face.Polygon, face.Depths, face.Color);
+        DrawPhotoSurface(renderer, orientation);
+        foreach (SceneFace face in sceneFaces)
+            renderer.StrokePolygon(face.Polygon, face.Depths, Color.FromArgb(45, 53, 62), 1.0f);
+        renderer.DrawTo(graphics);
+
         using Font faceFont = new("맑은 고딕", 8.5F, FontStyle.Bold);
         using Brush textBrush = new SolidBrush(Color.FromArgb(35, 39, 45));
         using StringFormat centered = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-        foreach (Face face in orderedFaces)
+        foreach (SceneFace face in sceneFaces)
         {
-            PointF[] polygon = face.Indices.Select(index => projected[index].Screen).ToArray();
-            using Brush fill = new SolidBrush(Color.FromArgb(225, face.Color));
-            graphics.FillPolygon(fill, polygon);
-            graphics.DrawPolygon(edge, polygon);
-            if (face.Label.Length == 0) continue;
-            float x = polygon.Average(point => point.X);
-            float y = polygon.Average(point => point.Y);
-            graphics.DrawString(face.Label, faceFont, textBrush, new PointF(x, y), centered);
+            if (face.Label.Length == 0 || !renderer.IsVisible(face.Center.Screen, face.Center.Depth)) continue;
+            graphics.DrawString(face.Label, faceFont, textBrush, face.Center.Screen, centered);
+        }
+    }
+
+    private void AddSceneFaces(List<SceneFace> sceneFaces, Point3[] points, Face[] modelFaces)
+    {
+        foreach (Face face in modelFaces)
+        {
+            Point3[] vertices = face.Indices.Select(index => points[index]).ToArray();
+            ProjectedPoint[] projected = vertices.Select(Project).ToArray();
+            Point3 center = new(vertices.Average(point => point.X),
+                vertices.Average(point => point.Y), vertices.Average(point => point.Z));
+            sceneFaces.Add(new SceneFace(projected.Select(point => point.Screen).ToArray(),
+                projected.Select(point => point.Depth).ToArray(), face.Color, face.Label, Project(center)));
         }
     }
 
@@ -166,13 +184,12 @@ internal sealed class ImuOrientationView : Control
         return new Bitmap(source);
     }
 
-    private void DrawPhotoSurface(Graphics graphics, Matrix3 orientation)
+    private void DrawPhotoSurface(ReelSceneRenderer renderer, Matrix3 orientation)
     {
         Point3 topNormal = orientation.Transform(new Point3(0, 1, 0));
         float facing = Dot(topNormal, Normalize(camera));
-        Image? image = facing >= 0 ? reelTopImage : reelBottomImage;
+        ReelSceneTexture? image = facing >= 0 ? reelTopTexture : reelBottomTexture;
         if (image == null) return;
-
         float opacity = Math.Clamp((MathF.Abs(facing) - 0.03f) / 0.14f, 0.0f, 1.0f);
         if (opacity <= 0.01f) return;
 
@@ -181,18 +198,16 @@ internal sealed class ImuOrientationView : Control
         const float minZ = -0.82f * FrontScale;
         const float maxZ = 0.82f * FrontScale;
         float surfaceY = (facing >= 0 ? 0.69f : -0.69f) * TopScale;
-
-        PointF[] destination;
+        Point3[] corners;
         RectangleF sourceRectangle;
         if (facing >= 0)
         {
             const float bodyFraction = 0.62f;
             float photoMaxX = minX + (maxX - minX) * bodyFraction;
-            destination = new[]
+            corners = new[]
             {
-                Project(orientation.Transform(new Point3(minX, surfaceY, minZ))).Screen,
-                Project(orientation.Transform(new Point3(photoMaxX, surfaceY, minZ))).Screen,
-                Project(orientation.Transform(new Point3(minX, surfaceY, maxZ))).Screen
+                new Point3(minX, surfaceY, minZ), new Point3(photoMaxX, surfaceY, minZ),
+                new Point3(photoMaxX, surfaceY, maxZ), new Point3(minX, surfaceY, maxZ)
             };
             sourceRectangle = new RectangleF(0, 0, image.Width * bodyFraction, image.Height);
         }
@@ -200,27 +215,17 @@ internal sealed class ImuOrientationView : Control
         {
             const float handleFraction = 0.34f;
             float photoMaxX = maxX - (maxX - minX) * handleFraction;
-            destination = new[]
+            corners = new[]
             {
-                Project(orientation.Transform(new Point3(photoMaxX, surfaceY, minZ))).Screen,
-                Project(orientation.Transform(new Point3(minX, surfaceY, minZ))).Screen,
-                Project(orientation.Transform(new Point3(photoMaxX, surfaceY, maxZ))).Screen
+                new Point3(photoMaxX, surfaceY, minZ), new Point3(minX, surfaceY, minZ),
+                new Point3(minX, surfaceY, maxZ), new Point3(photoMaxX, surfaceY, maxZ)
             };
             sourceRectangle = new RectangleF(image.Width * handleFraction, 0,
                 image.Width * (1.0f - handleFraction), image.Height);
         }
-
-        ColorMatrix alpha = new(new[]
-        {
-            new[] { 1.0f, 0, 0, 0, 0 },
-            new[] { 0, 1.0f, 0, 0, 0 },
-            new[] { 0, 0, 1.0f, 0, 0 },
-            new[] { 0, 0, 0, opacity, 0 },
-            new[] { 0, 0, 0, 0, 1.0f }
-        });
-        using ImageAttributes attributes = new();
-        attributes.SetColorMatrix(alpha);
-        graphics.DrawImage(image, destination, sourceRectangle, GraphicsUnit.Pixel, attributes);
+        ProjectedPoint[] projected = corners.Select(point => Project(orientation.Transform(point))).ToArray();
+        renderer.DrawTexture(projected.Select(point => point.Screen).ToArray(),
+            projected.Select(point => point.Depth).ToArray(), image, sourceRectangle, opacity);
     }
 
     private static void BuildReelModel(out Point3[] points, out Face[] modelFaces,
@@ -450,6 +455,7 @@ internal sealed class ImuOrientationView : Control
     private readonly record struct Point3(float X, float Y, float Z);
     private readonly record struct ProjectedPoint(PointF Screen, float Depth);
     private sealed record Face(int[] Indices, Color Color, string Label);
+    private sealed record SceneFace(PointF[] Polygon, float[] Depths, Color Color, string Label, ProjectedPoint Center);
 
     private readonly record struct Matrix3(
         float M11, float M12, float M13,

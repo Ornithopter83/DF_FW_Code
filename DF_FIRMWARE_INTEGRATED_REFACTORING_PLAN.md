@@ -2,10 +2,20 @@
 
 Updated: 2026-10-02
 
-2026-10-02 기준 main, 백업 태그 `backup/local-20261002-143949`. 백업 전 HEAD는 0de2d0a였으며 이번 보존에는 문서 최신화와 로컬 변경을 포함한다. 작업 12-A/B/D/E/F/G 구현 후 승인된 SDK·NuGet 준비, 정적 확인 및 네 빌드를 수행했다. Main/Rod Release와 TM Debug 성공, TM Release는 NU1004 잠금 불일치로 실패했다. 공통 analyzer 설정을 수정했고 잠금 갱신/재시도는 새 승인 대기다. 잔여 번호 1개(12), 잔여 문자 3개(C/H/I).
+2026-10-02 main의 원격 백업은 bc8e551 / `backup/local-20261002-143949`로 보존한다. 이후 작업 13-A/B에서 TM FRONT 기준축과 손잡이 표시 회전량 1.3배를 수정하고 승인된 NuGet 잠금 재평가·TM Release 게시에 성공했다. 12-C 완료, 잔여 번호 1개(12), 잔여 문자 2개(H/I: 수정 후 TM Debug 및 IDE/경로 이동 확인).
 
 - [개발환경 세부 계획](docs/build/VSCode_VS2022_COMPATIBILITY_PLAN.md)
 - [복구 지점 및 복원 안내](docs/build/RECOVERY_BEFORE_VSCODE_2026-10-02.md)
+
+## 현재 추가 요청 (2026-10-02)
+
+최신: 승인된 Connector 재시도 1회에서 자체 포함 단일 EXE 게시 성공. 161,859,788 bytes이며 .NET 런타임·네이티브 라이브러리·기본 INI 리소스 포함. Main과 Connector 빌드를 근거로 16-A/B/C 완료. 실제 실행/통신/장비 시험은 미실행이다. 잔여 번호 2개(12,15), 문자 3개(12-H/I,15-B). 아래 재게시 대기 설명은 이전 이력이다.
+
+최신 빌드: 승인된 Main 1회 성공, Connector 명시 복원 1회 성공, Release 게시 1회 CS8510 실패. 예외 패턴 순서를 소스 수정했고 수정 후 재게시 1회는 새 승인 대기다. Main application BIN은 909,696 bytes, Connector EXE는 없다. 16-C 미완료, 잔여 번호/문자 수는 3개/4개 유지. [실행 결과](docs/build/BOARD_WIFI_BUILD_2026-10-02.md).
+
+최신: 작업 16-A/B에서 Main 전용 AP/TCP·게임 시리얼 우선 종료 중계와 BoardWifiConnector 트레이/INI/최초 등록·개발 환경을 구현했다. 사용자는 로그온 후 동작이면 충분하다고 확인했다. 소스 편집만 완료했고 빌드·테스트·등록·플래시는 미실행이다. 잔여 번호 3개(12,15,16), 잔여 문자 4개(12-H/I,15-B,16-C). 현재 상태는 CurrentWork.md의 작업 16을 우선한다.
+
+작업 15-A에서 TM 디밍 패턴 1~6 선택, 기본 6(Default), 우측 순환 색 표시를 구현했다. 빌드·테스트는 승인되지 않아 미실행이고 15-B는 승인 대기다. 현재 EXE는 작업 14 릴 그림 수정 빌드이며 새 디밍 UI는 포함하지 않는다. 잔여 번호 2개(12,15), 잔여 문자 3개(12-H/I,15-B).
 
 ## 목표
 
@@ -33,7 +43,11 @@ DF Firmware Repository
 | 09 | [통합 검증과 릴리스](tasks/09_통합검증_릴리스.md) | 현재 Main/Rod 한 쌍의 수동 검증 및 릴리스 자료 확정 | 사용자 범위 제외 |
 | 10 | [Main 중계형 Rod 무선 FW 업데이트](tasks/10_Rod_무선_FW_업데이트.md) | 등록·연결된 단일 Rod의 application을 Main 경유 ESP-NOW로 갱신 | 기존 H 제외·TestModule 보완만 진행 |
 | 11 | [독립형 TestModule 프로그램](tasks/11_독립형_TestModule_프로그램.md) | 새 UI와 장비 기능을 독립 단일 EXE 프로그램으로 구성 | J/K 완료 |
-| 12 | [VS Code / VS2022 호환 개발환경](tasks/12_VSCode_VS2022_호환_개발환경.md) | TM 분리 솔루션·공통 빌드/디버깅·루트 bin 상대경로 | Main/Rod·TM Debug 빌드 성공·Release 잠금 수정/재시도 대기 |
+| 12 | [VS Code / VS2022 호환 개발환경](tasks/12_VSCode_VS2022_호환_개발환경.md) | TM 분리 솔루션·공통 빌드/디버깅·루트 bin 상대경로 | C 완료·Release 게시 성공·H Debug/I 승인 대기 |
+| 13 | [TM IMU 영점·손잡이 표시 보정](tasks/13_TM_IMU_영점_손잡이_표시보정.md) | FRONT 기준축 정렬·손잡이 표시 회전량 1.3배 | A/B 수정·빌드 완료 |
+| 14 | [TM 릴 3D 가려짐·테두리 수정](tasks/14_TM_릴3D_가려짐_렌더링.md) | 공통 픽셀 깊이 처리·숨은 선 제외 | A/B 구현·빌드 완료 |
+| 15 | [TM LED 디밍 패턴 선택](tasks/15_TM_LED_디밍_패턴선택.md) | 최대 6·기본 6·우측 순환 색 표시 | A 구현 완료·B 빌드 승인 대기 |
+| 16 | [보드 AP/TCP 및 트레이 연결](tasks/16_BoardWifiConnector_AP_TCP.md) | 게임 시리얼 우선·Wi-Fi 종료 대체 경로·독립 트레이 | A/B/C 완료·자체 포함 단일 EXE 게시 성공 |
 
 ## 최신 요청 처리 (2026-08-31)
 
@@ -65,7 +79,7 @@ DF Firmware Repository
 
 ## 진행 순서
 
-현재 요청: 12-A/B/D/E/F/G 완료 → C의 SDK/잠금 준비 → H 승인된 빌드/설정 확인 → I IDE/이동 확인. C/H/I 실행은 사전 승인 필요. 아래 기존 진행 순서는 과거 작업의 이력이다.
+현재 요청: 13-A/B 완료 및 12-C 완료 → 12-H 수정 후 TM Debug 빌드 → 12-I IDE/이동 확인. H/I 실행은 새 사전 승인 필요. 아래 기존 진행 순서는 과거 작업의 이력이다.
 
 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11
 
@@ -118,13 +132,9 @@ DF_FW_Code/
 
 ## 현재 상태
 
-현재 작업: 승인 빌드 후 TM Release NU1004 수정. SDK/초기 잠금은 생성했고 공통 analyzer 설정을 수정했다. 잠금 갱신 및 TM Debug/Release 재시도는 새 승인 대기다.
+작업 13의 TM 표시 수정·Release 게시 완료. 공통 analyzer 수정 후 NuGet 잠금 재평가와 Release 성공을 근거로 12-C 완료 처리한다. 수정 후 TM Debug와 두 IDE/경로 이동 확인은 미실행이다.
 
-잔여 번호 작업 1개 (12)
-
-작업 12 잔여 문자 3개 (C, H, I)
-
-Main/Rod Release와 수정 전 TM Debug 성공. H Release와 I IDE/이동 확인은 미완료. 사용자 제외 장비 게이트는 재개하지 않는다.
+잔여 번호 작업 1개(12), 잔여 문자 2개(H/I). 작업 13 잔여 문자 0개. 실제 FRONT 방향과 손잡이 회전량의 장비 일치는 사용자 확인 미실행이며 테스트·장비 동작을 자동 재개하지 않는다.
 
 ## 로컬 버전 백업 기준 (2026-10-02)
 

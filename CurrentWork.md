@@ -2,7 +2,71 @@
 
 Updated: 2026-10-02
 
-## 현재 작업 12 — 로컬 버전 원격 백업 기준
+## 현재 상태 — 작업 16 게시 완료·기존 12/15 승인 대기
+
+- 2026-10-02 사용자 재시도 승인 및 자체 포함 단일 파일 요청으로 Connector Release 게시 1회 exit 0. 첫 실패 이후 수정한 CS8510 오류는 이번 빌드에 없다.
+- EXE: bin/BoardWifiConnector/Release/BoardWifiConnector.exe, 161,859,788 bytes. win-x64, .NET 런타임·네이티브 라이브러리·기본 INI 양식을 포함한다. Release PDB 제외, 최초 실행 시 EXE 옆에 connection.ini 생성. 기존 설정은 보존한다.
+- 명시 NuGet 잠금 갱신/재평가 및 Main 재빌드는 하지 않았다. 이전 Main 성공 산출물을 유지한다.
+- 16-A/B/C 완료. 잔여 번호 2개(12,15), 잔여 문자 3개(12-H/I,15-B). 기존 작업 빌드/검증을 자동 재개하지 않는다.
+- 결과: docs/build/BOARD_WIFI_BUILD_2026-10-02.md, 근거: artifacts/boardwifi-build-20261002-02/.
+- EXE 실행·정적/GUI/통신/장비 시험·설치/최초 등록·자동 시작 등록·Windows 종료·플래시·commit/push 미실행. 실제 종료는 사용자가 최초 등록 후 INI의 AllowWindowsShutdown=true로 설정하고 재연결한다.
+
+## 이전 작업 16 — Main 빌드 성공·Connector 재게시 승인 대기
+
+- 2026-10-02 새 승인 실행: Main Release 빌드 1회 exit 0, Connector NuGet 명시 복원 1회 exit 0, Connector Release 게시 1회 exit 1. 실패 재시도 없음.
+- Main 새 AP/TCP 산출물은 bin/release/x64/Vm1.0.10.0 네 파일이며 application BIN은 909,696 bytes. 기존 같은 버전 파일은 새 빌드로 갱신됐다. 플래시는 미실행이다.
+- Connector packages.lock.json 생성. 게시의 CS8510은 SocketException을 일반 Win32Exception 뒤에 배치한 패턴 순서 오류다. 순서를 수정했으며 수정 후 빌드는 미실행이다. 새 Connector EXE는 없다.
+- 다음은 Connector Release 게시 1회 재시도이며 새 사전 승인 필요. Main 재빌드·명시 잠금 갱신·테스트는 추가 실행하지 않는다.
+- 결과 기록: docs/build/BOARD_WIFI_BUILD_2026-10-02.md, 실행 로그: artifacts/boardwifi-build-20261002-01/.
+- 16-C 미완료 유지. 잔여 번호 3개(12,15,16), 잔여 문자 4개(12-H/I,15-B,16-C). 아래 구현 직후 미실행 설명은 이전 시점의 기록이다.
+
+- 사용자 명시적 묶음 요청 1/2와 조사·구현 승인으로 Main 전용 Wi-Fi AP/TCP 및 루트 BoardWifiConnector를 구현했다.
+- 16-A/B 완료: 기존 ESP-NOW 채널 1 유지, 게임 시리얼 우선 및 연결 상실 시 Wi-Fi 전환, 인증/생존 신호/종료 응답 처리. 기존 USB5V/2분 전원 처리 흐름 유지.
+- PC는 중복 실행 방지·트레이 네 상태·고정 INI·DPAPI 접속 정보·USB 최초 등록·재연결과 사용자 선택 자동 시작 메뉴를 제공한다.
+- 사용자는 로그온 후 트레이 동작이면 충분하다고 확인했다. 로그인 전 서비스는 범위 제외다.
+- 상세 사용 안내/설정: BoardWifiConnector/README.md. 독립 VS2022 솔루션·VS Code workspace와 루트 bin 상대 출력 구성 작성.
+- 최초 설정 AllowWindowsShutdown=false. 실제 종료는 최초 등록 후 사용자가 true로 설정하고 재연결한다. 수신만 하는 경우에도 기존 보드 2분 강제 차단 조건은 유지된다.
+- 소스 편집 완료이며 NuGet 복원·잠금 생성·Main/Connector 빌드·정적/실행 테스트·장비/플래시·설치·Windows 종료·commit/push 미실행. 새 EXE/펌웨어 산출물은 없다.
+- 16-C 빌드는 새 승인 대기. 잔여 번호 3개(12,15,16), 잔여 문자 4개(12-H/I,15-B,16-C).
+- 작업서: tasks/16_BoardWifiConnector_AP_TCP.md. 기존 사용자/TM 변경은 보존했다.
+
+## 이전 작업 15 — 디밍 옵션 구현 후 빌드 승인 대기
+
+- 사용자 요청: 최대 6, 기본 6(Default), 순환 색상 우측 표기.
+- 15-A 구현 완료: 디밍에서 별도 1~6 패턴 선택 표시, 일반 색상 행 숨김, 우측 순서 갱신 및 패턴값 전송. 명령 생성의 디밍 범위도 1~6으로 제한했다.
+- 센서·릴 렌더링·일반 LED 명령·펌웨어 출력은 유지했다. 대체 전 LED 코드 조각은 deprecated에 보존한다.
+- 이번 요청에는 빌드/테스트 승인이 없으므로 미실행이다. 15-B 빌드 확인은 새 승인 대기다.
+- 기존 bin/testmodule/Release/DFTestModule_V041.exe는 작업 14 빌드이며 이 디밍 UI 수정은 포함하지 않는다.
+- 잔여 번호 2개(12,15), 잔여 문자 3개(12-H/I,15-B).
+- 작업서: tasks/15_TM_LED_디밍_패턴선택.md. 현재 구현은 기존 백업 이후 로컬 변경이며 commit/push는 미실행.
+
+## 이전 작업 12 — TM Debug 및 IDE 확인 승인 대기
+
+- 2026-10-02 작업 14-A/B 완료: 본체/손잡이/사진 공통 픽셀 깊이 처리, 불투명 면·숨은 테두리 제외와 가장자리 표현 정리.
+- 이전 FRONT 중앙 정렬 및 손잡이 표시 1.3배 유지. 센서·영점·통신·물리 출력은 변경하지 않는다.
+- 사용자 요청에 따른 TM Release 게시 1회 exit 0. 별도 NuGet 잠금 갱신과 실패 재시도 없음.
+- 최신 EXE: bin/testmodule/Release/DFTestModule_V041.exe, 83,112,766 bytes. 이전 작업 13 EXE를 새 게시 파일로 교체했다.
+- 상세·해시: docs/build/TM_REEL_RENDERING_FIX_2026-10-02.md. 근거: artifacts/tm-reel-depth-20261002/.
+- 실제 회전 화면·성능·장비 및 자체 테스트는 미실행이다. 이번 변경을 화면 검증 완료로 기록하지 않는다.
+- 최신 표시 수정 후 Debug 빌드(12-H)와 두 IDE/경로 이동(12-I)은 새 승인 대기다.
+- 잔여 번호 1개(12), 잔여 문자 2개(H/I). 작업 13/14 잔여 문자 0개.
+- 기존 원격 백업 bc8e551 / backup/local-20261002-143949는 이전 기준이다. 이후 로컬 수정과 문서에 대한 commit/push는 미실행.
+- 작업서: tasks/12_VSCode_VS2022_호환_개발환경.md. 완료 기록: tasks/14_TM_릴3D_가려짐_렌더링.md.
+
+## 이전 작업 12 — TM Debug 및 IDE 확인 승인 대기
+
+- 2026-10-02 작업 13-A/B 완료: TM IMU 영점 기준 카메라를 중앙으로 정렬하고 손잡이 표시 회전량을 1.3배로 조정했다.
+- 사용자가 관련 코드 조회·분석·수정과 빌드를 승인했다. 명시 NuGet restore 1회와 TM Release 게시 1회 모두 exit 0. 재시도 없음.
+- Release EXE: `bin/testmodule/Release/DFTestModule_V041.exe`, 83,103,038 bytes. 상세와 해시: `docs/build/TM_DISPLAY_CORRECTION_2026-10-02.md`.
+- 기존 NU1004는 이번 Release에서 발생하지 않았다. 잠금 재평가 후 packages.lock.json의 Git 내용 차이는 없다. 12-C는 완료 처리한다.
+- 센서·영점 계산·프로토콜·물리 출력은 유지했다. 실제 FRONT 화면 방향과 손잡이의 물리적 일치는 사용자 확인 미실행이다.
+- 이번 표시 수정 이후 TM Debug 빌드는 미실행. 12-H의 Debug와 12-I의 두 IDE 중단점·경로 이동 확인은 새 승인 대기다.
+- 잔여 번호 작업 1개(12), 잔여 문자 2개(H/I). 작업 13 잔여 문자 0개.
+- 추가 테스트·EXE 실행·장비 조작·FW 빌드·commit/push는 이번 작업에서 수행하지 않았다.
+- 원격 백업 bc8e551 / backup/local-20261002-143949는 수정 전 기준으로 보존한다. 이번 수정과 문서는 이후 로컬 변경이다.
+- 작업서: `tasks/12_VSCode_VS2022_호환_개발환경.md`, 완료 기록: `tasks/13_TM_IMU_영점_손잡이_표시보정.md`.
+
+## 이전 작업 12 — 로컬 버전 원격 백업 기준
 
 - 현재 보존 기준: `main` 및 주석 태그 `backup/local-20261002-143949`. 태그는 문서 최신화와 로컬 변경을 포함하는 이번 백업 커밋을 지정한다.
 - 커밋 전 로컬 HEAD는 `0de2d0a`, 원격 main은 `c84be58`이었다. 원격 참조 조회 결과 로컬에만 커밋 1개가 있고 원격에만 있는 커밋은 없었다. fetch/pull/reset/merge는 수행하지 않았다.

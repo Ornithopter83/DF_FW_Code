@@ -2094,8 +2094,11 @@ static unsigned int	g_PSON_Count = 0;
 static unsigned int	g_PSOF_Count = 0;
 static unsigned int	g_USB5V_Count = 0;
 //
+#include "DF_Main_BoardWifi.h"
+
 void subAcOff_WithOtherOff()
 {
+	DF_Main_BoardWifi_CancelShutdown();
 	subAC_Off();		// OFF Output
 	// LED OFF
 	ledOff_MbCent();
@@ -2198,7 +2201,7 @@ void check_PowerSwitch_Change_10ms()
 		if ((CheckPowerSwitch() == PWR_SW_OFF) ||	// 
 			(g_AutoReboot && CheckAppCmd() && checkTO(g_TmFTM, AUTO_REBOOT_TIME))) {	// TEST AUTO REBOOT
 			recvPwrOffExec_Resp = 0;				// 수신 플래그 클리어
-			StsSendPrintln(STS_APSTS_REQ+"00%");	// PC OFF REQ 커맨드 송신
+			DF_Main_BoardWifi_BeginShutdown();	// Serial game first, Wi-Fi fallback
 			setTO(g_TmFTM);							// FTM(2분) 설정(강제종료 타이머)
 			setTO(g_TmRTM);							// RTM(500ms) 설정(응답 타이머)
 			g_ProcStatus = PS_RSPWAIT;				// 응답 대기로 상태 전환
@@ -2209,6 +2212,7 @@ void check_PowerSwitch_Change_10ms()
 		{
 			recvPwrOffExec_Resp = 0;				// 수신 플래그 클리어
 			g_ProcStatus = PS_USBWAIT;				// USB 5V LOW 대기
+			DF_Main_BoardWifi_CancelShutdown();
 		}
 		else if (checkTO(g_TmFTM, FORCE_OFF_2MIN))	// 강제 종료 시간(2분) 경과이면
 		{
@@ -2221,9 +2225,10 @@ void check_PowerSwitch_Change_10ms()
 			if ((CheckPowerSwitch() == PWR_SW_ON)	// 전원 스위치가 다시 On이고
 				&& (CheckAppCmd() == 0)) {			// AP가 실행 안되고 있으면
 				g_ProcStatus = PS_RUNNING;			// 초기 상태로 전환
+				DF_Main_BoardWifi_CancelShutdown();
 			}
 			else {
-				StsSendPrintln(STS_APSTS_REQ+"00%");// PC OFF REQ 재전송
+				DF_Main_BoardWifi_RetryShutdown();
 				setTO(g_TmRTM);						// RTM(500ms) 설정(응답 타이머)
 			}
 		}

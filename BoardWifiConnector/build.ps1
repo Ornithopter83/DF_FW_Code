@@ -1,0 +1,27 @@
+[CmdletBinding()]
+param([ValidateSet('Restore','Build','Publish')][string]$Mode = 'Build')
+$ErrorActionPreference = 'Stop'
+$dfConnectorRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$dfConnectorProject = Join-Path $PSScriptRoot 'BoardWifiConnector.csproj'
+$dfConnectorLock = Join-Path $PSScriptRoot 'packages.lock.json'
+$dfConnectorExit = 0
+Push-Location -LiteralPath $dfConnectorRoot
+try {
+    if ($Mode -eq 'Restore') {
+        & dotnet restore $dfConnectorProject -p:Platform=x64 -p:SelfContained=true -p:PublishSingleFile=true -p:RestoreLockedMode=false --force-evaluate
+    } elseif (-not (Test-Path -LiteralPath $dfConnectorLock)) {
+        throw 'NuGet lock is missing. Restore requires separate Codex execution approval.'
+    } elseif ($Mode -eq 'Build') {
+        & dotnet build $dfConnectorProject -c Debug -p:Platform=x64 -p:RestoreLockedMode=true -p:SelfContained=false -p:PublishSingleFile=false
+    } else {
+        $dfConnectorOutput = (Join-Path $dfConnectorRoot 'bin\BoardWifiConnector\Release').Replace('\','/') + '/'
+        & dotnet publish $dfConnectorProject -c Release -p:Platform=x64 -p:RestoreLockedMode=true --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true "-p:PublishDir=$dfConnectorOutput"
+    }
+    $dfConnectorExit = $LASTEXITCODE
+} catch {
+    Write-Error $_
+    $dfConnectorExit = 1
+} finally {
+    Pop-Location
+}
+exit $dfConnectorExit

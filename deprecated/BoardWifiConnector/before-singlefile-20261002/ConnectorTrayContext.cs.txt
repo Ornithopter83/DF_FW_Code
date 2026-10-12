@@ -1,0 +1,217 @@
+using System.Diagnostics;
+using System.Drawing.Drawing2D;
+using System.IO.Ports;
+using System.Runtime.InteropServices;
+
+internal sealed class ConnectorTrayContext : ApplicationContext
+{
+    private readonly Control dispatcher = new();
+    private readonly NotifyIcon tray;
+    private readonly ContextMenuStrip menu = new();
+    private readonly Dictionary<ConnectorState, Icon> icons = new();
+    private readonly ToolStripMenuItem status = new("미연결") { Enabled = false };
+    private readonly ToolStripMenuItem reconnect = new("재연결 / INI 다시 읽기");
+    private readonly ToolStripMenuItem pause = new("통신 일시 정지");
+    private readonly ToolStripMenuItem enrollment = new("USB 최초 등록");
+    private readonly ToolStripMenuItem quit = new("프로그램 종료");
+    private readonly BoardConnection connection;
+    private CancellationTokenSource? lifetime;
+    private Task? worker;
+    private bool busy;
+    private bool exiting;
+    private bool paused;
+
+    public ConnectorTrayContext()
+    {
+        _ = dispatcher.Handle;
+        icons.Add(ConnectorState.Disconnected, MakeIcon(Color.Gray));
+        icons.Add(ConnectorState.Connecting, MakeIcon(Color.Goldenrod));
+        icons.Add(ConnectorState.Failed, MakeIcon(Color.Firebrick));
+        icons.Add(ConnectorState.Connected, MakeIcon(Color.SeaGreen));
+        tray = new NotifyIcon { Icon = icons[ConnectorState.Disconnected], Text = "BoardWifiConnector · 미연결", ContextMenuStrip = menu, Visible = true };
+        menu.Items.Add(status);
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(reconnect);
+        menu.Items.Add(pause);
+        menu.Items.Add(enrollment);
+        menu.Items.Add("INI 파일 열기", null, (_, _) => OpenIni());
+        menu.Items.Add("로그온 자동 시작 등록", null, (_, _) => SetAutoStart(true));
+        menu.Items.Add("로그온 자동 시작 해제", null, (_, _) => SetAutoStart(false));
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(quit);
+        reconnect.Click += async (_, _) => await RestartAsync();
+        pause.Click += async (_, _) => await PauseAsync();
+        quit.Click += async (_, _) => await QuitAsync();
+        menu.Opening += (_, _) => PopulatePorts();
+        connection = new BoardConnection(Report);
+        try { EnsureIni(); }
+        catch (Exception error) { Report(ConnectorState.Failed, BoardConnection.FriendlyError(error)); }
+        Start();
+    }
+
+    private void EnsureIni()
+    {
+        if (!File.Exists(ConnectorSettings.IniPath))
+            File.Copy(Path.Combine(AppContext.BaseDirectory, "connection.example.ini"), ConnectorSettings.IniPath, false);
+    }
+    private void Start()
+    {
+        if (exiting || paused) return;
+        lifetime = new CancellationTokenSource();
+        CancellationToken cancellation = lifetime.Token;
+        worker = Task.Run(() => connection.RunAsync(cancellation));
+    }
+    private async Task StopAsync()
+    {
+        lifetime?.Cancel();
+        if (worker != null) await worker;
+        worker = null;
+        lifetime?.Dispose();
+        lifetime = null;
+    }
+    private void Busy(bool value)
+    {
+        busy = value;
+        reconnect.Enabled = !value;
+        pause.Enabled = !value;
+        enrollment.Enabled = !value;
+        quit.Enabled = !value;
+    }
+    private async Task RestartAsync()
+    {
+        if (busy || exiting) return;
+        Busy(true);
+        try { await StopAsync(); paused = false; pause.Text = "통신 일시 정지"; Start(); }
+        finally { Busy(false); }
+    }
+    private async Task PauseAsync()
+    {
+        if (busy || exiting) return;
+        if (paused) { await RestartAsync(); return; }
+        Busy(true);
+        try { paused = true; await StopAsync(); pause.Text = "통신 재개"; Report(ConnectorState.Disconnected, "미연결 · 일시 정지"); }
+        finally { Busy(false); }
+    }
+    private void PopulatePorts()
+    {
+        if (busy) return;
+        while (enrollment.DropDownItems.Count != 0)
+        {
+            ToolStripItem item = enrollment.DropDownItems[0];
+            enrollment.DropDownItems.RemoveAt(0);
+            item.Dispose();
+        }
+        try
+        {
+            foreach (string port in SerialPort.GetPortNames().OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
+            {
+                string selected = port;
+                enrollment.DropDownItems.Add(port, null, async (_, _) => await PairAsync(selected));
+            }
+        }
+        catch { enrollment.DropDownItems.Add("포트 조회 실패").Enabled = false; }
+        if (enrollment.DropDownItems.Count == 0) enrollment.DropDownItems.Add("USB 포트 없음").Enabled = false;
+    }
+    private async Task PairAsync(string port)
+    {
+        if (busy || exiting) return;
+        Busy(true);
+        bool resume = !paused;
+        try
+        {
+            await StopAsync();
+            Report(ConnectorState.Connecting, "USB 최초 등록 중");
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(25));
+            await Task.Run(() => BoardEnrollment.Pair(port, cancellation.Token));
+            tray.ShowBalloonTip(4000, "BoardWifiConnector", "보드 등록 완료. 지정된 보드로 연결합니다.", ToolTipIcon.Info);
+        }
+        catch (Exception error) { Report(ConnectorState.Failed, "최초 등록 실패 · " + BoardConnection.FriendlyError(error)); }
+        finally { Busy(false); if (resume) Start(); }
+    }
+    private void OpenIni()
+    {
+        try
+        {
+            EnsureIni();
+            var start = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "notepad.exe")) { UseShellExecute = false };
+            start.ArgumentList.Add(ConnectorSettings.IniPath);
+            Process.Start(start)?.Dispose();
+        }
+        catch { tray.ShowBalloonTip(3000, "BoardWifiConnector", "INI 파일을 열 수 없습니다.", ToolTipIcon.Error); }
+    }
+    private void SetAutoStart(bool enable)
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+            if (enable)
+            {
+                if (!string.Equals(Path.GetFileName(Environment.ProcessPath), "BoardWifiConnector.exe", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("자동 시작은 게시 EXE에서 등록 필요");
+                key.SetValue("DF.BoardWifiConnector", "\"" + Environment.ProcessPath + "\"");
+            }
+            else key.DeleteValue("DF.BoardWifiConnector", false);
+            tray.ShowBalloonTip(3000, "BoardWifiConnector", enable ? "로그온 자동 시작을 등록했습니다." : "로그온 자동 시작을 해제했습니다.", ToolTipIcon.Info);
+        }
+        catch { tray.ShowBalloonTip(3000, "BoardWifiConnector", "자동 시작 설정 권한 오류", ToolTipIcon.Error); }
+    }
+    private void Report(ConnectorState state, string message)
+    {
+        if (exiting || dispatcher.IsDisposed) return;
+        try
+        {
+            dispatcher.BeginInvoke((Action)(() =>
+            {
+                if (exiting) return;
+                tray.Icon = icons[state];
+                string text = "BoardWifiConnector · " + message;
+                tray.Text = text.Length > 63 ? text[..63] : text;
+                status.Text = message;
+            }));
+        }
+        catch (InvalidOperationException) { }
+    }
+    private async Task QuitAsync()
+    {
+        if (busy || exiting) return;
+        Busy(true);
+        exiting = true;
+        await StopAsync();
+        tray.Visible = false;
+        ExitThread();
+    }
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            exiting = true;
+            lifetime?.Cancel();
+            tray.Visible = false;
+            tray.Dispose(); menu.Dispose(); dispatcher.Dispose();
+            foreach (Icon icon in icons.Values) icon.Dispose();
+            lifetime?.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+    private static Icon MakeIcon(Color color)
+    {
+        using var image = new Bitmap(32, 32);
+        using (Graphics graphics = Graphics.FromImage(image))
+        {
+            graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            graphics.Clear(Color.Transparent);
+            using var fill = new SolidBrush(color);
+            using var border = new Pen(Color.FromArgb(70, 70, 70), 1.5f);
+            graphics.FillEllipse(fill, 4, 4, 24, 24);
+            graphics.DrawEllipse(border, 4, 4, 24, 24);
+            using var mark = new Pen(Color.White, 2.5f);
+            graphics.DrawArc(mark, 9, 9, 14, 14, 215, 110);
+            graphics.DrawArc(mark, 12, 13, 8, 8, 215, 110);
+            graphics.FillEllipse(Brushes.White, 15, 21, 3, 3);
+        }
+        IntPtr handle = image.GetHicon();
+        try { using Icon borrowed = Icon.FromHandle(handle); return (Icon)borrowed.Clone(); }
+        finally { DestroyIcon(handle); }
+    }
+    [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool DestroyIcon(IntPtr icon);
+}

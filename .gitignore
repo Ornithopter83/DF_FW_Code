@@ -42,6 +42,10 @@ local.settings.cmd
 *.local.cmd
 .env
 
+# BoardWifiConnector local enrollment and connection settings
+/BoardWifiConnector/connection.ini
+/BoardWifiConnector/credential.dat
+
 # Temporary files
 *.tmp
 *.bak

@@ -1,0 +1,43 @@
+{
+  "folders": [{ "path": "." }],
+  "settings": { "dotnet.defaultSolution": "BoardWifiConnector.sln" },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Connector: Restore",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/build.ps1", "-Mode", "Restore"],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "Connector: Debug",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/build.ps1", "-Mode", "Build"],
+        "group": { "kind": "build", "isDefault": true },
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "Connector: Publish",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/build.ps1", "-Mode", "Publish"],
+        "problemMatcher": "$msCompile"
+      }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [{
+      "name": "BoardWifiConnector Debug",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Connector: Debug",
+      "program": "${workspaceFolder}/../bin/BoardWifiConnector/Debug/win-x64/BoardWifiConnector.dll",
+      "cwd": "${workspaceFolder}/..",
+      "console": "internalConsole"
+    }]
+  }
+}

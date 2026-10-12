@@ -1,0 +1,28 @@
+    private Panel BuildLedPage()
+    {
+        Panel page = Page(); FlowLayoutPanel content = Column(); content.Controls.Add(SectionTitle("본체 LED 제어"));
+        ComboBox position = Choice(new[] { "꺼짐 (0)", "중앙 (1)", "왼쪽 (2) - 비활성", "오른쪽 (3) - 비활성" }, 1);
+        ComboBox action = Choice(new[] { "꺼짐 (0)", "켜짐 (1)", "점멸 (2)", "디밍 (3)" }, 1);
+        ComboBox color = Choice(new[] {
+            "00 - White", "01 - Red", "02 - Lime", "03 - Blue", "04 - Yellow", "05 - Cyan", "06 - Magenta", "07 - Maroon",
+            "08 - Olive", "09 - Green", "10 - Purple", "11 - Teal", "12 - Navy", "13 - Silver", "14 - Gray", "15 - Black"
+        }, 1);
+        NumericUpDown time = Number(10, 9999, 2000), brightness = Number(10, 100, 100);
+        content.Controls.Add(FieldRow("위치", position));
+        content.Controls.Add(FieldRow("표시 액션", action));
+        content.Controls.Add(FieldRow("색상", color));
+        content.Controls.Add(FieldRow("표시 시간(ms)", time));
+        Button apply = MotorButton("적용", Color.FromArgb(27, 126, 96), 110);
+        apply.Margin = new Padding(125, 10, 0, 10);
+        position.SelectedIndexChanged += (_, _) => apply.Enabled = position.SelectedIndex <= 1;
+        apply.Click += (_, _) => TrySend(DeviceProtocol.LedControl(position.SelectedIndex, action.SelectedIndex, color.SelectedIndex, (int)time.Value));
+        content.Controls.Add(apply);
+        content.Controls.Add(Note("위치 2(왼쪽)와 3(오른쪽)은 현재 본체에서 비활성이라 명령을 전송하지 않습니다."));
+        content.Controls.Add(FieldRow("밝기(%)", brightness));
+        FlowLayoutPanel brightActions = new() { Width = 520, Height = 45, Margin = new Padding(125, 2, 0, 0) };
+        Button read = MotorButton("읽기", Color.FromArgb(35, 105, 190), 90); Button write = MotorButton("쓰기", Color.FromArgb(27, 126, 96), 90);
+        read.Click += (_, _) => TrySend(DeviceProtocol.LedBrightnessRead()); write.Click += (_, _) => TrySend(DeviceProtocol.LedBrightnessWrite((int)brightness.Value));
+        brightActions.Controls.Add(read); brightActions.Controls.Add(write); content.Controls.Add(brightActions);
+        statusLabels["Brightness"] = ValueLabel("-"); content.Controls.Add(FieldRow("수신 밝기", statusLabels["Brightness"]));
+        page.Controls.Add(content); return page;
+    }

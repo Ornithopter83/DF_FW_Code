@@ -4,6 +4,9 @@ namespace DFTestModule;
 
 internal static class DeviceProtocol
 {
+    public const int LedDimmingMaxPattern = 6;
+    public const int LedDimmingDefaultPattern = 6;
+
     public static string Torque(int duty, int timeMs)
     {
         Range(duty, 0, 255, "메인 모터 Duty"); Range(timeMs, 0, 9999, "동작 시간");
@@ -45,7 +48,9 @@ internal static class DeviceProtocol
     public static string LedControl(int position, int action, int color, int timeMs)
     {
         Range(position, 0, 3, "LED 위치"); Range(action, 0, 3, "LED 표시 액션");
-        Range(color, 0, 15, "LED 색상"); Range(timeMs, 10, 9999, "LED 시간");
+        if (action == 3) Range(color, 1, LedDimmingMaxPattern, "디밍 패턴");
+        else Range(color, 0, 15, "LED 색상");
+        Range(timeMs, 10, 9999, "LED 시간");
         if (action == 0) return string.Format(CultureInfo.InvariantCulture, "$06{0}0%", position);
         if (action == 1) return string.Format(CultureInfo.InvariantCulture, "$06{0}1{1:00}%", position, color);
         return string.Format(CultureInfo.InvariantCulture, "$06{0}{1}{2:00}{3:0000}%", position, action, color, timeMs);

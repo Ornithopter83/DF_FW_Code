@@ -1417,6 +1417,8 @@ void uartRecvParsing()
 /*  =====================================
        From PC, (Uart) Recv Data Hanlder From PC
   ===================================== */
+#include "DF_Main_BoardWifi.h"
+
 void uartRecvHandler()
 {
 /*
@@ -1437,6 +1439,7 @@ void uartRecvHandler()
 	rcved_flag = 0; // MSG ANA FINISH
 
 	msg.trim();				// Delete Space in String
+	if (DF_Main_BoardWifi_HandlePairCommand(msg)) return;
 
 	// msg있을때만 처리    
     if (msg == "")			// Return, if not Recv

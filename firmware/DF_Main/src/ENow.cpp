@@ -53,7 +53,7 @@ void ENow::init(esp_now_recv_cb_t cbfunc)
 	    ESP32 WIFI_AP_STA : access point and a station connected to another access point
 	    출처: https://cocoastudy.tistory.com/353 [EIGHTBOX:티스토리]
 	  */
-	WiFi.mode(WIFI_STA);
+	WiFi.mode(WIFI_AP_STA);
 
 	WiFi.disconnect();
 
