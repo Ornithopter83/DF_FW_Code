@@ -19,6 +19,20 @@ internal sealed class MainForm : Form
     private readonly Label mainVersion = ValueLabel("Vm -");
     private readonly Label rodVersion = ValueLabel("Vr -");
     private readonly Label imuVersion = ValueLabel("IMU -");
+    private readonly Label batteryDiagnostic = new() {
+        Text = "(현재 ---- / 평균 ----)", Width = 245, Height = 48,
+        AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, ForeColor = Color.DimGray,
+        BackColor = Color.FromArgb(247, 248, 250), Padding = new Padding(6, 3, 6, 3)
+    };
+    private readonly BatteryGauge batteryGauge = new() { Width = 500, Height = 30, Margin = new Padding(0) };
+    private readonly Label batteryMinimum = new() {
+        Text = "0% (2828)", Width = 110, Height = 22,
+        TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.DimGray
+    };
+    private readonly Label batteryMaximum = new() {
+        Text = "99% (3546)", Width = 110, Height = 22,
+        TextAlign = ContentAlignment.MiddleRight, ForeColor = Color.DimGray
+    };
     private readonly RichTextBox logBox = new() { Dock = DockStyle.Fill, ReadOnly = true, BackColor = Color.White, Font = new Font("Consolas", 9F) };
     private readonly CheckBox autoScroll = new() { Text = "Auto Scroll", Checked = true, AutoSize = true };
     private readonly Panel pageHost = new() { Dock = DockStyle.Fill, Padding = new Padding(14), BackColor = Color.FromArgb(247, 248, 250) };
@@ -46,6 +60,8 @@ internal sealed class MainForm : Form
     private bool encoderMonitorEnabled;
     private bool powerOffRequestObserved;
     private bool registrationWaiting;
+    private string batteryPercent = "--";
+    private string batteryState = "";
 
     public MainForm()
     {
@@ -224,9 +240,21 @@ internal sealed class MainForm : Form
         connections.Controls.Add(reelConnectionState); connections.Controls.Add(imuConnectionState);
         content.Controls.Add(connections);
         content.Controls.Add(SectionTitle("릴 상태"));
-        statusLabels["배터리"] = ValueLabel("-");
         statusLabels["릴 엔코더"] = ValueLabel("-");
-        content.Controls.Add(FieldRow("배터리", statusLabels["배터리"]));
+        FlowLayoutPanel batteryRow = new() { Width = 1040, Height = 74, WrapContents = false, Margin = new Padding(0, 0, 0, 2) };
+        batteryRow.Controls.Add(new Label { Text = "배터리", Width = 100, Height = 60, TextAlign = ContentAlignment.MiddleLeft });
+        Panel gaugePanel = new() { Width = 500, Height = 58, Margin = new Padding(0, 4, 12, 0) };
+        batteryGauge.Location = new Point(0, 0);
+        batteryMinimum.Location = new Point(0, 34);
+        batteryMaximum.Location = new Point(390, 34);
+        gaugePanel.Controls.Add(batteryGauge);
+        gaugePanel.Controls.Add(batteryMinimum);
+        gaugePanel.Controls.Add(batteryMaximum);
+        batteryRow.Controls.Add(gaugePanel);
+        batteryRow.Controls.Add(batteryDiagnostic);
+        content.Controls.Add(batteryRow);
+        content.Controls.Add(Note("막대와 퍼센트는 배터리 잔량 요청 반환값이며, 막대 안 괄호 숫자는 20회 평균 ADC입니다. 좌우 기준은 ADC 2828~3546에 대응하는 0~99%입니다. 오른쪽은 현재 ADC와 평균 ADC(500ms 간격 20회, 약 10초)입니다."));
+        content.Controls.Add(Note("상태 코드: -3 변화 없음, -4 충전 중, -5 사용 중, -2 연결 끊김/미확인, -1 ROD 상태 미확인."));
         content.Controls.Add(FieldRow("릴 엔코더", statusLabels["릴 엔코더"]));
         content.Controls.Add(SectionTitle("릴 버튼 상태"));
         FlowLayoutPanel indicators = new() { Width = 600, Height = 64 };
@@ -520,11 +548,18 @@ internal sealed class MainForm : Form
         } else if (frame.StartsWith("$20", StringComparison.Ordinal) && frame.Length >= 5) {
             rodConnected = frame.Substring(3, 2) == "01";
             SetConnectionIndicator(reelConnectionState, rodConnected, "릴");
+            if (!rodConnected) {
+                batteryDiagnostic.Text = "(현재 ---- / 평균 ----)";
+                batteryDiagnostic.ForeColor = Color.DimGray;
+                batteryGauge.AverageAdc = -1;
+            }
         } else if (frame.StartsWith("$21", StringComparison.Ordinal) && frame.Length >= 5) {
             imuConnected = frame.Substring(3, 2) == "01";
             SetConnectionIndicator(imuConnectionState, imuConnected, "IMU");
         } else if (frame.StartsWith("$12", StringComparison.Ordinal)) {
-            SetStatus("배터리", frame.Substring(3).TrimEnd('%'), Color.LightGreen);
+            UpdateBatteryStatus(frame.Substring(3).TrimEnd('%'));
+        } else if (frame.StartsWith("$31", StringComparison.Ordinal)) {
+            UpdateBatteryDiagnostic(frame.Substring(3).TrimEnd('%'));
         } else if (frame.StartsWith("$14", StringComparison.Ordinal)) {
             SetStatus("릴 엔코더", frame.Substring(3).TrimEnd('%'), Color.LightGreen);
             imuOrientation.AdvanceHandleCounterClockwise();
@@ -534,6 +569,50 @@ internal sealed class MainForm : Form
             else if (code == "04") { registrationWaiting = true; rodRegisterButton.Text = "ROD 등록 취소"; registrationState.Text = "등록 진행 중"; registrationState.BackColor = Color.LightPink; }
             else if (code == "05") FinishRegistration("등록 완료", Color.LightBlue);
         }
+    }
+
+    private void UpdateBatteryStatus(string value)
+    {
+        if (!int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed)) return;
+        if (parsed >= 0 && parsed <= 99) {
+            batteryPercent = parsed.ToString(CultureInfo.InvariantCulture);
+            batteryState = "";
+        } else if (parsed < 0 && parsed >= -5) {
+            batteryState = parsed.ToString(CultureInfo.InvariantCulture);
+            if (parsed == -1 || parsed == -2) batteryPercent = "--";
+        } else {
+            return;
+        }
+
+        UpdateBatteryGauge();
+    }
+
+    private void UpdateBatteryGauge()
+    {
+        if (int.TryParse(batteryPercent, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) && parsed >= 0 && parsed <= 99) {
+            batteryGauge.Percent = parsed;
+        } else {
+            batteryGauge.Percent = -1;
+        }
+
+        batteryGauge.BatteryState = batteryState;
+    }
+
+    private void UpdateBatteryDiagnostic(string payload)
+    {
+        string[] values = payload.Split(',');
+        if (values.Length != 4 ||
+            !int.TryParse(values[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int currentAdc) ||
+            !int.TryParse(values[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int averageAdc) ||
+            !int.TryParse(values[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int mappedPercent) ||
+            !int.TryParse(values[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out int displayPercent) ||
+            currentAdc < 0 || currentAdc > 4095 || averageAdc < 0 || averageAdc > 4095 ||
+            mappedPercent < -1000 || mappedPercent > 1000 || displayPercent < 0 || displayPercent > 99) return;
+
+        batteryGauge.AverageAdc = averageAdc;
+        batteryDiagnostic.Text = string.Format(CultureInfo.InvariantCulture,
+            "(현재 {0:D4} / 평균 {1:D4})", currentAdc, averageAdc);
+        batteryDiagnostic.ForeColor = Color.FromArgb(35, 65, 95);
     }
 
     private void ParseInput(string frame)

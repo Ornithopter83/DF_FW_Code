@@ -16,7 +16,7 @@
 #define BATTERY_MIN_VALUE_NEW  	2828	// 기존 20%를 0%로 설정함(Vr1.0.1.0)
 #define BATTERY_MAX_VALUE_NEW   3546	// 기존 82%를 100%로 설정함(Vr1.0.1.0)
 
-#define BAT_BUF_SIZE 		20		// AVG 20 SEC ( 1 sec * 20 Times) 
+#define BAT_BUF_SIZE 		20		// 20 samples; scanAvgInteg is called every 500 ms (~10 sec window)
 
 #define	BAT_UPDATE_INTVL	(60*1000)		// 60sec
 #define	BAT_UPDATE_GAP		2				// 
@@ -39,6 +39,7 @@ class Battery
 	int ad_idx = 0;
 
 	int adc_value;						// Vr1.0.1.0
+	int mapped_lvl;					// ADC 환산 원값(0~100 이상), 표시용 clamp 전
 	long sum_ad;
 	int avg_ad;
 	int integ_ad;

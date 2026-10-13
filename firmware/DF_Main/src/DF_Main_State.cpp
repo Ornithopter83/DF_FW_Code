@@ -334,6 +334,7 @@ String STS_APSTS_REQ         	= "$18";
 String RESP_STX_ROD_CONN		= "$20";
 // Add Define RESP_STX
 String RESP_STX_IMU_CONNECT     = "$21";
+String RESP_STX_BATTERY_DIAG    = "$31";
 	#define RESP_IMU_FULLSTR_CONN		"$2101%"
 	#define RESP_IMU_FULLSTR_DISCONN	"$2100%"
 

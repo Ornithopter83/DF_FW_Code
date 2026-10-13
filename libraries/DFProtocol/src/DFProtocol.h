@@ -36,6 +36,7 @@ typedef enum
     DF_Protocol_Pid_RodToMain_Version = 22,
     DF_Protocol_Pid_RodToMain_ImuConnection = 24,
     DF_Protocol_Pid_RodToMain_Battery = 26,
+    DF_Protocol_Pid_RodToMain_BatteryDiagnostic = 28,
     DF_Protocol_Pid_RodToMain_RodAddress = 32,
     DF_Protocol_Pid_RodToMain_Sleep = 34
 } DF_Protocol_RodToMainPid;
@@ -61,6 +62,7 @@ extern const char DF_Protocol_RodToMain_Encoder[];
 extern const char DF_Protocol_RodToMain_Version[];
 extern const char DF_Protocol_RodToMain_ImuConnection[];
 extern const char DF_Protocol_RodToMain_Battery[];
+extern const char DF_Protocol_RodToMain_BatteryDiagnostic[];
 extern const char DF_Protocol_RodToMain_RodAddress[];
 extern const char DF_Protocol_RodToMain_Sleep[];
 

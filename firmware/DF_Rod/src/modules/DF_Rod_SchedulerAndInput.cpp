@@ -113,6 +113,9 @@ void t1sec_Process()
 	// 5) Send BAT LEVEL (each 1 SEC)
 	battChangeCheckSend();
 
+	// 5-1) TM battery ADC diagnostic (1 Hz)
+	batteryDiagnosticSend();
+
 	// 6) LED Display OUT
 	rodLed1SecControl();
 

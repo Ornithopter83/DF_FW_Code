@@ -1,6 +1,6 @@
 # DF Main/Rod protocol contract
 
-Updated: 2026-08-27
+Updated: 2026-10-13
 
 ## Wire format
 
@@ -40,6 +40,7 @@ byte 2..N : command-specific payload
 | 22 | Version | Rod 및 IMU version 문자열 |
 | 24 | ImuConnection | IMU 연결 상태 문자열 |
 | 26 | Battery | 3자리 battery level 문자열 |
+| 28 | BatteryDiagnostic | `현재ADC,20회평균ADC,ADC환산퍼센트,배터리요청반환퍼센트` 정수 필드; TM에서만 1초 주기 |
 | 32 | RodAddress | MAC address 문자열 |
 | 34 | Sleep | sleep/wakeup 상태 문자열 |
 
@@ -55,5 +56,8 @@ PID 번호, payload 조합 순서와 기존 문자열 형식은 이번 정리에
 | Main → Rod | AP type 정보 | `330100` |
 | Rod → Main | Alive 응답 | `10` |
 | Rod → Main | Battery 95% 예시 | `2695%` |
+| Rod → Main | TM battery diagnostic 예시 | `283520,3512,95,95` |
+
+PID 28은 기존 PID 26과 역할을 분리한다. PID 26 payload와 전송 정책은 바꾸지 않는다. Main은 TM AP일 때에만 PID 28을 PC 시리얼 `$31` 응답으로 중계하며, 게임 프로그램(AP_IS_DF)에는 진단 프레임을 보내지 않는다. 세 번째 필드는 ADC 평균값을 기준점 2828~3546에서 선형으로 환산한 원값이다. 네 번째 필드는 Rod가 PID 26 배터리 payload로 보내는 값과 동일하며, TM 좌측 잔량 및 배터리 요청 응답과 일치시킨다. 따라서 ADC 환산값과 요청 반환값이 다를 수 있으며, 전자는 측정 분석용 참고값이다.
 
 Golden 문자열은 현재 결합 규칙의 대표 fixture이며 실제 장비 결과로 검증하지 않은 상태다.
