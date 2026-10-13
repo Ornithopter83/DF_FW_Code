@@ -1,12 +1,20 @@
 # DF Firmware 프로젝트 명령서
 
-## 최신 BoardWifiConnector (2026-10-02)
+## 최신 작업 — TM 배터리 ADC 진단 표시 (2026-10-13)
 
-최신: 승인된 재시도 1회에서 자체 포함 단일 EXE 게시 성공. .NET 런타임·네이티브 라이브러리·기본 INI 리소스를 포함하며 Release PDB를 만들지 않는다. 출력: bin/BoardWifiConnector/Release/BoardWifiConnector.exe, 161,859,788 bytes. 최초 실행 시 INI 생성. 16-C 완료, 실제 실행/통신/장비 시험은 미실행이다. 아래 실패/재시도 대기 설명은 이전 이력이다.
+작업 17-A~E 초기 구현 후 Rod→Main PID 28, TM에서만 Main PC `$31` 중계, TM 배터리 상태/ADC 표시와 TM 단일 EXE 게시, Main/Rod Release 빌드에 성공했다. 이 성공 산출물은 배터리 반환값 일치와 게이지 UI의 후속 수정 전 결과다. 후속 Rod/TM 빌드와 protocol host test는 출력 파일 접근 권한 오류로 실패했으며 현재 최신 소스의 빌드는 미확인이다. 기존 PID 26 및 `$12` 프레임은 유지한다. 초기 성공 실행: [실행 기록](docs/build/TM_BATTERY_DIAGNOSTICS_BUILD_2026-10-13.md); 후속 실패: [빌드 기록](docs/build/TM_BATTERY_CANONICAL_BUILD_2026-10-13.md).
 
-최신 승인 실행: Main 1회 성공, Connector 명시 복원 1회 성공, Release 게시 1회 CS8510 실패. 소스 예외 순서를 수정했으나 재게시 미실행이다. 다음은 BoardWifiConnector/build.ps1 -Mode Publish 1회만 새 승인 후 실행한다. Main 산출물은 갱신됐고 Connector EXE는 없다. [실행 결과](docs/build/BOARD_WIFI_BUILD_2026-10-02.md). 아래 구현 시점 설명은 이전 이력이다.
+ADC 표시를 사용하려면 Main과 Rod 펌웨어를 모두 새 버전으로 업데이트해야 한다. TM 단독 업데이트는 기존 배터리 상태 표시만 가능하며 ADC 진단 프레임을 받을 수 없다. Main/Rod compile/link 및 플래시는 각 승인/수동 검증 정책을 따른다.
 
-작업 16-A/B에서 Main AP/TCP와 트레이 소스를 구현했다. 사용자는 로그온 후 동작이면 충분하다고 확인했다. 빌드/복원/시험/등록/플래시/실제 종료는 미실행이며 새 EXE는 없다. 16-C는 새 승인 대기다. 아래 명령은 제공만 했으며 자동 실행하지 않는다.
+## 최신 재빌드 결과 (2026-10-12)
+
+사용자 승인으로 Main Release x64, TM Release, BoardWifiConnector 자체 포함 단일 EXE 게시를 각각 1회 실행해 모두 성공(exit 0)했다. Main BIN은 909,696 bytes, TM EXE는 83,113,790 bytes, Connector EXE는 161,859,788 bytes다. 상세: [재빌드 결과](docs/build/BUILD_REVALIDATION_2026-10-12.md).
+
+프로토콜/GUI/통신 테스트, 플래시, 장비 시험, 설치 및 실제 종료 동작은 실행하지 않았다. 아래는 2026-10-02 당시의 실패·재시도 이력이다.
+
+2026-10-02 이력: Connector 명시 복원 1회 성공, 최초 Release 게시 1회 CS8510 실패 후 예외 패턴 순서를 수정했고 승인된 재시도에서 단일 EXE 게시에 성공했다. 당시 실행 결과: [BOARD_WIFI_BUILD_2026-10-02.md](docs/build/BOARD_WIFI_BUILD_2026-10-02.md).
+
+작업 16-A/B에서 Main AP/TCP와 트레이 소스를 구현했다. 사용자는 로그온 후 동작이면 충분하다고 확인했다. 실제 실행·통신·장비 시험, 설치·등록·플래시·실제 종료 동작은 여전히 미검증이다. 아래 명령은 필요할 때 명시적으로 실행한다.
 
 ```powershell
 .\BoardWifiConnector\build.ps1 -Mode Restore

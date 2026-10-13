@@ -38,6 +38,24 @@ void battChangeCheckSend()
 	}
 }
 
+// TM 전용 ADC 진단값. 기존 PID 26 배터리/상태 payload는 변경하지 않는다.
+void batteryDiagnosticSend()
+{
+	String payload;
+
+	if (AP_IS_TM != apType)
+	{
+		return;
+	}
+
+	payload = String(battery.adc_value) + ",";
+	payload += String(battery.avg_ad) + ",";
+	payload += String(battery.mapped_lvl) + ",";
+	// Match the percentage returned through PID 26, not the instantaneous ADC clamp.
+	payload += String(battery.restLvlStr.toInt());
+	eNow.write(DF_Protocol_RodToMain_BatteryDiagnostic, payload);
+}
+
 
 //----------------------------------------------------------------
 //

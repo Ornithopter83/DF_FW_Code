@@ -1,8 +1,34 @@
 # DF Main/Rod 통합 펌웨어 현재 작업 상태
 
-Updated: 2026-10-02
+Updated: 2026-10-13
 
-## 현재 상태 — 작업 16 게시 완료·기존 12/15 승인 대기
+## 최신 작업 — TM 배터리 ADC 진단 표시·게시 완료
+
+- 2026-10-13 후속 수정: TM 우측 진단 네 번째 배터리 퍼센트를 Rod PID 26 송신값(`restLvlStr`)과 맞췄다. Rod Release x64, TM Release publish, protocol host test를 각각 1회 시도했으나 기존 출력 정리/링크 단계의 권한 오류로 모두 실패했다. 이후 배터리 UI를 진행률 게이지로 바꾸고 좌우 기준 `0% (2828)` / `99% (3546)`, 현재/평균 ADC를 추가했다. 최신 UI는 미빌드·미실행 상태다. 빌드 기록: `docs/build/TM_BATTERY_CANONICAL_BUILD_2026-10-13.md`.
+
+- 작업 17-A/B 구현 완료: Rod는 ADC 현재값, 20회 평균, clamp 전 환산 퍼센트, PID 26으로 실제 송신하는 배터리 잔량을 PID 28로 1초마다 전송한다. TM AP가 아닐 때 Rod가 보내지 않는다.
+- Main은 TM AP에서만 PID 28을 PC `$31`로 전달한다. 기존 배터리 잔량 PID 26과 PC `$12` 상태코드는 유지한다.
+- TM UI는 `99% (-3)` 형식으로 기존 상태와 숫자 잔량을 함께 표시하고, 우측에 현재 ADC/평균 ADC/ADC 환산/요청 반환값을 나타낸다. 요청 반환값은 좌측 잔량과 같고 ADC 환산은 참고값이다. 20회 평균은 500ms 샘플 주기 기준 약 10초다.
+- 이번 작업에서 업데이트가 필요한 펌웨어는 **Main과 Rod 모두**다. 둘 중 하나만 업데이트하면 새 진단 경로가 끊겨 ADC 정보가 표시되지 않는다. TM은 새 단일 EXE를 사용한다.
+- 사용자 승인 후 TM Release 단일 EXE 게시 성공: `bin/testmodule/Release/DFTestModule_V041.exe`, 83,115,838 bytes. 게시 디렉터리에는 EXE 하나만 있다.
+- Main Release `Vm1.0.10.0`: `bin/release/x64/Vm1.0.10.0/DF_Main.ino.bin`, 909,840 bytes (배포 파일 4개).
+- Rod Release `Vr1.0.2.0`: `bin/release/x64/Vr1.0.2.0/DF_Rod.ino.bin`, 767,456 bytes (배포 파일 4개).
+- 제한된 환경에서 정리 및 X: 매핑 거부를 확인했으며, 사용자 승인으로 제한 환경 밖에서 세 스크립트를 각각 1회 실행해 성공했다. 추가 빌드/재시도는 하지 않았다.
+- GUI/COM/프로토콜 시험, 플래시 및 장비 확인은 미실행이다. 상세 결과: `docs/build/TM_BATTERY_DIAGNOSTICS_BUILD_2026-10-13.md`.
+- 상세 작업서: `tasks/17_TM_배터리_ADC_진단표시.md`; 프로토콜 계약: `docs/protocol/DF_PROTOCOL_CONTRACT.md`.
+- 작업 17 A~E 및 F/H 소스/UI 수정 완료. G 빌드/검사는 권한 오류로 미완료. 현재 UI 변경 빌드·실행 미확인. 잔여 번호 작업 1개(12), 잔여 문자 2개(12-H/I); 빌드 재시도는 새 승인 대기다.
+- 기존 10-12 문서 변경분은 보존했다. 변경은 현재 사용자 승인 범위의 작업 17에 한정한다.
+
+## 현재 상태 — Main/TM/Connector 재빌드 성공
+
+- 2026-10-12 사용자 승인으로 Main Release x64, TM Release, BoardWifiConnector 자체 포함 단일 EXE 게시를 각각 1회 수행했고 모두 exit 0이다.
+- 산출물: Main `bin/release/x64/Vm1.0.10.0/DF_Main.ino.bin` 909,696 bytes; TM `bin/testmodule/Release/DFTestModule_V041.exe` 83,113,790 bytes; Connector `bin/BoardWifiConnector/Release/BoardWifiConnector.exe` 161,859,788 bytes.
+- Rod 소스는 변경되지 않아 재빌드하지 않았다. 프로토콜 테스트, GUI/통신 실행, 플래시 및 장비 시험은 하지 않았다.
+- 작업 15-A/B 완료. 잔여 번호 작업 1개(12), 잔여 문자 2개(12-H/I).
+- 상세 근거: `docs/build/BUILD_REVALIDATION_2026-10-12.md`.
+- 이번 재빌드 결과 및 현황 문서는 아직 커밋하지 않았다. 빌드 산출물은 `bin/`에 생성됐다.
+
+## 이전 상태 — 2026-10-02 작업 16 게시 완료·12/15 승인 대기
 
 - 2026-10-02 사용자 재시도 승인 및 자체 포함 단일 파일 요청으로 Connector Release 게시 1회 exit 0. 첫 실패 이후 수정한 CS8510 오류는 이번 빌드에 없다.
 - EXE: bin/BoardWifiConnector/Release/BoardWifiConnector.exe, 161,859,788 bytes. win-x64, .NET 런타임·네이티브 라이브러리·기본 INI 양식을 포함한다. Release PDB 제외, 최초 실행 시 EXE 옆에 connection.ini 생성. 기존 설정은 보존한다.

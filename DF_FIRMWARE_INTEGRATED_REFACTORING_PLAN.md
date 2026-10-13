@@ -1,15 +1,19 @@
 # DF Main/Rod 통합 펌웨어 리팩토링 로드맵
 
-Updated: 2026-10-02
+Updated: 2026-10-13
 
-2026-10-02 main의 원격 백업은 bc8e551 / `backup/local-20261002-143949`로 보존한다. 이후 작업 13-A/B에서 TM FRONT 기준축과 손잡이 표시 회전량 1.3배를 수정하고 승인된 NuGet 잠금 재평가·TM Release 게시에 성공했다. 12-C 완료, 잔여 번호 1개(12), 잔여 문자 2개(H/I: 수정 후 TM Debug 및 IDE/경로 이동 확인).
+## 최신 작업 — TM 배터리 ADC 진단 표시 (2026-10-13)
+
+작업 17-A~E는 완료했고 Release 산출물도 생성했다. 이후 배터리 반환값 일치와 게이지 UI를 추가 수정했지만, 후속 Rod/TM 빌드와 host test는 출력 파일 접근 권한 오류로 실패해 현재 소스는 미검증이다. 기존 산출물 크기와 과거 성공 실행은 `CurrentWork.md` 및 [작업 17](tasks/17_TM_배터리_ADC_진단표시.md)을 따른다. Flash·GUI/COM·통합 통신·장비 확인은 미실행이다.
+
+2026-10-12 최신 승인 빌드에서 Main Release x64, TM Release, BoardWifiConnector 자체 포함 단일 EXE 게시가 각각 성공했다. 작업 15-A/B 완료, 잔여 번호 1개(12), 문자 2개(12-H/I: TM Debug 및 IDE/경로 이동 확인). 상세: `docs/build/BUILD_REVALIDATION_2026-10-12.md`.
 
 - [개발환경 세부 계획](docs/build/VSCode_VS2022_COMPATIBILITY_PLAN.md)
 - [복구 지점 및 복원 안내](docs/build/RECOVERY_BEFORE_VSCODE_2026-10-02.md)
 
 ## 현재 추가 요청 (2026-10-02)
 
-최신: 승인된 Connector 재시도 1회에서 자체 포함 단일 EXE 게시 성공. 161,859,788 bytes이며 .NET 런타임·네이티브 라이브러리·기본 INI 리소스 포함. Main과 Connector 빌드를 근거로 16-A/B/C 완료. 실제 실행/통신/장비 시험은 미실행이다. 잔여 번호 2개(12,15), 문자 3개(12-H/I,15-B). 아래 재게시 대기 설명은 이전 이력이다.
+2026-10-12 재빌드 기록은 위 최신 항목을 따른다. 아래 문단은 2026-10-02 당시의 진행 이력이다.
 
 최신 빌드: 승인된 Main 1회 성공, Connector 명시 복원 1회 성공, Release 게시 1회 CS8510 실패. 예외 패턴 순서를 소스 수정했고 수정 후 재게시 1회는 새 승인 대기다. Main application BIN은 909,696 bytes, Connector EXE는 없다. 16-C 미완료, 잔여 번호/문자 수는 3개/4개 유지. [실행 결과](docs/build/BOARD_WIFI_BUILD_2026-10-02.md).
 
@@ -46,8 +50,9 @@ DF Firmware Repository
 | 12 | [VS Code / VS2022 호환 개발환경](tasks/12_VSCode_VS2022_호환_개발환경.md) | TM 분리 솔루션·공통 빌드/디버깅·루트 bin 상대경로 | C 완료·Release 게시 성공·H Debug/I 승인 대기 |
 | 13 | [TM IMU 영점·손잡이 표시 보정](tasks/13_TM_IMU_영점_손잡이_표시보정.md) | FRONT 기준축 정렬·손잡이 표시 회전량 1.3배 | A/B 수정·빌드 완료 |
 | 14 | [TM 릴 3D 가려짐·테두리 수정](tasks/14_TM_릴3D_가려짐_렌더링.md) | 공통 픽셀 깊이 처리·숨은 선 제외 | A/B 구현·빌드 완료 |
-| 15 | [TM LED 디밍 패턴 선택](tasks/15_TM_LED_디밍_패턴선택.md) | 최대 6·기본 6·우측 순환 색 표시 | A 구현 완료·B 빌드 승인 대기 |
+| 15 | [TM LED 디밍 패턴 선택](tasks/15_TM_LED_디밍_패턴선택.md) | 최대 6·기본 6·우측 순환 색 표시 | A/B 완료 |
 | 16 | [보드 AP/TCP 및 트레이 연결](tasks/16_BoardWifiConnector_AP_TCP.md) | 게임 시리얼 우선·Wi-Fi 종료 대체 경로·독립 트레이 | A/B/C 완료·자체 포함 단일 EXE 게시 성공 |
+| 17 | [TM 배터리 ADC 진단 표시](tasks/17_TM_배터리_ADC_진단표시.md) | 1Hz Rod→Main→TM ADC 진단과 배터리 UI | A~E 완료·Release 산출물 생성 |
 
 ## 최신 요청 처리 (2026-08-31)
 
@@ -132,9 +137,11 @@ DF_FW_Code/
 
 ## 현재 상태
 
+작업 17-A~E 초기 구현과 Release 산출물 생성은 완료했다. 후속 요청 반환값 일치 및 진행률 게이지 UI는 구현했으나 아직 빌드되지 않았다. 최신 Rod/TM 빌드와 protocol host test 시도는 출력 경로 권한 오류로 실패했으며 재시도는 승인 대기다. 실제 flash, 통합 통신과 GUI/장비 확인은 미실행이다.
+
 작업 13의 TM 표시 수정·Release 게시 완료. 공통 analyzer 수정 후 NuGet 잠금 재평가와 Release 성공을 근거로 12-C 완료 처리한다. 수정 후 TM Debug와 두 IDE/경로 이동 확인은 미실행이다.
 
-잔여 번호 작업 1개(12), 잔여 문자 2개(H/I). 작업 13 잔여 문자 0개. 실제 FRONT 방향과 손잡이 회전량의 장비 일치는 사용자 확인 미실행이며 테스트·장비 동작을 자동 재개하지 않는다.
+잔여 번호 작업 1개(12), 잔여 문자 2개(12-H/I). 작업 13과 17 잔여 문자는 0개다. 실제 FRONT 방향과 손잡이 회전량의 장비 일치는 사용자 확인 미실행이며 테스트·장비 동작을 자동 재개하지 않는다.
 
 ## 로컬 버전 백업 기준 (2026-10-02)
 

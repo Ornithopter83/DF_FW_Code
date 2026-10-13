@@ -23,6 +23,7 @@ const char DF_Protocol_RodToMain_Encoder[] = "18";
 const char DF_Protocol_RodToMain_Version[] = "22";
 const char DF_Protocol_RodToMain_ImuConnection[] = "24";
 const char DF_Protocol_RodToMain_Battery[] = "26";
+const char DF_Protocol_RodToMain_BatteryDiagnostic[] = "28";
 const char DF_Protocol_RodToMain_RodAddress[] = "32";
 const char DF_Protocol_RodToMain_Sleep[] = "34";
 

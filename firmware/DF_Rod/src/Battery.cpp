@@ -7,6 +7,7 @@
 
 
 Battery::Battery()
+	: mapped_lvl(-2)
 {
 
 }
@@ -66,7 +67,8 @@ void Battery::scanAvgInteg()
 		
 		rest_ad = avg_ad;	
 
-	rest_lvl = map(rest_ad, BATTERY_MIN_VALUE_NEW, BATTERY_MAX_VALUE_NEW, 0, 100);
+	mapped_lvl = map(rest_ad, BATTERY_MIN_VALUE_NEW, BATTERY_MAX_VALUE_NEW, 0, 100);
+	rest_lvl = mapped_lvl;
 
   if( BATTERY_PER_MIN_0 > rest_lvl) rest_lvl = BATTERY_PER_MIN_0;	// 0 %
   //if( BATTERY_PER_MIN_1 > rest_lvl) rest_lvl = BATTERY_PER_MIN_1;	// 1 %

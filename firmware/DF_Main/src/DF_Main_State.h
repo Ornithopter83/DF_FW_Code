@@ -390,6 +390,8 @@ extern String RESP_STX_ROD_CONN;
 
 extern String RESP_STX_IMU_CONNECT;
 
+extern String RESP_STX_BATTERY_DIAG;
+
 #define RESP_IMU_FULLSTR_CONN		"$2101%"
 
 #define RESP_IMU_FULLSTR_DISCONN	"$2100%"

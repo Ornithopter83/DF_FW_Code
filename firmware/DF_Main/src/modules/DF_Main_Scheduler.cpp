@@ -1192,6 +1192,16 @@ void nowRecvHandler()
 
   }
 
+	// TM battery ADC diagnostics; keep this out of the game-program serial stream.
+	else if (DF_Protocol_Pid_RodToMain_BatteryDiagnostic == now_rcv_id && (!rodRegistMode))
+	{
+		if (AP_IS_TM == apType)
+		{
+			respMsg = RESP_STX_BATTERY_DIAG + now_cmd_data + "%";
+			StsSendPrintln(respMsg);
+		}
+	}
+
   // 6) IMU Connection(PID "21")
   else if (DF_Protocol_Pid_RodToMain_ImuConnection == now_rcv_id)	// IMU CONN
   {
