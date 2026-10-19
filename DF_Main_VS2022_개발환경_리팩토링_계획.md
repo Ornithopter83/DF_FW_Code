@@ -5,11 +5,11 @@
 본 문서는 `Vm1.0.9.0.zip`을 현재 최신 소스로 간주하고, 다음 두 목표를 안전하게 달성하기 위한 개발 기준을 정의한다.
 
 1. **Visual Micro 없이 Visual Studio 2022를 주 개발 IDE로 사용**
-2. **현재 22,000줄 이상인 `DF\_Main.ino`를 일반 C++ 구조로 단계적으로 분리·리팩토링**
+2. **현재 22,000줄 이상인 `DF\\\_Main.ino`를 일반 C++ 구조로 단계적으로 분리·리팩토링**
 
 가장 중요한 원칙은 다음과 같다.
 
-> \*\*개발환경 변경과 로직 리팩토링을 동시에 수행하지 않는다.\*\*
+> \\\*\\\*개발환경 변경과 로직 리팩토링을 동시에 수행하지 않는다.\\\*\\\*
 
 먼저 기존 Arduino 빌드 환경과 동일한 결과를 재현할 수 있게 만든 뒤, 파일 분리와 구조 개선을 단계적으로 진행한다.
 
@@ -23,7 +23,7 @@
 
 |파일|역할|규모|
 |-|-|-:|
-|`DF\_Main.ino`|메인 제어 및 대부분의 업무 로직|약 22,715줄|
+|`DF\\\_Main.ino`|메인 제어 및 대부분의 업무 로직|약 22,715줄|
 |`Common.h`|공통 정의, GPIO, 프로토콜, 상수|약 789줄|
 |`Config.h`|제품/기능별 컴파일 옵션|약 378줄|
 |`Version.h`|펌웨어 버전 및 이력|약 835줄|
@@ -38,11 +38,11 @@
 |`ServoMotor.cpp/.h`|Servo 제어|약 148줄|
 |`Diag.cpp/.h`|진단 기능|약 152줄|
 
-`DF\_Main.ino` 내부에는 대략 **357개의 함수**가 존재한다.
+`DF\\\_Main.ino` 내부에는 대략 **357개의 함수**가 존재한다.
 
 따라서 이 프로젝트의 핵심 문제는 파일 개수가 아니라:
 
-* 지나치게 큰 `DF\_Main.ino`
+* 지나치게 큰 `DF\\\_Main.ino`
 * 많은 전역 상태
 * 기능별 코드의 물리적 혼재
 * 여러 상태머신과 주기 태스크가 하나의 파일에 존재
@@ -66,11 +66,11 @@ build/
 기존 빌드 산출물도 포함되어 있다.
 
 ```text
-DF\_Main.ino.bin
-DF\_Main.ino.bootloader.bin
-DF\_Main.ino.partitions.bin
-DF\_Main.ino.elf
-DF\_Main.ino.map
+DF\\\_Main.ino.bin
+DF\\\_Main.ino.bootloader.bin
+DF\\\_Main.ino.partitions.bin
+DF\\\_Main.ino.elf
+DF\\\_Main.ino.map
 ```
 
 이는 향후 리팩토링 시 매우 중요한 기준 자료가 된다.
@@ -86,10 +86,10 @@ DF\_Main.ino.map
 ```cpp
 #include <Arduino.h>
 #include <WiFi.h>
-#include <esp\_now.h>
-#include <esp\_wifi.h>
-#include <esp\_pm.h>
-#include <esp\_sleep.h>
+#include <esp\\\_now.h>
+#include <esp\\\_wifi.h>
+#include <esp\\\_pm.h>
+#include <esp\\\_sleep.h>
 #include <SPIFFS.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -199,7 +199,7 @@ ESP-IDF/CMake
 
 ## 5.1 반드시 고정할 항목
 
-다음 항목을 `docs/BUILD\_ENVIRONMENT.md` 등에 기록한다.
+다음 항목을 `docs/BUILD\\\_ENVIRONMENT.md` 등에 기록한다.
 
 ```text
 Arduino CLI Version
@@ -309,19 +309,19 @@ Serial Tool 실행
 Build Command를 다음과 같이 연결한다.
 
 ```text
-tools\\build.cmd
+tools\\\\build.cmd
 ```
 
 Rebuild:
 
 ```text
-tools\\rebuild.cmd
+tools\\\\rebuild.cmd
 ```
 
 Upload:
 
 ```text
-tools\\upload.cmd
+tools\\\\upload.cmd
 ```
 
 이 방식이면 VS2022에서 F7 또는 Build 메뉴를 사용하면서도 실제 컴파일은 Arduino CLI가 담당한다.
@@ -333,9 +333,9 @@ tools\\upload.cmd
 초기 리팩토링 완료 후 목표 구조는 다음과 같다.
 
 ```text
-DF\_Main/
+DF\\\_Main/
 │
-├─ DF\_Main.ino
+├─ DF\\\_Main.ino
 │
 ├─ Common.h
 ├─ Config.h
@@ -410,7 +410,7 @@ DF\_Main/
 │  └─ serial.cmd
 │
 ├─ docs/
-│  ├─ BUILD\_ENVIRONMENT.md
+│  ├─ BUILD\\\_ENVIRONMENT.md
 │  ├─ REFACTORING.md
 │  └─ PROTOCOL.md
 │
@@ -428,7 +428,7 @@ DF\_Main/
 다음과 같은 구조는 피한다.
 
 ```text
-DF\_Main.ino
+DF\\\_Main.ino
 Motor.ino
 Game.ino
 Protocol.ino
@@ -496,7 +496,7 @@ Commit 5: 필요하면 클래스화
 
 첫 번째 목표는:
 
-> \*\*22,715줄짜리 INO를 여러 CPP로 이동하되 프로그램의 동작은 단 한 줄도 바꾸지 않는다.\*\*
+> \\\*\\\*22,715줄짜리 INO를 여러 CPP로 이동하되 프로그램의 동작은 단 한 줄도 바꾸지 않는다.\\\*\\\*
 
 이다.
 
@@ -535,7 +535,7 @@ unsigned long systemCounter = 0;
 
 # 11\. 가장 먼저 정리해야 할 영역
 
-현재 `DF\_Main.ino`의 함수들을 기준으로 다음 영역이 뚜렷하게 보인다.
+현재 `DF\\\_Main.ino`의 함수들을 기준으로 다음 영역이 뚜렷하게 보인다.
 
 ## 11.1 통신 / Protocol
 
@@ -546,8 +546,8 @@ uartRecvParsing
 uartRecvHandler
 uartRecvHandlerImp
 nowRecvHandler
-recv\_cb\_esp\_now\_msg
-sent\_cb\_esp\_now\_sts
+recv\\\_cb\\\_esp\\\_now\\\_msg
+sent\\\_cb\\\_esp\\\_now\\\_sts
 anaGameStatus
 anaDeviceInfoReq
 anaDeviceContReq
@@ -569,15 +569,15 @@ CommunicationControl.cpp
 대규모 함수 집합:
 
 ```text
-devChkReady\_Control
-devchk\_bbnAll\_Control
-devchk\_bbnMot\_Control
-devchk\_bbnEnc\_Control
-devchk\_bldc24v\_Control
-devchk\_torq\_Control
-devchk\_lmMot\_Control
-devchk\_lmEnc\_Control
-devchk\_WireBroken\_Control
+devChkReady\\\_Control
+devchk\\\_bbnAll\\\_Control
+devchk\\\_bbnMot\\\_Control
+devchk\\\_bbnEnc\\\_Control
+devchk\\\_bldc24v\\\_Control
+devchk\\\_torq\\\_Control
+devchk\\\_lmMot\\\_Control
+devchk\\\_lmEnc\\\_Control
+devchk\\\_WireBroken\\\_Control
 devReadyCheck
 ```
 
@@ -597,15 +597,15 @@ DeviceCheck.h
 예:
 
 ```text
-lmHome\_Control\_Start
-lmHome\_Control\_Stop
-lmLeft\_Control\_Start
-lmLeft\_Control
-lmRight\_Control
-lmReturn\_Control
-lmPosition\_Set
-wireHomeControl\_Start
-wireHome\_Control
+lmHome\\\_Control\\\_Start
+lmHome\\\_Control\\\_Stop
+lmLeft\\\_Control\\\_Start
+lmLeft\\\_Control
+lmRight\\\_Control
+lmReturn\\\_Control
+lmPosition\\\_Set
+wireHomeControl\\\_Start
+wireHome\\\_Control
 ```
 
 후보:
@@ -625,16 +625,16 @@ WireControl.h
 예:
 
 ```text
-biteType\_TorqSet
-execBite\_servo
-execBite\_torque\_justTarget
-execBite\_torque\_incTarget
-execBite\_BldcStart
-execBite\_BldcControl
-execBite\_torquewf\_Control
-execBite\_ptn1\_Control
-execBite\_ptn2\_Control
-execBite\_ptn3\_Control
+biteType\\\_TorqSet
+execBite\\\_servo
+execBite\\\_torque\\\_justTarget
+execBite\\\_torque\\\_incTarget
+execBite\\\_BldcStart
+execBite\\\_BldcControl
+execBite\\\_torquewf\\\_Control
+execBite\\\_ptn1\\\_Control
+execBite\\\_ptn2\\\_Control
+execBite\\\_ptn3\\\_Control
 ```
 
 후보:
@@ -651,15 +651,15 @@ BiteControl.h
 예:
 
 ```text
-execHit\_BldcStart
-execHit\_1st\_BldcControl
+execHit\\\_BldcStart
+execHit\\\_1st\\\_BldcControl
 execHiting
-execHit\_ResistRandomStart
-execHit\_HoldServo
-execHit\_ResistTorqControl
-execHit\_Holdon\_BldcControl
-execHit\_HoldOn\_TorqControl
-execHit\_BreakControl
+execHit\\\_ResistRandomStart
+execHit\\\_HoldServo
+execHit\\\_ResistTorqControl
+execHit\\\_Holdon\\\_BldcControl
+execHit\\\_HoldOn\\\_TorqControl
+execHit\\\_BreakControl
 ```
 
 후보:
@@ -678,13 +678,13 @@ HoldControl.h
 현재 별도의 `Led.cpp`가 있지만, 메인 INO에도 다음과 같은 상위 LED 제어가 존재한다.
 
 ```text
-ledCont\_OffStart
-ledCont\_OnStart
-ledCont\_BlinkStart
-execledCont\_Blink
-ledCont\_DimmStart
-execledCont\_Dimm
-extLed\_Control
+ledCont\\\_OffStart
+ledCont\\\_OnStart
+ledCont\\\_BlinkStart
+execledCont\\\_Blink
+ledCont\\\_DimmStart
+execledCont\\\_Dimm
+extLed\\\_Control
 ```
 
 권장 구분:
@@ -755,10 +755,10 @@ ESP32 Hardware
 현재 메인에서는 다음과 같은 주기 처리 함수가 존재한다.
 
 ```text
-t1ms\_Process\_Exec()
-t10ms\_Process\_Exec()
-t100ms\_Process\_Exec()
-system\_counter()
+t1ms\\\_Process\\\_Exec()
+t10ms\\\_Process\\\_Exec()
+t100ms\\\_Process\\\_Exec()
+system\\\_counter()
 ```
 
 그리고 `loop()`가 여러 주기 작업과 통신 처리를 수행한다.
@@ -803,8 +803,8 @@ GPIO ISR
 Encoder ISR
 ESP-NOW Callback
 volatile 변수
-portENTER\_CRITICAL
-portEXIT\_CRITICAL
+portENTER\\\_CRITICAL
+portEXIT\\\_CRITICAL
 ```
 
 ISR 또는 Callback에서 사용하는 변수는 일반 전역변수와 동일하게 이동해서는 안 된다.
@@ -813,7 +813,7 @@ ISR 또는 Callback에서 사용하는 변수는 일반 전역변수와 동일�
 
 ```text
 volatile 여부
-IRAM\_ATTR 여부
+IRAM\\\_ATTR 여부
 Critical Section
 ISR에서 호출되는 함수
 ISR Safe API 여부
@@ -853,7 +853,7 @@ HardwareContext.cpp
 HardwareContext.h
 ```
 
-또는 기존 `DF\_Main.ino`에 잠시 그대로 둔다.
+또는 기존 `DF\\\_Main.ino`에 잠시 그대로 둔다.
 
 초기화 구조가 안정화된 뒤 변경한다.
 
@@ -866,15 +866,15 @@ HardwareContext.h
 예:
 
 ```text
-NEW\_IF
-AP\_MOT\_CONT
-CONFIG\_TORQ\_WATT\_30W
-MC\_CONF\_NO\_4
-BBN\_MOT\_16W
-IO\_TORQ
-IO\_SERVO
-IO\_BBN
-IO\_I2C
+NEW\\\_IF
+AP\\\_MOT\\\_CONT
+CONFIG\\\_TORQ\\\_WATT\\\_30W
+MC\\\_CONF\\\_NO\\\_4
+BBN\\\_MOT\\\_16W
+IO\\\_TORQ
+IO\\\_SERVO
+IO\\\_BBN
+IO\\\_I2C
 ```
 
 초기 리팩토링에서는 **Config.h의 의미를 변경하지 않는다.**
@@ -928,7 +928,7 @@ git tag baseline-v1.0.9.0
 예:
 
 ```bat
-tools\\build.cmd
+tools\\\\build.cmd
 ```
 
 결과:
@@ -1084,7 +1084,7 @@ control/
 └─ PatternControl.cpp
 ```
 
-이 단계가 완료되면 `DF\_Main.ino` 크기가 크게 줄어들 것으로 예상한다.
+이 단계가 완료되면 `DF\\\_Main.ino` 크기가 크게 줄어들 것으로 예상한다.
 
 \---
 
@@ -1110,7 +1110,7 @@ struct GameState
     int status;
     int step;
     bool running;
-    uint32\_t startTime;
+    uint32\\\_t startTime;
 };
 ```
 
@@ -1189,7 +1189,7 @@ void loop()
 }
 ```
 
-`DF\_Main.ino` 목표 크기는 **300\~800줄 이하**로 잡는다.
+`DF\\\_Main.ino` 목표 크기는 **300\~800줄 이하**로 잡는다.
 
 가능하면 장기적으로는 `setup()/loop()` 외 대부분의 구현이 일반 `.cpp`에 존재하게 한다.
 
@@ -1359,43 +1359,43 @@ ESP-IDF
 본 프로젝트는 다음 순서로 진행하는 것을 권장한다.
 
 ```text
-\[현재 Vm1.0.9.0]
+\\\[현재 Vm1.0.9.0]
         │
         ▼
-\[Git Baseline 고정]
+\\\[Git Baseline 고정]
         │
         ▼
-\[Arduino CLI로 동일 빌드]
+\\\[Arduino CLI로 동일 빌드]
         │
         ▼
-\[VS2022 개발환경 연결]
+\\\[VS2022 개발환경 연결]
         │
         ▼
-\[INO 자동처리 의존 제거]
+\\\[INO 자동처리 의존 제거]
         │
         ▼
-\[기능별 CPP/H 물리적 분리]
+\\\[기능별 CPP/H 물리적 분리]
         │
         ▼
-\[전역 상태 정리]
+\\\[전역 상태 정리]
         │
         ▼
-\[Driver / Control / Protocol 계층화]
+\\\[Driver / Control / Protocol 계층화]
         │
         ▼
-\[DF\_Main.ino 최소화]
+\\\[DF\\\_Main.ino 최소화]
         │
         ▼
-\[필요 시 ESP-IDF + Arduino Component]
+\\\[필요 시 ESP-IDF + Arduino Component]
 ```
 
 핵심은 다음 세 문장으로 정리한다.
 
-> \*\*첫째, 기존 Arduino 빌드 환경을 먼저 완전히 재현한다.\*\*
+> \\\*\\\*첫째, 기존 Arduino 빌드 환경을 먼저 완전히 재현한다.\\\*\\\*
 
-> \*\*둘째, 22,715줄을 처음부터 다시 설계하지 말고 기능 단위로 그대로 CPP/H로 이동한다.\*\*
+> \\\*\\\*둘째, 22,715줄을 처음부터 다시 설계하지 말고 기능 단위로 그대로 CPP/H로 이동한다.\\\*\\\*
 
-> \*\*셋째, 물리적 파일 분리가 끝난 뒤에 전역변수·상태머신·클래스 구조를 개선한다.\*\*
+> \\\*\\\*셋째, 물리적 파일 분리가 끝난 뒤에 전역변수·상태머신·클래스 구조를 개선한다.\\\*\\\*
 
 이 순서를 따르면 리팩토링 중 문제가 발생하더라도 원인을 좁히기 쉽고, 언제든 직전 동작 버전으로 돌아갈 수 있다.
 
@@ -1418,7 +1418,7 @@ ESP-IDF
 10. Game Control 분리
 11. Scheduler 분리
 12. Global State 구조화
-13. DF\_Main.ino 최소화
+13. DF\\\_Main.ino 최소화
 ```
 
 **ISR / Timer / ESP-NOW Callback 자체의 구조 변경은 후순위**로 둔다.
@@ -1435,7 +1435,7 @@ ESP-IDF
 * Arduino IDE 없이 Build 가능
 * 기존 ESP32-S3 Firmware Flash 가능
 * 주요 기능 정상 동작
-* `DF\_Main.ino` 1,000줄 이하
+* `DF\\\_Main.ino` 1,000줄 이하
 * 기능별 CPP/H 분리 완료
 * Protocol / Control / Driver 경계 구분
 * `Config.h` 호환 유지
@@ -1458,7 +1458,7 @@ ESP-IDF
 
 현재 프로젝트는 Arduino라는 이유로 파일 분리가 제한되는 구조가 아니다.
 
-오히려 이미 여러 기능이 `.cpp/.h` 형태로 구현되어 있으므로, 동일한 방식으로 `DF\_Main.ino`의 대규모 로직을 단계적으로 분리하는 것이 적절하다.
+오히려 이미 여러 기능이 `.cpp/.h` 형태로 구현되어 있으므로, 동일한 방식으로 `DF\\\_Main.ino`의 대규모 로직을 단계적으로 분리하는 것이 적절하다.
 
 다만 Arduino의 `.ino` 자동 Prototype 생성, 전역 객체 초기화 순서, ISR/Callback, `volatile`, 조건부 컴파일과 같은 요소 때문에 **단순히 코드를 파일별로 잘라 붙이는 방식은 피해야 한다.**
 

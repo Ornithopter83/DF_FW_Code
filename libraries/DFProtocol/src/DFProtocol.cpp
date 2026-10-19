@@ -2,30 +2,32 @@
 
 #include <string.h>
 
-const char DF_Protocol_MainToRod_PowerOn[] = "05";
-const char DF_Protocol_MainToRod_RodInfoRequest[] = "07";
-const char DF_Protocol_MainToRod_Alive[] = "09";
-const char DF_Protocol_MainToRod_Break[] = "11";
-const char DF_Protocol_MainToRod_ImuDataControl[] = "13";
-const char DF_Protocol_MainToRod_VerticalMotor[] = "19";
-const char DF_Protocol_MainToRod_VersionRead[] = "21";
-const char DF_Protocol_MainToRod_ButtonLed[] = "27";
-const char DF_Protocol_MainToRod_AllOutputsOff[] = "29";
-const char DF_Protocol_MainToRod_MainAddress[] = "31";
-const char DF_Protocol_MainToRod_ApInfo[] = "33";
-const char DF_Protocol_MainToRod_Sleep[] = "34";
+const char DF_Protocol_MainToRod_PowerOn[]          = "05";
+const char DF_Protocol_MainToRod_RodInfoRequest[]   = "07";
+const char DF_Protocol_MainToRod_Alive[]            = "09";
+const char DF_Protocol_MainToRod_Break[]            = "11";
+const char DF_Protocol_MainToRod_ImuDataControl[]   = "13";
+const char DF_Protocol_MainToRod_VerticalMotor[]    = "19";
+const char DF_Protocol_MainToRod_VersionRead[]      = "21";
+const char DF_Protocol_MainToRod_ButtonLed[]        = "27";
+const char DF_Protocol_MainToRod_AllOutputsOff[]    = "29";
+const char DF_Protocol_MainToRod_MainAddress[]      = "31";
+const char DF_Protocol_MainToRod_ApInfo[]           = "33";
+const char DF_Protocol_MainToRod_Sleep[]            = "34";
+const char DF_Protocol_MainToRod_EncoderCalibration[] = "35";
 
-const char DF_Protocol_RodToMain_BoardType[] = "02";
-const char DF_Protocol_RodToMain_Alive[] = "10";
-const char DF_Protocol_RodToMain_ImuData[] = "14";
-const char DF_Protocol_RodToMain_Button[] = "16";
-const char DF_Protocol_RodToMain_Encoder[] = "18";
-const char DF_Protocol_RodToMain_Version[] = "22";
-const char DF_Protocol_RodToMain_ImuConnection[] = "24";
-const char DF_Protocol_RodToMain_Battery[] = "26";
-const char DF_Protocol_RodToMain_BatteryDiagnostic[] = "28";
-const char DF_Protocol_RodToMain_RodAddress[] = "32";
-const char DF_Protocol_RodToMain_Sleep[] = "34";
+const char DF_Protocol_RodToMain_BoardType[]        = "02";
+const char DF_Protocol_RodToMain_Alive[]            = "10";
+const char DF_Protocol_RodToMain_ImuData[]          = "14";
+const char DF_Protocol_RodToMain_Button[]           = "16";
+const char DF_Protocol_RodToMain_Encoder[]          = "18";
+const char DF_Protocol_RodToMain_Version[]          = "22";
+const char DF_Protocol_RodToMain_ImuConnection[]    = "24";
+const char DF_Protocol_RodToMain_Battery[]          = "26";
+const char DF_Protocol_RodToMain_BatteryDiagnostic[]= "28";
+const char DF_Protocol_RodToMain_RodAddress[]       = "32";
+const char DF_Protocol_RodToMain_Sleep[]            = "34";
+const char DF_Protocol_RodToMain_EncoderCalibration[] = "36";
 
 int DF_Protocol_Encode(char* output, size_t outputCapacity, const char* pidText, const char* payload, size_t payloadLength)
 {

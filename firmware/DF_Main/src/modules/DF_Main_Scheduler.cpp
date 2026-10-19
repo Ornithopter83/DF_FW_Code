@@ -1127,6 +1127,14 @@ void nowRecvHandler()
 		StsSendPrintln(respMsg);	  // NEW IF
 
   }
+	else if (DF_Protocol_Pid_RodToMain_EncoderCalibration == now_rcv_id && (!rodRegistMode))
+	{
+		if (AP_IS_TM == apType)
+		{
+			respMsg = STX_ENCODER_CALIBRATION + now_cmd_data + "%";
+			StsSendPrintln(respMsg);
+		}
+	}
 
 
   // 2) IMU EULER Data( 12 )
@@ -1479,6 +1487,28 @@ void uartRecvHandler()
 	if(0) { /* Dummy */ }
 	else if (DF_Main_RodOtaRelay_HandlePcCommand(msg))
 	{
+		return;
+	}
+	else if (msg.startsWith(STX_ENCODER_CALIBRATION))
+	{
+		String payload = msg.substring(3);
+		char action = payload.length() ? payload.charAt(0) : '\0';
+		if (AP_IS_TM != apType) return;
+		if ((DF_Protocol_EncoderCalibrationAction_Start != action) &&
+			(DF_Protocol_EncoderCalibrationAction_Complete != action) &&
+			(DF_Protocol_EncoderCalibrationAction_Apply != action) &&
+			(DF_Protocol_EncoderCalibrationAction_Cancel != action) &&
+			(DF_Protocol_EncoderCalibrationAction_Query != action))
+		{
+			Resp2ApPrintln(STX_ENCODER_CALIBRATION + "6,0,0,0%");
+			return;
+		}
+		if ((ROD_CONN != rod_conn_status) || rodRegistMode || (0 != gRodSleepStat))
+		{
+			Resp2ApPrintln(STX_ENCODER_CALIBRATION + "5,0,0,0%");
+			return;
+		}
+		eNow.write(DF_Protocol_MainToRod_EncoderCalibration, String(action));
 		return;
 	}
 

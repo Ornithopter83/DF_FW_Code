@@ -13,6 +13,7 @@ int DF_Rod_Communication_TakeReceived(char *data, unsigned int capacity, unsigne
 void DF_Rod_Communication_ProcessSendResult();
 void btnChangeCallback(String str);
 void rotateChangeCallback(String str);
+void encoderCalibrationChangeCallback(String str);
 void imuDataCallback(String pid, String str);
 void setData_RodCycleTest(String msg);
 void sendInfo_boardType();

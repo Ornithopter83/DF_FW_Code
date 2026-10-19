@@ -20,6 +20,12 @@
 #define ENC_DIV_VX		ENC_DIV_V3
 #define MAX_COUNT_VX	MAX_COUNT_V3
 
+enum
+{
+	DF_Rod_Encoder_CalibrationTargetStepCount = 20,
+	DF_Rod_Encoder_CalibrationMaxPulseCount = 100000
+};
+
 class Encoder
 {
   public:
@@ -29,8 +35,19 @@ class Encoder
     void rotate();
 
     void setRotateCallback(void (*rotateCallback)(String));
+	void setCalibrationCallback(void (*calibrationCallback)(String));
+	void beginCalibration();
+	void completeCalibration();
+	void applyCalibration();
+	void cancelCalibration();
+	void queryCalibration();
 	String fillZero2char(int _count);
-	int count = 0;
+	int count;
+	unsigned long calibrationRawPulseCount;
+	unsigned int calibratedPulsesPerRevolution;
+	bool calibrationActive;
+	bool calibrationAwaitingApply;
+	bool calibrationValid;
 
   private:
     int lastCLK;
@@ -38,8 +55,15 @@ class Encoder
     int currentCLK;
     int currentDT;
     String oldStr;
+	unsigned long pendingCorrectedOutputCount;
+	unsigned int correctedOutputStepCount;
+	bool calibrationStorageError;
 
     String sendCount();
+	void sendPendingCorrectedStep();
+	void sendCalibrationStatus(char state);
+	bool saveCalibration(unsigned long pulseCount);
+	bool loadCalibration();
 };
 
 

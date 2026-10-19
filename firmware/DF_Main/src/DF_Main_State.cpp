@@ -245,6 +245,7 @@ String STX_BUTT_SWC       = "$13";		// BUTTON SWITCH
 String STX_HAND_ENC       = "$14";		// HANDLE ENCODER
 
 String STX_DEV_CONT_REQ   = "$15";
+String STX_ENCODER_CALIBRATION = "$37";
 String STX_GET_ADDR       = "$16";
 String STX_SET_ADDR       = "$17";
 String STX_APSTS_RESP     = "$18";

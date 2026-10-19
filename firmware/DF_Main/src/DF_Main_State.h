@@ -271,6 +271,7 @@ extern String STX_BUTT_SWC;
 extern String STX_HAND_ENC;
 
 extern String STX_DEV_CONT_REQ;
+extern String STX_ENCODER_CALIBRATION;
 
 extern String STX_GET_ADDR;
 

@@ -53,7 +53,15 @@ internal sealed class MainForm : Form
     private readonly Label imuConnectionState = Indicator("IMU 연결 대기");
     private readonly ImuOrientationView imuOrientation = new() { Width = 300, Height = 150, Margin = new Padding(18, 0, 0, 0) };
     private readonly Button imuZeroButton = SmallButton("0점 보정", 100);
+    private readonly Label encoderCalibrationState = ValueLabel("릴 연결 대기");
+    private readonly Label encoderCalibrationRawCount = ValueLabel("00");
+    private readonly Button encoderCalibrationStartButton = SmallButton("엔코더 보정", 120);
+    private readonly Button encoderCalibrationCompleteButton = SmallButton("보정 완료", 100);
+    private readonly Button encoderCalibrationCancelButton = SmallButton("취소", 75);
+    private bool encoderCalibrationActive;
+    private bool encoderCalibrationAwaitingApply;
     private bool firmwareBusy;
+    private bool initializingMainConnection;
     private bool rodConnected;
     private bool imuConnected;
     private bool imuDataEnabled;
@@ -253,9 +261,49 @@ internal sealed class MainForm : Form
         batteryRow.Controls.Add(gaugePanel);
         batteryRow.Controls.Add(batteryDiagnostic);
         content.Controls.Add(batteryRow);
-        content.Controls.Add(Note("막대와 퍼센트는 배터리 잔량 요청 반환값이며, 막대 안 괄호 숫자는 20회 평균 ADC입니다. 좌우 기준은 ADC 2828~3546에 대응하는 0~99%입니다. 오른쪽은 현재 ADC와 평균 ADC(500ms 간격 20회, 약 10초)입니다."));
-        content.Controls.Add(Note("상태 코드: -3 변화 없음, -4 충전 중, -5 사용 중, -2 연결 끊김/미확인, -1 ROD 상태 미확인."));
         content.Controls.Add(FieldRow("릴 엔코더", statusLabels["릴 엔코더"]));
+        content.Controls.Add(SectionTitle("릴 엔코더 보정"));
+        FlowLayoutPanel encoderCalibrationRow = new() { Width = 760, Height = 48, WrapContents = false };
+        encoderCalibrationRow.Controls.Add(encoderCalibrationStartButton);
+        encoderCalibrationRow.Controls.Add(encoderCalibrationCompleteButton);
+        encoderCalibrationRow.Controls.Add(encoderCalibrationCancelButton);
+        encoderCalibrationRow.Controls.Add(new Label { Text = "회전 카운트", Width = 90, Height = 34, TextAlign = ContentAlignment.MiddleCenter });
+        encoderCalibrationRow.Controls.Add(encoderCalibrationRawCount);
+        content.Controls.Add(encoderCalibrationRow);
+        content.Controls.Add(FieldRow("보정 상태", encoderCalibrationState));
+        encoderCalibrationStartButton.Enabled = false;
+        encoderCalibrationCompleteButton.Enabled = false;
+        encoderCalibrationCancelButton.Enabled = false;
+        encoderCalibrationCompleteButton.Visible = false;
+        encoderCalibrationCancelButton.Visible = false;
+        encoderCalibrationStartButton.Click += (_, _) => {
+            if (!rodConnected || !serial.IsOpen) return;
+            DialogResult result = MessageBox.Show(
+                "릴의 기준 위치를 표시한 뒤 시작하세요. 시작 후 같은 방향으로 정확히 한 바퀴 회전하고, 기준 위치에 돌아오면 '보정 완료'를 누르세요.",
+                "엔코더 보정", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+            if (result != DialogResult.OK) return;
+            encoderCalibrationRawCount.Text = "00";
+            encoderCalibrationState.Text = "보정 시작 요청 중";
+            encoderCalibrationActive = true;
+            encoderCalibrationAwaitingApply = false;
+            UpdateEncoderCalibrationButtons();
+            if (!TrySend(DeviceProtocol.EncoderCalibrationStart())) {
+                encoderCalibrationActive = false;
+                encoderCalibrationState.Text = "시작 명령 송신 실패";
+                UpdateEncoderCalibrationButtons();
+            }
+        };
+        encoderCalibrationCompleteButton.Click += (_, _) => {
+            if (!rodConnected) return;
+            if (encoderCalibrationActive && !TrySend(DeviceProtocol.EncoderCalibrationComplete()))
+                encoderCalibrationState.Text = "측정 완료 명령 송신 실패";
+            else if (encoderCalibrationAwaitingApply && !TrySend(DeviceProtocol.EncoderCalibrationApply()))
+                encoderCalibrationState.Text = "적용 명령 송신 실패";
+        };
+        encoderCalibrationCancelButton.Click += (_, _) => {
+            if (rodConnected && (encoderCalibrationActive || encoderCalibrationAwaitingApply) && !TrySend(DeviceProtocol.EncoderCalibrationCancel()))
+                encoderCalibrationState.Text = "취소 명령 송신 실패";
+        };
         content.Controls.Add(SectionTitle("릴 버튼 상태"));
         FlowLayoutPanel indicators = new() { Width = 600, Height = 64 };
         indicators.Controls.Add(leftButtonState); indicators.Controls.Add(rightButtonState); indicators.Controls.Add(setupButtonState); indicators.Controls.Add(bootButtonState);
@@ -483,7 +531,10 @@ internal sealed class MainForm : Form
             connectButton.Text = "끊음";
             connectionState.Text = serial.PortName + " 초기화 중"; connectionState.ForeColor = Color.DarkOrange;
             AppendLog("SYSTEM", serial.PortName + " 연결됨, 초기 명령 대기");
-            bool initialized = await InitializeConnectedMainAsync();
+            initializingMainConnection = true;
+            bool initialized;
+            try { initialized = await InitializeConnectedMainAsync(); }
+            finally { initializingMainConnection = false; }
             if (!initialized) {
                 if (serial.IsOpen) DisconnectMain();
                 AppendLog("WARNING", "연결 초기화를 완료하지 못했습니다.");
@@ -537,8 +588,8 @@ internal sealed class MainForm : Form
             }
         } else if (frame.StartsWith("$13", StringComparison.Ordinal) && frame.Length >= 5) {
             string code = frame.Substring(3, 2);
-            if (code == "10") SetButtonIndicator(leftButtonState, true, Color.Blue); else if (code == "11") SetButtonIndicator(leftButtonState, false, Color.Gray);
-            else if (code == "20") SetButtonIndicator(rightButtonState, true, Color.Red); else if (code == "21") SetButtonIndicator(rightButtonState, false, Color.Gray);
+            if (code == "10") SetButtonIndicator(leftButtonState, true, Color.Red); else if (code == "11") SetButtonIndicator(leftButtonState, false, Color.Gray);
+            else if (code == "20") SetButtonIndicator(rightButtonState, true, Color.Blue); else if (code == "21") SetButtonIndicator(rightButtonState, false, Color.Gray);
             else if (code == "80") SetButtonIndicator(setupButtonState, true, Color.Red); else if (code == "81") SetButtonIndicator(setupButtonState, false, Color.LightYellow);
             else if (code == "90") SetButtonIndicator(bootButtonState, true, Color.Red); else if (code == "91") SetButtonIndicator(bootButtonState, false, Color.LightYellow);
         } else if (frame.StartsWith("$0608", StringComparison.Ordinal)) {
@@ -546,16 +597,52 @@ internal sealed class MainForm : Form
         } else if (frame.StartsWith("$27", StringComparison.Ordinal)) {
             ParseInput(frame);
         } else if (frame.StartsWith("$20", StringComparison.Ordinal) && frame.Length >= 5) {
+            bool wasRodConnected = rodConnected;
             rodConnected = frame.Substring(3, 2) == "01";
             SetConnectionIndicator(reelConnectionState, rodConnected, "릴");
             if (!rodConnected) {
                 batteryDiagnostic.Text = "(현재 ---- / 평균 ----)";
                 batteryDiagnostic.ForeColor = Color.DimGray;
                 batteryGauge.AverageAdc = -1;
+                encoderCalibrationActive = false;
+                encoderCalibrationAwaitingApply = false;
+                encoderCalibrationState.Text = "보정 상태를 확인할 수 없음";
+                encoderCalibrationRawCount.Text = "00";
+                UpdateEncoderCalibrationButtons();
+            } else if (!wasRodConnected && serial.IsOpen) {
+                encoderCalibrationState.Text = "Rod 보정 상태 조회 중";
+                UpdateEncoderCalibrationButtons();
+                if (!TrySend(DeviceProtocol.EncoderCalibrationQuery(), false)) {
+                    encoderCalibrationState.Text = "보정 상태 조회 실패";
+                    AppendLog("WARNING", "ROD 연결 후 엔코더 보정 상태 조회 송신 실패");
+                }
+                if (!initializingMainConnection) {
+                    rodVersion.Text = "Vr 조회 중";
+                    imuVersion.Text = "IMU 조회 중";
+                    if (!TrySend("$10%", false)) {
+                        rodVersion.Text = "Vr 조회 실패";
+                        imuVersion.Text = "IMU 조회 실패";
+                        AppendLog("WARNING", "ROD 재연결 후 버전 조회 송신 실패");
+                    } else {
+                        AppendLog("SYSTEM", "ROD 재연결 감지: ROD/IMU 버전 재조회 요청");
+                    }
+                }
             }
         } else if (frame.StartsWith("$21", StringComparison.Ordinal) && frame.Length >= 5) {
+            bool wasImuConnected = imuConnected;
             imuConnected = frame.Substring(3, 2) == "01";
             SetConnectionIndicator(imuConnectionState, imuConnected, "IMU");
+            if (!imuConnected && wasImuConnected) {
+                imuVersion.Text = "IMU 미연결";
+            } else if (imuConnected && !wasImuConnected && serial.IsOpen && !initializingMainConnection) {
+                imuVersion.Text = "IMU 조회 중";
+                if (!TrySend("$10%", false)) {
+                    imuVersion.Text = "IMU 조회 실패";
+                    AppendLog("WARNING", "IMU 재연결 후 버전 조회 송신 실패");
+                } else {
+                    AppendLog("SYSTEM", "IMU 재연결 감지: IMU 버전 재조회 요청");
+                }
+            }
         } else if (frame.StartsWith("$12", StringComparison.Ordinal)) {
             UpdateBatteryStatus(frame.Substring(3).TrimEnd('%'));
         } else if (frame.StartsWith("$31", StringComparison.Ordinal)) {
@@ -563,12 +650,55 @@ internal sealed class MainForm : Form
         } else if (frame.StartsWith("$14", StringComparison.Ordinal)) {
             SetStatus("릴 엔코더", frame.Substring(3).TrimEnd('%'), Color.LightGreen);
             imuOrientation.AdvanceHandleCounterClockwise();
+        } else if (frame.StartsWith("$37", StringComparison.Ordinal)) {
+            UpdateEncoderCalibration(frame.Substring(3).TrimEnd('%'));
         } else if (frame.StartsWith("$30", StringComparison.Ordinal) && frame.Length >= 5) {
             string code = frame.Substring(3, 2);
             if (code == "03") FinishRegistration("등록 취소", Color.LightGray);
             else if (code == "04") { registrationWaiting = true; rodRegisterButton.Text = "ROD 등록 취소"; registrationState.Text = "등록 진행 중"; registrationState.BackColor = Color.LightPink; }
             else if (code == "05") FinishRegistration("등록 완료", Color.LightBlue);
         }
+    }
+
+    private void UpdateEncoderCalibration(string payload)
+    {
+        string[] values = payload.Split(',');
+        if (values.Length < 4 || values[0].Length != 1) return;
+        char state = values[0][0];
+        int.TryParse(values[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int rawCount);
+        int.TryParse(values[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out int pulsesPerRevolution);
+        encoderCalibrationRawCount.Text = Math.Max(0, rawCount).ToString("00", CultureInfo.InvariantCulture);
+        encoderCalibrationActive = state == '1';
+        encoderCalibrationAwaitingApply = state == '7';
+        switch (state) {
+            case '0':
+                encoderCalibrationState.Text = values[1] == "1"
+                    ? "저장된 보정 사용 중 (회전당 " + pulsesPerRevolution.ToString(CultureInfo.InvariantCulture) + "펄스)"
+                    : "미보정: 기본 환산 사용 중";
+                break;
+            case '1': encoderCalibrationState.Text = "보정 중: 한 바퀴 회전 후 완료를 누르세요"; break;
+            case '2': encoderCalibrationState.Text = "보정 저장 완료 (회전당 " + pulsesPerRevolution.ToString(CultureInfo.InvariantCulture) + "펄스)"; break;
+            case '3': encoderCalibrationState.Text = "보정 실패: 카운트가 0이거나 허용 범위를 벗어났습니다"; break;
+            case '4': encoderCalibrationState.Text = "저장 또는 설정 오류: 기본/이전 환산을 사용합니다"; break;
+            case '5': encoderCalibrationState.Text = "릴 연결 또는 동작 상태를 확인하세요"; break;
+            case '6': encoderCalibrationState.Text = "보정 명령을 인식하지 못했습니다"; break;
+            case '7': encoderCalibrationState.Text = "측정 완료: 적용하거나 취소하세요"; break;
+            default: encoderCalibrationState.Text = "알 수 없는 보정 상태"; break;
+        }
+        UpdateEncoderCalibrationButtons();
+    }
+
+    private void UpdateEncoderCalibrationButtons()
+    {
+        bool connected = serial.IsOpen && rodConnected;
+        bool editingCalibration = encoderCalibrationActive || encoderCalibrationAwaitingApply;
+        encoderCalibrationStartButton.Visible = !editingCalibration;
+        encoderCalibrationCompleteButton.Visible = editingCalibration;
+        encoderCalibrationCompleteButton.Text = encoderCalibrationAwaitingApply ? "적용" : "보정 완료";
+        encoderCalibrationCancelButton.Visible = editingCalibration;
+        encoderCalibrationStartButton.Enabled = connected && !editingCalibration;
+        encoderCalibrationCompleteButton.Enabled = connected && editingCalibration;
+        encoderCalibrationCancelButton.Enabled = connected && editingCalibration;
     }
 
     private void UpdateBatteryStatus(string value)
@@ -659,6 +789,7 @@ internal sealed class MainForm : Form
     private async Task<bool> InitializeConnectedMainAsync()
     {
         rodConnected = false; imuConnected = false; powerOffRequestObserved = false; registrationWaiting = false;
+        encoderCalibrationActive = false; encoderCalibrationAwaitingApply = false; encoderCalibrationState.Text = "릴 연결 대기"; encoderCalibrationRawCount.Text = "00"; UpdateEncoderCalibrationButtons();
         rodRegisterButton.Text = "ROD 등록"; registrationState.Text = "등록 대기 안 함";
         registrationState.BackColor = Color.FromArgb(239, 241, 244);
         SetPeripheralConnectionPending();
@@ -683,6 +814,13 @@ internal sealed class MainForm : Form
             connectionWait++;
         }
         if (!serial.IsOpen) return false;
+        if (rodConnected) {
+            encoderCalibrationState.Text = "Rod 보정 상태 조회 중";
+            if (!TrySend(DeviceProtocol.EncoderCalibrationQuery(), false)) {
+                encoderCalibrationState.Text = "보정 상태 조회 실패";
+                AppendLog("WARNING", "초기 연결 후 엔코더 보정 상태 조회 송신 실패");
+            }
+        }
         if (!TrySend("$10%", false)) {
             AppendLog("WARNING", "초기 버전 조회 송신 실패");
             return false;
@@ -694,6 +832,7 @@ internal sealed class MainForm : Form
     {
         pollTimer.Stop(); serial.Close(); connectButton.Text = "연결"; connectionState.Text = "연결 안 됨"; connectionState.ForeColor = Color.DimGray;
         rodConnected = false; imuConnected = false; imuDataEnabled = false; imuZeroButton.Enabled = false; imuOrientation.ClearZero(); powerOffRequestObserved = false; registrationWaiting = false; rodRegisterButton.Text = "ROD 등록";
+        encoderCalibrationActive = false; encoderCalibrationAwaitingApply = false; encoderCalibrationState.Text = "릴 연결 대기"; encoderCalibrationRawCount.Text = "00"; UpdateEncoderCalibrationButtons();
         mainVersion.Text = "Vm -"; rodVersion.Text = "Vr -"; imuVersion.Text = "IMU -";
         SetConnectionIndicator(reelConnectionState, false, "릴"); SetConnectionIndicator(imuConnectionState, false, "IMU");
     }

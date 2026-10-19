@@ -45,6 +45,11 @@ internal static class DeviceProtocol
     public static string ReelLeftLed(bool on) { return on ? "$2411%" : "$2410%"; }
     public static string ReelRightLed(bool on) { return on ? "$2421%" : "$2420%"; }
     public static string Imu(bool on) { return on ? "$081%" : "$080%"; }
+    public static string EncoderCalibrationStart() { return "$37S%"; }
+    public static string EncoderCalibrationComplete() { return "$37C%"; }
+    public static string EncoderCalibrationApply() { return "$37A%"; }
+    public static string EncoderCalibrationCancel() { return "$37X%"; }
+    public static string EncoderCalibrationQuery() { return "$37Q%"; }
     public static string LedControl(int position, int action, int color, int timeMs)
     {
         Range(position, 0, 3, "LED 위치"); Range(action, 0, 3, "LED 표시 액션");

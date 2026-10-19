@@ -106,6 +106,11 @@ void rotateChangeCallback(String str) {
   eNow.write(DF_Protocol_RodToMain_Encoder, str);
 }
 
+void encoderCalibrationChangeCallback(String str) {
+	if (DF_Rod_Ota_IsActive()) return;
+	eNow.write(DF_Protocol_RodToMain_EncoderCalibration, str);
+}
+
 /*------------------------------------------------------------------------
 	Send IMU Data By eNOw ( SLAVE -> MAIN )
 ------------------------------------------------------------------------*/
@@ -434,6 +439,25 @@ void nowRecvHandler()
 			LogPrintln(" LG] BtnLED Err:NOT_EXIST BTN LED");
 		}
   } 
+
+	// (35) Encoder calibration requested by TestModule through Main.
+	else if (DF_Protocol_Pid_MainToRod_EncoderCalibration == now_rcv_id)
+	{
+		char action = cmd_str_data.length() ? cmd_str_data.charAt(0) : '\0';
+		if (DF_Protocol_EncoderCalibrationAction_Start == action) encoder.beginCalibration();
+		else if (DF_Protocol_EncoderCalibrationAction_Complete == action) encoder.completeCalibration();
+		else if (DF_Protocol_EncoderCalibrationAction_Apply == action) encoder.applyCalibration();
+		else if (DF_Protocol_EncoderCalibrationAction_Cancel == action) encoder.cancelCalibration();
+		else if (DF_Protocol_EncoderCalibrationAction_Query == action) encoder.queryCalibration();
+		else
+		{
+			String payload = "6,";
+			payload += encoder.calibrationValid ? "1," : "0,";
+			payload += String(encoder.calibrationRawPulseCount) + ",";
+			payload += String(encoder.calibratedPulsesPerRevolution);
+			encoderCalibrationChangeCallback(payload);
+		}
+	}
 
   // ( ? ) NOT DEFINE PID
   else					// ELSE : Error

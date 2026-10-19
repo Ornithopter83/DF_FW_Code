@@ -23,7 +23,8 @@ typedef enum
     DF_Protocol_Pid_MainToRod_AllOutputsOff = 29,
     DF_Protocol_Pid_MainToRod_MainAddress = 31,
     DF_Protocol_Pid_MainToRod_ApInfo = 33,
-    DF_Protocol_Pid_MainToRod_Sleep = 34
+    DF_Protocol_Pid_MainToRod_Sleep = 34,
+    DF_Protocol_Pid_MainToRod_EncoderCalibration = 35
 } DF_Protocol_MainToRodPid;
 
 typedef enum
@@ -38,8 +39,30 @@ typedef enum
     DF_Protocol_Pid_RodToMain_Battery = 26,
     DF_Protocol_Pid_RodToMain_BatteryDiagnostic = 28,
     DF_Protocol_Pid_RodToMain_RodAddress = 32,
-    DF_Protocol_Pid_RodToMain_Sleep = 34
+    DF_Protocol_Pid_RodToMain_Sleep = 34,
+    DF_Protocol_Pid_RodToMain_EncoderCalibration = 36
 } DF_Protocol_RodToMainPid;
+
+typedef enum
+{
+    DF_Protocol_EncoderCalibrationAction_Start = 'S',
+    DF_Protocol_EncoderCalibrationAction_Complete = 'C',
+    DF_Protocol_EncoderCalibrationAction_Apply = 'A',
+    DF_Protocol_EncoderCalibrationAction_Cancel = 'X',
+    DF_Protocol_EncoderCalibrationAction_Query = 'Q'
+} DF_Protocol_EncoderCalibrationAction;
+
+typedef enum
+{
+    DF_Protocol_EncoderCalibrationState_Idle = '0',
+    DF_Protocol_EncoderCalibrationState_Collecting = '1',
+    DF_Protocol_EncoderCalibrationState_Saved = '2',
+    DF_Protocol_EncoderCalibrationState_InvalidCount = '3',
+    DF_Protocol_EncoderCalibrationState_StorageError = '4',
+    DF_Protocol_EncoderCalibrationState_RodUnavailable = '5',
+    DF_Protocol_EncoderCalibrationState_InvalidAction = '6',
+    DF_Protocol_EncoderCalibrationState_AwaitingApply = '7'
+} DF_Protocol_EncoderCalibrationState;
 
 extern const char DF_Protocol_MainToRod_PowerOn[];
 extern const char DF_Protocol_MainToRod_RodInfoRequest[];
@@ -53,6 +76,7 @@ extern const char DF_Protocol_MainToRod_AllOutputsOff[];
 extern const char DF_Protocol_MainToRod_MainAddress[];
 extern const char DF_Protocol_MainToRod_ApInfo[];
 extern const char DF_Protocol_MainToRod_Sleep[];
+extern const char DF_Protocol_MainToRod_EncoderCalibration[];
 
 extern const char DF_Protocol_RodToMain_BoardType[];
 extern const char DF_Protocol_RodToMain_Alive[];
@@ -65,6 +89,7 @@ extern const char DF_Protocol_RodToMain_Battery[];
 extern const char DF_Protocol_RodToMain_BatteryDiagnostic[];
 extern const char DF_Protocol_RodToMain_RodAddress[];
 extern const char DF_Protocol_RodToMain_Sleep[];
+extern const char DF_Protocol_RodToMain_EncoderCalibration[];
 
 typedef struct
 {

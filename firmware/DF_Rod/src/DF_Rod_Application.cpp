@@ -117,6 +117,7 @@ void DF_Rod_Application_Setup()
 
 		// Set Callback Funtion encoder/Btn/imu, Only Norma Mode
 		encoder.setRotateCallback(rotateChangeCallback);
+		encoder.setCalibrationCallback(encoderCalibrationChangeCallback);
 		sBtn.setSwitchCallback(btnChangeCallback);
 		imu.setStateCallback(imuDataCallback);
 
